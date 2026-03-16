@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 6% 10%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 6% 10%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 349 77% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 65%;
+
+    --accent: 240 4% 16%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 349 77% 50%;
+
+    --radius: 1rem;
+
+    --sidebar-background: 240 6% 10%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 349 77% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 4% 16%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 4% 16%;
+    --sidebar-ring: 349 77% 50%;
+
+    /* Custom tokens */
+    --card-hover-border: 349 77% 50%;
+    --live-glow: 349 77% 50%;
+    --surface-glass: 240 6% 10%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .live-pulse {
+    animation: livePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes livePulse {
+    0%, 100% {
+      opacity: 1;
+      box-shadow: 0 0 0 0 hsl(349 77% 50% / 0.7);
+    }
+    50% {
+      opacity: 0.8;
+      box-shadow: 0 0 0 6px hsl(349 77% 50% / 0);
+    }
+  }
+
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border border-border;
+  }
+
+  .gradient-overlay {
+    background: linear-gradient(to top, hsl(240 10% 3.9% / 0.9) 0%, hsl(240 10% 3.9% / 0.4) 40%, transparent 100%);
+  }
+}
