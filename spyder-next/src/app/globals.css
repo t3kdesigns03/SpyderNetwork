@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 6%;
+    --foreground: 0 0% 98%;
+    --card: 222 40% 8%;
+    --card-foreground: 0 0% 98%;
+    --popover: 222 40% 8%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 346 76% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222 30% 12%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 222 30% 12%;
+    --muted-foreground: 222 10% 60%;
+    --accent: 222 30% 12%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 222 25% 15%;
+    --input: 222 25% 15%;
+    --ring: 346 76% 50%;
+    --radius: 1rem;
+    --spyder-red: #e11d48;
+    --spyder-neon: #ff1744;
+    --spyder-black: #111111;
+    --spyder-navy: #0a1428;
+  }
+
+  .after-dark {
+    --background: 222 60% 4%;
+    --primary: 346 100% 55%;
+    --ring: 346 100% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .live-pulse {
+    animation: livePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes livePulse {
+    0%,
+    100% {
+      opacity: 1;
+      box-shadow: 0 0 0 0 hsl(346 76% 50% / 0.7);
+    }
+    50% {
+      opacity: 0.8;
+      box-shadow: 0 0 0 6px hsl(346 76% 50% / 0);
+    }
+  }
+
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border border-border;
+  }
+
+  .glass-after-dark {
+    @apply bg-card/90 backdrop-blur-xl border border-primary/30 shadow-[0_0_20px_rgba(255,23,68,0.15)];
+  }
+
+  .gradient-overlay {
+    background: linear-gradient(
+      to top,
+      hsl(222 47% 6% / 0.95) 0%,
+      hsl(222 47% 6% / 0.5) 40%,
+      transparent 100%
+    );
+  }
+
+  .neon-glow-text {
+    text-shadow: 0 0 10px var(--spyder-neon), 0 0 20px var(--spyder-neon);
+  }
+
+  .neon-glow-box {
+    box-shadow: 0 0 15px var(--spyder-neon), 0 0 30px var(--spyder-neon);
+  }
+}

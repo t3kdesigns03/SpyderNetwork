@@ -1,0 +1,135 @@
+"use client";
+
+import Link from "next/link";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { lakeEvents2026 } from "@/data/events";
+import { format } from "date-fns";
+import { CalendarDays, Video } from "lucide-react";
+import { useMemo, useState } from "react";
+
+export function EventsPageClient() {
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+
+  const eventsOnDate = useMemo(() => {
+    if (!selectedDate) return [];
+    return lakeEvents2026.filter((e) => {
+      const d = new Date(e.date);
+      return (
+        d.getFullYear() === selectedDate.getFullYear() &&
+        d.getMonth() === selectedDate.getMonth() &&
+        d.getDate() === selectedDate.getDate()
+      );
+    });
+  }, [selectedDate]);
+
+  const modifiers = {
+    hasEvent: lakeEvents2026.map((e) => e.date),
+  };
+
+  return (
+    <div className="container py-12">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-foreground">Events 2026</h1>
+        <p className="text-muted-foreground mt-1">
+          Aquapalooza, Shootout, concerts, and more at the Lake
+        </p>
+      </div>
+
+      <Tabs defaultValue="calendar" className="space-y-6">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="calendar">Calendar</TabsTrigger>
+          <TabsTrigger value="list">All Events</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="calendar" className="space-y-6">
+          <div className="flex flex-col lg:flex-row gap-8">
+            <Card className="lg:w-[380px]">
+              <CardHeader>
+                <h3 className="font-semibold text-foreground">Select a date</h3>
+              </CardHeader>
+              <CardContent>
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  defaultMonth={new Date(2026, 0)}
+                  modifiers={modifiers}
+                  modifiersClassNames={{
+                    hasEvent: "bg-primary/20 text-primary font-semibold",
+                  }}
+                />
+              </CardContent>
+            </Card>
+            <div className="flex-1">
+              <h3 className="font-semibold text-foreground mb-4">
+                {selectedDate ? format(selectedDate, "MMMM d, yyyy") : "Select a date"}
+              </h3>
+              {eventsOnDate.length ? (
+                <div className="space-y-4">
+                  {eventsOnDate.map((event) => (
+                    <Card key={event.id}>
+                      <CardHeader className="pb-2">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-semibold text-foreground">{event.title}</h4>
+                          <Badge variant="secondary">{event.type}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{event.location}</p>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground">{event.description}</p>
+                        {event.featuredCamId && (
+                          <Link
+                            href={`/cam/${event.featuredCamId}`}
+                            className="mt-3 inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                          >
+                            <Video className="h-4 w-4" />
+                            Featured on Cam
+                          </Link>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">No events on this date.</p>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="list" className="space-y-4">
+          {lakeEvents2026.map((event) => (
+            <Card key={event.id}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-semibold text-foreground">{event.title}</h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {format(event.date, "MMM d, yyyy")} • {event.location}
+                    </p>
+                  </div>
+                  <Badge variant="secondary">{event.type}</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{event.description}</p>
+                {event.featuredCamId && (
+                  <Link
+                    href={`/cam/${event.featuredCamId}`}
+                    className="mt-3 inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                  >
+                    <Video className="h-4 w-4" />
+                    Featured on Cam
+                  </Link>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
