@@ -10,6 +10,7 @@ export interface Camera {
   twitchChannel: string;
   category: CameraCategory;
   videoUrl: string;
+  thumbnailUrl?: string; // static thumbnail for cards (no video preview)
   lat: number;
   lng: number;
   crowdLevel: CrowdLevel;
@@ -17,6 +18,8 @@ export interface Camera {
   website?: string;
   description?: string;
 }
+
+export const PLACEHOLDER_THUMBNAIL = "/placeholder.svg";
 
 function fakeViewerCount(crowdLevel: CrowdLevel, id: string): number {
   const base = { Low: 12, Medium: 47, High: 128, Packed: 312 };

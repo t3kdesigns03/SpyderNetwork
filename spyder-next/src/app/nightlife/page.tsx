@@ -1,7 +1,8 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { cameras } from "@/data/cameras";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import Image from "next/image";
+import { cameras, PLACEHOLDER_THUMBNAIL } from "@/data/cameras";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = {
@@ -31,12 +32,12 @@ export default function NightlifePage() {
           <Link key={cam.id} href={`/cam/${cam.id}`}>
             <Card className="overflow-hidden hover:border-primary/50 transition-colors">
               <div className="aspect-video relative">
-                <video
-                  src={cam.videoUrl}
-                  muted
-                  loop
-                  playsInline
-                  className="w-full h-full object-cover"
+                <Image
+                  src={cam.thumbnailUrl ?? PLACEHOLDER_THUMBNAIL}
+                  alt={cam.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw, 33vw"
+                  className="object-cover"
                 />
                 <div className="gradient-overlay absolute inset-0" />
                 <div className="absolute top-3 left-3">

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Pin, Heart } from "lucide-react";
-import { Camera } from "@/data/cameras";
+import { Camera, PLACEHOLDER_THUMBNAIL } from "@/data/cameras";
 import { Badge } from "@/components/ui/badge";
 import { usePip } from "@/providers/pip-provider";
 import { useFavorites } from "@/providers/favorites-provider";
@@ -24,6 +25,7 @@ interface CamCardProps {
 export function CamCard({ camera, index }: CamCardProps) {
   const { pinCamera } = usePip();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const thumbnail = camera.thumbnailUrl ?? PLACEHOLDER_THUMBNAIL;
 
   return (
     <motion.div
@@ -34,13 +36,13 @@ export function CamCard({ camera, index }: CamCardProps) {
       <div className="group relative block overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:border-primary/50 hover:scale-[1.02]">
         <Link href={`/cam/${camera.id}`} className="block">
           <div className="aspect-video relative overflow-hidden bg-secondary">
-            <video
-              src={camera.videoUrl}
-              muted
-              loop
-              playsInline
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              poster=""
+            <Image
+              src={thumbnail}
+              alt={camera.name}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              unoptimized={thumbnail.startsWith("data:")}
             />
             <div className="gradient-overlay absolute inset-0" />
             <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1 backdrop-blur-sm">

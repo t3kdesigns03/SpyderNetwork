@@ -81,9 +81,9 @@ export function FloatingOrb() {
                 onClick={onClick}
                 className={cn(
                   "flex items-center gap-2 w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                  "hover:bg-primary/20 hover:text-primary",
-                  "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-[#111]",
-                  isAfterDark && "hover:shadow-[0_0_12px_rgba(255,23,68,0.4)]"
+                  "hover:bg-[#ff1744]/20 hover:text-[#ff1744]",
+                  "focus:outline-none focus:ring-2 focus:ring-[#ff1744]/50 focus:ring-offset-2 focus:ring-offset-[#111]",
+                  "hover:shadow-[0_0_12px_rgba(255,23,68,0.4)]"
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />

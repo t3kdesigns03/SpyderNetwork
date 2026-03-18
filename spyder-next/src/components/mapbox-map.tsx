@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import { useTheme } from "@/providers/theme-provider";
 import { cn } from "@/lib/utils";
 
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
 
 interface MapboxMapProps {
   cameras: Camera[];
@@ -64,7 +64,7 @@ function BoatMarker({
           fill="none"
           className={cn(
             "transition-all",
-            isAfterDark && "animate-pulse"
+            (isAfterDark || isSelected || isHovered) && "animate-pulse"
           )}
         >
           {/* Hull - boat shape */}
@@ -155,7 +155,7 @@ export function MapboxMap({ cameras, onMarkerClick, selectedCam }: MapboxMapProp
       "rgba(255,23,68,0.95)",
     ],
     "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 8, 9, 25, 15, 50],
-    "heatmap-opacity": isAfterDark ? 0.9 : 0.7,
+    "heatmap-opacity": isAfterDark ? 0.6 : 0.4,
   };
 
   if (!MAPBOX_TOKEN) {
