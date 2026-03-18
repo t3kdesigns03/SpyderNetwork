@@ -41,6 +41,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
   themeColor: "#0a1428",
 };
 
@@ -51,7 +53,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans min-h-screen bg-[#0a1428]`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} font-sans min-h-[100dvh] bg-[#0a1428] overflow-x-hidden`}>
         <ThemeProvider>
           <PipProvider>
             <FavoritesProvider>

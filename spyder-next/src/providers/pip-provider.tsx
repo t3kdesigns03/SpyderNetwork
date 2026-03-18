@@ -4,11 +4,25 @@ import React, { createContext, useContext, useState, useCallback, useRef } from 
 import type { Camera } from "@/data/cameras";
 
 const MAX_PIPS = 3;
+const getDefaultSize = () => {
+  if (typeof window === "undefined") return { width: 360, height: 203 };
+  const isMobile = window.innerWidth < 768;
+  const maxW = isMobile ? Math.min(360, window.innerWidth * 0.9) : 360;
+  return { width: maxW, height: Math.round(maxW * (9 / 16)) };
+};
 const DEFAULT_SIZE = { width: 360, height: 203 };
-const DEFAULT_POSITION = () =>
-  typeof window !== "undefined"
-    ? { x: window.innerWidth - 380, y: 80 }
-    : { x: 20, y: 80 };
+const getDefaultPosition = (index: number) => {
+  if (typeof window === "undefined") return { x: 20, y: 80 };
+  const isMobile = window.innerWidth < 768;
+  const safeTop = 72;
+  const gap = isMobile ? 12 : 24;
+  const size = getDefaultSize();
+  const x = isMobile
+    ? (window.innerWidth - size.width) / 2
+    : Math.max(16, window.innerWidth - size.width - 24 - index * gap);
+  const y = safeTop + index * (size.height + gap);
+  return { x, y };
+};
 
 export interface PipInstance {
   id: string;
@@ -50,14 +64,14 @@ export function PipProvider({ children }: { children: React.ReactNode }) {
           p.id === existing.id ? { ...p, isMinimized: false } : p
         );
       }
-      const base = DEFAULT_POSITION();
-      const offset = prev.length * 24;
+      const size = getDefaultSize();
+      const pos = getDefaultPosition(prev.length);
       const newPip: PipInstance = {
         id: `pip-${++pipIdCounter}`,
         camera,
         isMinimized: false,
-        position: { x: base.x - offset, y: base.y + offset },
-        size: DEFAULT_SIZE,
+        position: pos,
+        size,
       };
       const next = [...prev, newPip];
       if (next.length > MAX_PIPS) {

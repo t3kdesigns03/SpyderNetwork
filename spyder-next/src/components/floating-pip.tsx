@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 import { usePip } from "@/providers/pip-provider";
 import { motion, useDragControls, AnimatePresence } from "framer-motion";
 import { X, Minimize2, Maximize2, GripVertical } from "lucide-react";
@@ -8,8 +8,9 @@ import Link from "next/link";
 
 const MIN_WIDTH = 240;
 const MIN_HEIGHT = 135;
-const MIN_DOCK_WIDTH = 180;
+const MIN_DOCK_WIDTH = 160;
 const MIN_DOCK_HEIGHT = 44;
+const MOBILE_BREAKPOINT = 768;
 
 function PipWindow({
   pip,
@@ -67,25 +68,38 @@ function PipWindow({
   );
 
 
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   const handleDragEnd = useCallback(
     (_: unknown, info: { point: { x: number; y: number } }) => {
       const { x, y } = info.point;
       const vw = typeof window !== "undefined" ? window.innerWidth : 1920;
       const vh = typeof window !== "undefined" ? window.innerHeight : 1080;
-      const w = pip.isMinimized ? MIN_DOCK_WIDTH : pip.size.width;
+      const maxW = isMobile ? vw * 0.9 : 600;
+      const w = pip.isMinimized
+        ? Math.min(MIN_DOCK_WIDTH, vw * 0.9)
+        : Math.min(pip.size.width, maxW);
       const h = pip.isMinimized ? MIN_DOCK_HEIGHT : pip.size.height;
-      const nx = Math.max(0, Math.min(vw - w, x));
-      const ny = Math.max(0, Math.min(vh - h, y));
+      const nx = Math.max(8, Math.min(vw - w - 8, x));
+      const ny = Math.max(8, Math.min(vh - h - 8, y));
       setPosition(pip.id, { x: nx, y: ny });
     },
-    [pip.id, pip.isMinimized, pip.size, setPosition]
+    [pip.id, pip.isMinimized, pip.size, setPosition, isMobile]
   );
 
+  const w = pip.isMinimized ? MIN_DOCK_WIDTH : pip.size.width;
+  const h = pip.isMinimized ? MIN_DOCK_HEIGHT : pip.size.height;
   const pipStyle = {
     left: pip.position.x,
     top: pip.position.y,
-    width: pip.isMinimized ? MIN_DOCK_WIDTH : pip.size.width,
-    height: pip.isMinimized ? MIN_DOCK_HEIGHT : pip.size.height,
+    width: w,
+    height: h,
     zIndex,
   };
 
@@ -104,7 +118,7 @@ function PipWindow({
         bringToFront(pip.id);
         if (!pip.isMinimized) setActiveVideo(videoRef.current);
       }}
-      className="fixed rounded-xl overflow-hidden cursor-grab active:cursor-grabbing bg-card/90 backdrop-blur-xl border-2 shadow-[0_0_20px_rgba(255,23,68,0.2),0_0_40px_rgba(255,23,68,0.1)] border-[#ff1744]/60 hover:border-[#ff1744]"
+      className="fixed rounded-xl overflow-hidden cursor-grab active:cursor-grabbing bg-card/90 backdrop-blur-xl border-2 shadow-[0_0_20px_rgba(255,23,68,0.2),0_0_40px_rgba(255,23,68,0.1)] border-[#ff1744]/60 hover:border-[#ff1744] max-w-[90vw] md:max-w-none"
       style={pipStyle}
     >
       {pip.isMinimized ? (
@@ -198,27 +212,31 @@ function PipWindow({
               playsInline
               className="w-full h-full object-cover"
             />
-            {/* Resize handles - corners */}
-            <div
-              className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize"
-              onMouseDown={(e) => handleResizeStart(e, "se")}
-              style={{ background: "linear-gradient(135deg, transparent 50%, rgba(255,23,68,0.3) 50%)" }}
-            />
-            <div
-              className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize"
-              onMouseDown={(e) => handleResizeStart(e, "sw")}
-              style={{ background: "linear-gradient(225deg, transparent 50%, rgba(255,23,68,0.3) 50%)" }}
-            />
-            <div
-              className="absolute top-9 right-0 w-4 h-4 cursor-ne-resize"
-              onMouseDown={(e) => handleResizeStart(e, "ne")}
-              style={{ background: "linear-gradient(315deg, transparent 50%, rgba(255,23,68,0.3) 50%)" }}
-            />
-            <div
-              className="absolute top-9 left-0 w-4 h-4 cursor-nw-resize"
-              onMouseDown={(e) => handleResizeStart(e, "nw")}
-              style={{ background: "linear-gradient(45deg, transparent 50%, rgba(255,23,68,0.3) 50%)" }}
-            />
+            {/* Resize handles - corners (hidden on mobile) */}
+            {!isMobile && (
+              <>
+                <div
+                  className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize"
+                  onMouseDown={(e) => handleResizeStart(e, "se")}
+                  style={{ background: "linear-gradient(135deg, transparent 50%, rgba(255,23,68,0.3) 50%)" }}
+                />
+                <div
+                  className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize"
+                  onMouseDown={(e) => handleResizeStart(e, "sw")}
+                  style={{ background: "linear-gradient(225deg, transparent 50%, rgba(255,23,68,0.3) 50%)" }}
+                />
+                <div
+                  className="absolute top-9 right-0 w-4 h-4 cursor-ne-resize"
+                  onMouseDown={(e) => handleResizeStart(e, "ne")}
+                  style={{ background: "linear-gradient(315deg, transparent 50%, rgba(255,23,68,0.3) 50%)" }}
+                />
+                <div
+                  className="absolute top-9 left-0 w-4 h-4 cursor-nw-resize"
+                  onMouseDown={(e) => handleResizeStart(e, "nw")}
+                  style={{ background: "linear-gradient(45deg, transparent 50%, rgba(255,23,68,0.3) 50%)" }}
+                />
+              </>
+            )}
           </div>
         </>
       )}

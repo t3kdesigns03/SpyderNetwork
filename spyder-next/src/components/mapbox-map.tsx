@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useCallback, useState } from "react";
-import Map, { Marker, Popup, Source, Layer } from "react-map-gl";
+import Map, { Marker, Popup, Source, Layer, NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import type { Camera } from "@/data/cameras";
 import { motion } from "framer-motion";
@@ -56,14 +56,12 @@ function BoatMarker({
         onMouseEnter={() => onHover(true)}
         onMouseLeave={() => onHover(false)}
       >
-        {/* Boat-shaped SVG - hull with red accent */}
+        {/* Boat-shaped SVG - hull with red accent, responsive scaling */}
         <svg
-          width="36"
-          height="36"
           viewBox="0 0 36 36"
           fill="none"
           className={cn(
-            "transition-all",
+            "w-8 h-8 sm:w-9 sm:h-9 shrink-0 transition-all",
             (isAfterDark || isSelected || isHovered) && "animate-pulse"
           )}
         >
@@ -181,9 +179,10 @@ export function MapboxMap({ cameras, onMarkerClick, selectedCam }: MapboxMapProp
         latitude: 38.15,
         zoom: 10,
       }}
-      style={{ width: "100%", height: "100%" }}
+      style={{ width: "100%", height: "100%", minHeight: "100dvh" }}
       mapStyle="mapbox://styles/mapbox/dark-v11"
     >
+      <NavigationControl position="top-right" showCompass={false} />
       {/* Heat layer - neon red glow based on viewer count */}
       <Source id="cam-heatmap" type="geojson" data={heatmapData()}>
         {/* @ts-expect-error Mapbox heatmap paint types are strict */}

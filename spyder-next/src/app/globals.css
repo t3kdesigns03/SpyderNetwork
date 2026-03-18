@@ -42,8 +42,27 @@
     @apply border-border;
   }
 
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
+  }
+
+  /* Safe area insets for notched devices */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .pb-safe-orb {
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px);
+  }
+
+  /* Disable hover animations on touch devices for performance */
+  @media (hover: none) {
+    .hover-scale-disable {
+      transform: none !important;
+    }
   }
 }
 

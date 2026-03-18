@@ -57,7 +57,7 @@ export function FloatingOrb() {
   ];
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-6 right-4 md:right-6 z-50 flex flex-col items-end gap-3 pb-safe-orb">
       <AnimatePresence>
         {expanded && (
           <motion.div
@@ -80,7 +80,7 @@ export function FloatingOrb() {
                 transition={{ delay: i * 0.05, ...springSmooth }}
                 onClick={onClick}
                 className={cn(
-                  "flex items-center gap-2 w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                  "flex items-center gap-2 w-full px-4 py-3 min-h-[48px] rounded-lg text-sm font-medium transition-all duration-200 touch-manipulation",
                   "hover:bg-[#ff1744]/20 hover:text-[#ff1744]",
                   "focus:outline-none focus:ring-2 focus:ring-[#ff1744]/50 focus:ring-offset-2 focus:ring-offset-[#111]",
                   "hover:shadow-[0_0_12px_rgba(255,23,68,0.4)]"
@@ -98,7 +98,7 @@ export function FloatingOrb() {
       <motion.button
         onClick={() => setExpanded(!expanded)}
         className={cn(
-          "relative w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center",
+          "relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center min-w-[48px] min-h-[48px]",
           "border-2 border-[#111]",
           "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#0a1428]",
           "touch-manipulation select-none",

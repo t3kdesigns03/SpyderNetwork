@@ -28,7 +28,7 @@ export function MapView() {
   );
 
   return (
-    <div className="fixed inset-0 z-0">
+    <div className="fixed inset-0 z-0 w-full h-full min-h-[100dvh]">
       <MapboxMap cameras={cameras} onMarkerClick={handleMarkerClick} selectedCam={selectedCam} />
     </div>
   );

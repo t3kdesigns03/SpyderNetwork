@@ -33,7 +33,7 @@ export function CamCard({ camera, index }: CamCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05, ease: [0.2, 0, 0, 1] }}
     >
-      <div className="group relative block overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:border-primary/50 hover:scale-[1.02]">
+      <div className="group relative block overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:border-primary/50 hover:scale-[1.02] focus-within:border-primary/50">
         <Link href={`/cam/${camera.id}`} className="block">
           <div className="aspect-video relative overflow-hidden bg-secondary">
             <Image
@@ -62,13 +62,13 @@ export function CamCard({ camera, index }: CamCardProps) {
             </div>
           </div>
         </Link>
-        <div className="absolute bottom-3 left-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute bottom-3 left-3 right-3 flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
           <motion.button
             onClick={(e) => {
               e.preventDefault();
               pinCamera(camera);
             }}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-semibold text-sm bg-[#ff1744]/90 hover:bg-[#ff1744] text-white border-2 border-[#ff1744] shadow-[0_0_15px_rgba(255,23,68,0.4)] hover:shadow-[0_0_25px_rgba(255,23,68,0.6),0_0_40px_rgba(255,23,68,0.25)] pin-float-hover transition-all duration-200"
+            className="flex-1 flex items-center justify-center gap-2 min-h-[48px] py-2.5 px-4 rounded-lg font-semibold text-sm bg-[#ff1744]/90 hover:bg-[#ff1744] text-white border-2 border-[#ff1744] shadow-[0_0_15px_rgba(255,23,68,0.4)] hover:shadow-[0_0_25px_rgba(255,23,68,0.6),0_0_40px_rgba(255,23,68,0.25)] pin-float-hover transition-all duration-200 touch-manipulation"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             title="Pin to Float"
@@ -82,7 +82,7 @@ export function CamCard({ camera, index }: CamCardProps) {
               toggleFavorite(camera.id);
             }}
             className={cn(
-              "p-2.5 rounded-lg border-2 transition-all",
+              "p-2.5 min-w-[48px] min-h-[48px] rounded-lg border-2 transition-all touch-manipulation flex items-center justify-center",
               isFavorite(camera.id)
                 ? "bg-primary/20 border-primary/50 text-primary"
                 : "bg-secondary/80 border-border text-muted-foreground hover:border-primary/30 hover:text-primary"

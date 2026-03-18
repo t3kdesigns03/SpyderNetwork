@@ -49,7 +49,7 @@ export function CamViewClient({ camera }: { camera: Camera }) {
             <div className="absolute top-4 right-4 flex gap-2">
               <motion.button
                 onClick={() => pinCamera(camera)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-[#ff1744]/90 hover:bg-[#ff1744] text-white border-2 border-[#ff1744] shadow-[0_0_15px_rgba(255,23,68,0.4)] hover:shadow-[0_0_25px_rgba(255,23,68,0.6)] transition-all duration-200"
+                className="inline-flex items-center justify-center min-h-[48px] min-w-[48px] gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-[#ff1744]/90 hover:bg-[#ff1744] text-white border-2 border-[#ff1744] shadow-[0_0_15px_rgba(255,23,68,0.4)] hover:shadow-[0_0_25px_rgba(255,23,68,0.6)] transition-all duration-200 touch-manipulation"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -58,7 +58,7 @@ export function CamViewClient({ camera }: { camera: Camera }) {
               </motion.button>
               <motion.button
                 className={cn(
-                  "inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm border-2 transition-all",
+                  "inline-flex items-center justify-center min-h-[48px] min-w-[48px] gap-2 px-4 py-2 rounded-lg font-semibold text-sm border-2 transition-all touch-manipulation",
                   isFavorite(camera.id)
                     ? "bg-primary/20 border-primary/50 text-primary"
                     : "bg-secondary/80 border-border text-muted-foreground hover:border-primary/30 hover:text-primary"
