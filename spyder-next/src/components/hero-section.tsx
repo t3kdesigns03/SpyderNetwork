@@ -5,7 +5,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Camera } from "@/data/cameras";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Pin } from "lucide-react";
 import { usePip } from "@/providers/pip-provider";
 
@@ -60,21 +59,25 @@ export function HeroSection({ featuredCam }: HeroSectionProps) {
               <span className="text-sm text-white/90">Tonight: Lazy Gators Pub Crawl</span>
             </div>
 
-            <div className="mt-6 flex gap-3">
+            <div className="mt-6 flex flex-wrap gap-3">
               <Link href={`/cam/${featuredCam.id}`}>
-                <Button size="lg" className="bg-[#e11d48] hover:bg-[#e11d48]/90 text-white">
+                <motion.span
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-[#e11d48] hover:bg-[#ff1744] border-2 border-[#ff1744]/50 shadow-[0_0_20px_rgba(255,23,68,0.3)] hover:shadow-[0_0_30px_rgba(255,23,68,0.5)] transition-all duration-200"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
                   Watch Full Screen
-                </Button>
+                </motion.span>
               </Link>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/30 text-white hover:bg-white/10"
+              <motion.button
                 onClick={() => pinCamera(featuredCam)}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white bg-[#ff1744]/80 hover:bg-[#ff1744] border-2 border-[#ff1744] shadow-[0_0_15px_rgba(255,23,68,0.3)] hover:shadow-[0_0_25px_rgba(255,23,68,0.5)] transition-all duration-200"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <Pin className="mr-2 h-4 w-4" />
+                <Pin className="h-4 w-4" />
                 Pin to Float
-              </Button>
+              </motion.button>
             </div>
           </motion.div>
         </div>

@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { ArrowLeft, Pin, Heart } from "lucide-react";
 import { Camera } from "@/data/cameras";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { usePip } from "@/providers/pip-provider";
 import { useFavorites } from "@/providers/favorites-provider";
@@ -47,24 +47,29 @@ export function CamViewClient({ camera }: { camera: Camera }) {
               <Badge variant={crowdVariant[camera.crowdLevel]}>{camera.crowdLevel}</Badge>
             </div>
             <div className="absolute top-4 right-4 flex gap-2">
-              <Button
-                size="sm"
-                variant="secondary"
-                className="backdrop-blur-sm"
+              <motion.button
                 onClick={() => pinCamera(camera)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-[#ff1744]/90 hover:bg-[#ff1744] text-white border-2 border-[#ff1744] shadow-[0_0_15px_rgba(255,23,68,0.4)] hover:shadow-[0_0_25px_rgba(255,23,68,0.6)] transition-all duration-200"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <Pin className="h-4 w-4 mr-1" />
+                <Pin className="h-4 w-4" />
                 Pin to Float
-              </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                className={cn("backdrop-blur-sm", isFavorite(camera.id) && "text-primary")}
+              </motion.button>
+              <motion.button
+                className={cn(
+                  "inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm border-2 transition-all",
+                  isFavorite(camera.id)
+                    ? "bg-primary/20 border-primary/50 text-primary"
+                    : "bg-secondary/80 border-border text-muted-foreground hover:border-primary/30 hover:text-primary"
+                )}
                 onClick={() => toggleFavorite(camera.id)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <Heart className={cn("h-4 w-4 mr-1", isFavorite(camera.id) && "fill-current")} />
+                <Heart className={cn("h-4 w-4", isFavorite(camera.id) && "fill-current")} />
                 {isFavorite(camera.id) ? "Saved" : "Favorite"}
-              </Button>
+              </motion.button>
             </div>
           </div>
           <div className="p-6">

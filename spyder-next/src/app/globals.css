@@ -56,6 +56,15 @@
     animation: livePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
+  .pin-float-hover:hover {
+    animation: pinFloatPulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pinFloatPulse {
+    0%, 100% { box-shadow: 0 0 15px rgba(255,23,68,0.4); }
+    50% { box-shadow: 0 0 25px rgba(255,23,68,0.6), 0 0 40px rgba(255,23,68,0.25); }
+  }
+
   @keyframes livePulse {
     0%,
     100% {

@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { Pin, Heart } from "lucide-react";
 import { Camera } from "@/data/cameras";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { usePip } from "@/providers/pip-provider";
 import { useFavorites } from "@/providers/favorites-provider";
 import { cn } from "@/lib/utils";
@@ -61,31 +60,35 @@ export function CamCard({ camera, index }: CamCardProps) {
             </div>
           </div>
         </Link>
-        <div className="absolute bottom-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            size="icon"
-            variant="secondary"
-            className="h-8 w-8"
+        <div className="absolute bottom-3 left-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <motion.button
             onClick={(e) => {
               e.preventDefault();
               pinCamera(camera);
             }}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-semibold text-sm bg-[#ff1744]/90 hover:bg-[#ff1744] text-white border-2 border-[#ff1744] shadow-[0_0_15px_rgba(255,23,68,0.4)] hover:shadow-[0_0_25px_rgba(255,23,68,0.6),0_0_40px_rgba(255,23,68,0.25)] pin-float-hover transition-all duration-200"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             title="Pin to Float"
           >
             <Pin className="h-4 w-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="secondary"
-            className={cn("h-8 w-8", isFavorite(camera.id) && "text-primary")}
+            Pin to Float
+          </motion.button>
+          <motion.button
             onClick={(e) => {
               e.preventDefault();
               toggleFavorite(camera.id);
             }}
+            className={cn(
+              "p-2.5 rounded-lg border-2 transition-all",
+              isFavorite(camera.id)
+                ? "bg-primary/20 border-primary/50 text-primary"
+                : "bg-secondary/80 border-border text-muted-foreground hover:border-primary/30 hover:text-primary"
+            )}
             title="Add to Favorites"
           >
             <Heart className={cn("h-4 w-4", isFavorite(camera.id) && "fill-current")} />
-          </Button>
+          </motion.button>
         </div>
       </div>
     </motion.div>
