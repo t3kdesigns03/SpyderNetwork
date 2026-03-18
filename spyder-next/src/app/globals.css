@@ -92,4 +92,15 @@
   .neon-glow-box {
     box-shadow: 0 0 15px var(--spyder-neon), 0 0 30px var(--spyder-neon);
   }
+
+  /* Map popup overrides */
+  .spyder-map-popup .mapboxgl-popup-content {
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+  .spyder-map-popup .mapboxgl-popup-tip {
+    border-top-color: hsl(var(--card));
+  }
 }

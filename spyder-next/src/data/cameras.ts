@@ -13,11 +13,19 @@ export interface Camera {
   lat: number;
   lng: number;
   crowdLevel: CrowdLevel;
+  viewerCount?: number; // fake viewer count for heat layer
   website?: string;
   description?: string;
 }
 
-export const cameras: Camera[] = [
+function fakeViewerCount(crowdLevel: CrowdLevel, id: string): number {
+  const base = { Low: 12, Medium: 47, High: 128, Packed: 312 };
+  const hash = id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  const jitter = (hash % 30) - 15;
+  return Math.max(5, base[crowdLevel] + jitter);
+}
+
+const rawCameras: Omit<Camera, "viewerCount">[] = [
   { id: "backwater-jacks-pool", name: "Backwater Jack's Pool", location: "Lake of the Ozarks", twitchChannel: "spydernetwork3", category: "Pools", videoUrl: DEMO_VIDEO, lat: 38.128, lng: -92.642, crowdLevel: "High", website: "https://backwaterjacks.com/", description: "Where the Lake Comes to Party — poolside cocktails, fresh food, live music." },
   { id: "backwater-jacks-stage", name: "Backwater Jack's Stage", location: "Lake of the Ozarks", twitchChannel: "spydernetwork5", category: "Stages", videoUrl: DEMO_VIDEO, lat: 38.129, lng: -92.643, crowdLevel: "Packed", website: "https://backwaterjacks.com/" },
   { id: "backwater-jacks-dock", name: "Backwater Jack's Dock", location: "Lake of the Ozarks", twitchChannel: "spydernetwork12", category: "Docks", videoUrl: DEMO_VIDEO, lat: 38.127, lng: -92.641, crowdLevel: "Medium", website: "https://backwaterjacks.com/" },
@@ -77,5 +85,10 @@ export const cameras: Camera[] = [
   { id: "outlaws-mens-outpost", name: "Outlaws Men's Outpost", location: "Lake of the Ozarks", twitchChannel: "spydernetwork60", category: "Other", videoUrl: DEMO_VIDEO, lat: 38.152, lng: -92.655, crowdLevel: "Low" },
   { id: "cactus-blossom", name: "The Cactus Blossom Boutique", location: "Lake of the Ozarks", twitchChannel: "spydernetwork61", category: "Other", videoUrl: DEMO_VIDEO, lat: 38.149, lng: -92.660, crowdLevel: "Low" },
 ];
+
+export const cameras: Camera[] = rawCameras.map((c) => ({
+  ...c,
+  viewerCount: fakeViewerCount(c.crowdLevel, c.id),
+}));
 
 export const categories: CameraCategory[] = ["All", "Bars & Grills", "Pools", "Stages", "Docks", "Views", "Other"];
