@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { WaterRipple } from "@/components/water-ripple";
-import { FireflyParticles } from "@/components/firefly-particles";
 import { PipProvider } from "@/providers/pip-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";

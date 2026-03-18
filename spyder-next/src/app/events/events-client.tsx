@@ -5,12 +5,17 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FeaturedOnCamButton } from "@/components/featured-on-cam-button";
+import { SpiderIcon } from "@/components/spider-icon";
 import { lakeEvents2026 } from "@/data/events";
+import { useTheme } from "@/providers/theme-provider";
 import { format } from "date-fns";
+import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 
 export function EventsPageClient() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const { mode } = useTheme();
+  const isAfterDark = mode === "after-dark";
 
   const eventsOnDate = useMemo(() => {
     if (!selectedDate) return [];
@@ -69,7 +74,29 @@ export function EventsPageClient() {
               {eventsOnDate.length ? (
                 <div className="space-y-4">
                   {eventsOnDate.map((event) => (
-                    <Card key={event.id}>
+                    <Card key={event.id} className="relative">
+                      {isAfterDark && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="absolute -top-2 right-4 pointer-events-none z-10"
+                        >
+                          <motion.div
+                            animate={{
+                              y: [0, -4, 0],
+                              boxShadow: [
+                                "0 0 8px rgba(255,23,68,0.5)",
+                                "0 0 14px rgba(255,23,68,0.8)",
+                                "0 0 8px rgba(255,23,68,0.5)",
+                              ],
+                            }}
+                            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                            className="rounded-full bg-[#111]/90 p-1 border border-[#ff1744]/50"
+                          >
+                            <SpiderIcon size={14} />
+                          </motion.div>
+                        </motion.div>
+                      )}
                       <CardHeader className="pb-2">
                         <div className="flex items-center gap-2">
                           <h4 className="font-semibold text-foreground">{event.title}</h4>
@@ -97,7 +124,29 @@ export function EventsPageClient() {
 
         <TabsContent value="list" className="space-y-4">
           {lakeEvents2026.map((event) => (
-            <Card key={event.id}>
+            <Card key={event.id} className="relative">
+              {isAfterDark && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="absolute -top-2 right-4 pointer-events-none z-10"
+                >
+                  <motion.div
+                    animate={{
+                      y: [0, -4, 0],
+                      boxShadow: [
+                        "0 0 8px rgba(255,23,68,0.5)",
+                        "0 0 14px rgba(255,23,68,0.8)",
+                        "0 0 8px rgba(255,23,68,0.5)",
+                      ],
+                    }}
+                    transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                    className="rounded-full bg-[#111]/90 p-1 border border-[#ff1744]/50"
+                  >
+                    <SpiderIcon size={14} />
+                  </motion.div>
+                </motion.div>
+              )}
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>

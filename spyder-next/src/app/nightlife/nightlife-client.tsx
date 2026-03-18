@@ -12,6 +12,7 @@ import { Pin } from "lucide-react";
 import { cameras, PLACEHOLDER_THUMBNAIL } from "@/data/cameras";
 import { usePip } from "@/providers/pip-provider";
 import { useTheme } from "@/providers/theme-provider";
+import { SpiderIcon } from "@/components/spider-icon";
 import { cn } from "@/lib/utils";
 
 const nightlifeCams = cameras.filter(
@@ -30,7 +31,8 @@ const categories = [
 
 export function NightlifeClient() {
   const { pinCamera } = usePip();
-  const { setMode } = useTheme();
+  const { setMode, mode } = useTheme();
+  const isAfterDark = mode === "after-dark";
 
   useEffect(() => {
     setMode("after-dark");
@@ -104,6 +106,28 @@ export function NightlifeClient() {
                             Live
                           </span>
                         </div>
+                        {isAfterDark && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="absolute top-2 right-14 pointer-events-none"
+                          >
+                            <motion.div
+                              animate={{
+                                y: [0, -4, 0],
+                                boxShadow: [
+                                  "0 0 8px rgba(255,23,68,0.5)",
+                                  "0 0 14px rgba(255,23,68,0.8)",
+                                  "0 0 8px rgba(255,23,68,0.5)",
+                                ],
+                              }}
+                              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                              className="rounded-full bg-[#111]/90 p-1 border border-[#ff1744]/50"
+                            >
+                              <SpiderIcon size={14} />
+                            </motion.div>
+                          </motion.div>
+                        )}
                       </div>
                     </Link>
                     <CardContent className="pt-4">

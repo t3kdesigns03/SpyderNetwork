@@ -9,7 +9,11 @@ import { Camera, PLACEHOLDER_THUMBNAIL } from "@/data/cameras";
 import { Badge } from "@/components/ui/badge";
 import { usePip } from "@/providers/pip-provider";
 import { useFavorites } from "@/providers/favorites-provider";
+import { useTheme } from "@/providers/theme-provider";
+import { SpiderIcon } from "@/components/spider-icon";
 import { cn } from "@/lib/utils";
+
+const NIGHTLIFE_CATEGORIES = ["Bars & Grills", "Stages", "Pools"] as const;
 
 const crowdVariant = {
   Low: "low",
@@ -26,7 +30,10 @@ interface CamCardProps {
 export function CamCard({ camera, index }: CamCardProps) {
   const { pinCamera } = usePip();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { mode } = useTheme();
   const thumbnail = camera.thumbnailUrl ?? PLACEHOLDER_THUMBNAIL;
+  const isAfterDark = mode === "after-dark";
+  const showSpiderBadge = isAfterDark && NIGHTLIFE_CATEGORIES.includes(camera.category as (typeof NIGHTLIFE_CATEGORIES)[number]);
 
   return (
     <motion.div
@@ -57,6 +64,28 @@ export function CamCard({ camera, index }: CamCardProps) {
                 {camera.crowdLevel}
               </Badge>
             </div>
+            {showSpiderBadge && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="absolute top-2 right-14 pointer-events-none"
+              >
+                <motion.div
+                  animate={{
+                    y: [0, -4, 0],
+                    boxShadow: [
+                      "0 0 8px rgba(255,23,68,0.5)",
+                      "0 0 14px rgba(255,23,68,0.8)",
+                      "0 0 8px rgba(255,23,68,0.5)",
+                    ],
+                  }}
+                  transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                  className="rounded-full bg-[#111]/90 p-1 border border-[#ff1744]/50"
+                >
+                  <SpiderIcon size={14} />
+                </motion.div>
+              </motion.div>
+            )}
             <div className="absolute bottom-0 left-0 right-0 p-3">
               <h3 className="text-sm font-semibold text-foreground leading-tight">{camera.name}</h3>
               <p className="mt-0.5 text-xs text-muted-foreground">{camera.location}</p>

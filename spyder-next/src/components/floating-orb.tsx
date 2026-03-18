@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shuffle, Moon, Zap, Heart, X } from "lucide-react";
 import { usePip } from "@/providers/pip-provider";
@@ -8,10 +8,74 @@ import { useFavorites } from "@/providers/favorites-provider";
 import { useTheme } from "@/providers/theme-provider";
 import { useRouter } from "next/navigation";
 import { cameras } from "@/data/cameras";
+import { SpiderIcon } from "@/components/spider-icon";
 import { cn } from "@/lib/utils";
 
 const springBounce = { type: "spring" as const, stiffness: 400, damping: 15 };
 const springSmooth = { type: "spring" as const, stiffness: 300, damping: 25 };
+const spiderSpring = { type: "spring" as const, stiffness: 80, damping: 18 };
+
+const ORB_SPIDER_COUNT = 10;
+
+function OrbFloatingSpiders() {
+  const spiders = useMemo(() => {
+    return Array.from({ length: ORB_SPIDER_COUNT }, (_, i) => ({
+      angle: (i * 360) / ORB_SPIDER_COUNT + Math.random() * 30,
+      radius: 28 + Math.random() * 40,
+      driftX: (Math.random() - 0.5) * 50,
+      driftY: (Math.random() - 0.5) * 50,
+      size: 10 + Math.random() * 6,
+      duration: 4 + Math.random() * 3,
+      delay: i * 0.2,
+    }));
+  }, []);
+
+  return (
+    <div
+      className="absolute pointer-events-none"
+      style={{
+        width: 180,
+        height: 180,
+        left: "50%",
+        top: "50%",
+        marginLeft: -90,
+        marginTop: -90,
+      }}
+    >
+      {spiders.map((s, i) => {
+        const cx = 90;
+        const cy = 90;
+        const baseX = cx + s.radius * Math.cos((s.angle * Math.PI) / 180);
+        const baseY = cy + s.radius * Math.sin((s.angle * Math.PI) / 180);
+        return (
+          <motion.div
+            key={i}
+            className="absolute"
+            style={{
+              left: baseX,
+              top: baseY,
+              transform: "translate(-50%, -50%)",
+            }}
+            animate={{
+              x: [0, s.driftX, -s.driftX * 0.5, s.driftX * 0.3, 0],
+              y: [0, s.driftY, -s.driftY * 0.5, s.driftY * 0.3, 0],
+              opacity: [0.5, 1, 0.6, 0.9, 0.5],
+            }}
+            transition={{
+              duration: s.duration,
+              repeat: Infinity,
+              repeatType: "reverse",
+              delay: s.delay,
+              ...spiderSpring,
+            }}
+          >
+            <SpiderIcon size={s.size} />
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
 
 export function FloatingOrb() {
   const [expanded, setExpanded] = useState(false);
@@ -94,82 +158,57 @@ export function FloatingOrb() {
         )}
       </AnimatePresence>
 
-      {/* Orb - bouncy spring physics, neon red glow, black base */}
-      <motion.button
-        onClick={() => setExpanded(!expanded)}
-        className={cn(
-          "relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center min-w-[48px] min-h-[48px]",
-          "border-2 border-[#111]",
-          "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#0a1428]",
-          "touch-manipulation select-none",
-          "active:scale-95"
-        )}
-        style={{
-          background: "linear-gradient(145deg, #1a1a1a 0%, #111 100%)",
-          boxShadow: isAfterDark
-            ? "0 0 25px #ff1744, 0 0 50px rgba(255,23,68,0.4), inset 0 0 15px rgba(255,23,68,0.15)"
-            : "0 0 20px #ff1744, 0 0 40px rgba(255,23,68,0.3), inset 0 1px 0 rgba(255,255,255,0.05)",
-        }}
-        whileHover={{
-          scale: 1.08,
-          boxShadow: isAfterDark
-            ? "0 0 35px #ff1744, 0 0 70px rgba(255,23,68,0.5)"
-            : "0 0 30px #ff1744, 0 0 60px rgba(255,23,68,0.4)",
-        }}
-        whileTap={{ scale: 0.95 }}
-        animate={{
-          y: isAfterDark ? [0, -8, 0] : [0, -4, 0],
-        }}
-        transition={{
-          y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" },
-          ...springBounce,
-        }}
-        aria-label={expanded ? "Close orb" : "Open floating control orb"}
-      >
-        {/* Inner glow */}
-        <div
-          className="absolute inset-0 rounded-full opacity-60"
-          style={{
-            background: "radial-gradient(circle at 30% 30%, rgba(255,23,68,0.4), transparent 70%)",
-          }}
-        />
-        {/* After Dark: neon red firefly particles around orb */}
+      {/* Orb + floating spiders when Nightlife Mode */}
+      <div className="relative">
+        {/* After Dark: 8–12 floating neon red spiders around orb */}
         {isAfterDark && (
-          <>
-            {[...Array(6)].map((_, i) => {
-              const angle = (i * 2 * Math.PI) / 6;
-              const r = 22;
-              const dx = r * Math.cos(angle);
-              const dy = r * Math.sin(angle);
-              return (
-                <motion.div
-                  key={i}
-                  className="absolute w-1.5 h-1.5 rounded-full pointer-events-none"
-                  style={{
-                    left: `calc(50% + ${dx}px)`,
-                    top: `calc(50% + ${dy}px)`,
-                    transform: "translate(-50%, -50%)",
-                    background: "#ff1744",
-                    boxShadow: "0 0 8px #ff1744, 0 0 16px rgba(255,23,68,0.6)",
-                  }}
-                  animate={{ opacity: [0.3, 1, 0.3] }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    delay: i * 0.25,
-                    ease: "easeInOut",
-                  }}
-                />
-              );
-            })}
-          </>
+          <OrbFloatingSpiders />
         )}
-        {expanded ? (
+        <motion.button
+          onClick={() => setExpanded(!expanded)}
+          className={cn(
+            "relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center min-w-[48px] min-h-[48px]",
+            "border-2 border-[#111]",
+            "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#0a1428]",
+            "touch-manipulation select-none",
+            "active:scale-95"
+          )}
+          style={{
+            background: "linear-gradient(145deg, #1a1a1a 0%, #111 100%)",
+            boxShadow: isAfterDark
+              ? "0 0 25px #ff1744, 0 0 50px rgba(255,23,68,0.4), inset 0 0 15px rgba(255,23,68,0.15)"
+              : "0 0 20px #ff1744, 0 0 40px rgba(255,23,68,0.3), inset 0 1px 0 rgba(255,255,255,0.05)",
+          }}
+          whileHover={{
+            scale: 1.08,
+            boxShadow: isAfterDark
+              ? "0 0 35px #ff1744, 0 0 70px rgba(255,23,68,0.5)"
+              : "0 0 30px #ff1744, 0 0 60px rgba(255,23,68,0.4)",
+          }}
+          whileTap={{ scale: 0.95 }}
+          animate={{
+            y: isAfterDark ? [0, -8, 0] : [0, -4, 0],
+          }}
+          transition={{
+            y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" },
+            ...springBounce,
+          }}
+          aria-label={expanded ? "Close orb" : "Open floating control orb"}
+        >
+          {/* Inner glow */}
+          <div
+            className="absolute inset-0 rounded-full opacity-60"
+            style={{
+              background: "radial-gradient(circle at 30% 30%, rgba(255,23,68,0.4), transparent 70%)",
+            }}
+          />
+          {expanded ? (
           <X className="h-6 w-6 sm:h-7 sm:w-7 text-[#ff1744] relative z-10" />
         ) : (
           <Zap className="h-6 w-6 sm:h-7 sm:w-7 text-[#ff1744] relative z-10" />
         )}
-      </motion.button>
+        </motion.button>
+      </div>
     </div>
   );
 }
