@@ -1,13 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { FeaturedOnCamButton } from "@/components/featured-on-cam-button";
 import { lakeEvents2026 } from "@/data/events";
 import { format } from "date-fns";
-import { CalendarDays, Video } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export function EventsPageClient() {
@@ -26,7 +25,7 @@ export function EventsPageClient() {
   }, [selectedDate]);
 
   const modifiers = {
-    hasEvent: lakeEvents2026.map((e) => e.date),
+    hasEvent: lakeEvents2026.map((e) => new Date(e.date)),
   };
 
   return (
@@ -81,13 +80,9 @@ export function EventsPageClient() {
                       <CardContent>
                         <p className="text-sm text-muted-foreground">{event.description}</p>
                         {event.featuredCamId && (
-                          <Link
-                            href={`/cam/${event.featuredCamId}`}
-                            className="mt-3 inline-flex items-center gap-2 text-sm text-primary hover:underline"
-                          >
-                            <Video className="h-4 w-4" />
-                            Featured on Cam
-                          </Link>
+                          <div className="mt-3">
+                            <FeaturedOnCamButton camId={event.featuredCamId} />
+                          </div>
                         )}
                       </CardContent>
                     </Card>
@@ -117,13 +112,9 @@ export function EventsPageClient() {
               <CardContent>
                 <p className="text-sm text-muted-foreground">{event.description}</p>
                 {event.featuredCamId && (
-                  <Link
-                    href={`/cam/${event.featuredCamId}`}
-                    className="mt-3 inline-flex items-center gap-2 text-sm text-primary hover:underline"
-                  >
-                    <Video className="h-4 w-4" />
-                    Featured on Cam
-                  </Link>
+                  <div className="mt-3">
+                    <FeaturedOnCamButton camId={event.featuredCamId} />
+                  </div>
                 )}
               </CardContent>
             </Card>

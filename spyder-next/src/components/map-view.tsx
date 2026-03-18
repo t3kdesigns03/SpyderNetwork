@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import dynamic from "next/dynamic";
+import { toast } from "sonner";
 import { cameras } from "@/data/cameras";
 import { usePip } from "@/providers/pip-provider";
 import type { Camera } from "@/data/cameras";
@@ -23,6 +24,7 @@ export function MapView() {
     (cam: Camera) => {
       setSelectedCam(cam);
       pinCamera(cam);
+      toast.success("Cam pinned", { description: `${cam.name} is now playing in the PiP player.` });
     },
     [pinCamera]
   );

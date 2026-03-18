@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Video, Map, Moon, Calendar, Heart } from "lucide-react";
+import { Menu, X, Video, Map, Moon, Calendar, Heart, Sun } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/providers/theme-provider";
@@ -19,7 +19,7 @@ const navLinks = [
 
 export function Navbar() {
   const pathname = usePathname();
-  const { mode, toggleMode } = useTheme();
+  const { mode, colorScheme, toggleMode, toggleColorScheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -53,9 +53,18 @@ export function Navbar() {
               {label}
             </Link>
           ))}
-          <div className="flex items-center gap-2 pl-4 border-l border-border">
-            <span className="text-xs text-muted-foreground">After Dark</span>
-            <Switch checked={mode === "after-dark"} onCheckedChange={toggleMode} />
+          <div className="flex items-center gap-4 pl-4 border-l border-border">
+            <button
+              onClick={toggleColorScheme}
+              className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+              aria-label={colorScheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {colorScheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">After Dark</span>
+              <Switch checked={mode === "after-dark"} onCheckedChange={toggleMode} />
+            </div>
           </div>
         </nav>
 
@@ -91,9 +100,18 @@ export function Navbar() {
                   {label}
                 </Link>
               ))}
-              <div className="flex items-center justify-between pt-2">
-                <span className="text-sm text-muted-foreground">After Dark</span>
-                <Switch checked={mode === "after-dark"} onCheckedChange={toggleMode} />
+              <div className="flex flex-col gap-2 pt-2">
+                <button
+                  onClick={() => { toggleColorScheme(); setMobileOpen(false); }}
+                  className="flex items-center gap-2 text-sm text-muted-foreground py-2 min-h-[44px]"
+                >
+                  {colorScheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                  {colorScheme === "dark" ? "Light mode" : "Dark mode"}
+                </button>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">After Dark</span>
+                  <Switch checked={mode === "after-dark"} onCheckedChange={toggleMode} />
+                </div>
               </div>
             </div>
           </motion.nav>

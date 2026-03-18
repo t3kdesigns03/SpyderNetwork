@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { Pin, Heart } from "lucide-react";
 import { Camera, PLACEHOLDER_THUMBNAIL } from "@/data/cameras";
 import { Badge } from "@/components/ui/badge";
@@ -67,6 +68,7 @@ export function CamCard({ camera, index }: CamCardProps) {
             onClick={(e) => {
               e.preventDefault();
               pinCamera(camera);
+              toast.success("Cam pinned", { description: `${camera.name} is now playing in the PiP player.` });
             }}
             className="flex-1 flex items-center justify-center gap-2 min-h-[48px] py-2.5 px-4 rounded-lg font-semibold text-sm bg-[#ff1744]/90 hover:bg-[#ff1744] text-white border-2 border-[#ff1744] shadow-[0_0_15px_rgba(255,23,68,0.4)] hover:shadow-[0_0_25px_rgba(255,23,68,0.6),0_0_40px_rgba(255,23,68,0.25)] pin-float-hover transition-all duration-200 touch-manipulation"
             whileHover={{ scale: 1.02 }}

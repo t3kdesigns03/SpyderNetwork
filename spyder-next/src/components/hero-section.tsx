@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { Camera } from "@/data/cameras";
 import { Badge } from "@/components/ui/badge";
 import { Pin } from "lucide-react";
@@ -70,7 +71,10 @@ export function HeroSection({ featuredCam }: HeroSectionProps) {
                 </motion.span>
               </Link>
               <motion.button
-                onClick={() => pinCamera(featuredCam)}
+                onClick={() => {
+                  pinCamera(featuredCam);
+                  toast.success("Cam pinned", { description: `${featuredCam.name} is now playing in the PiP player.` });
+                }}
                 className="inline-flex items-center justify-center min-h-[48px] min-w-[48px] gap-2 px-6 py-3 rounded-lg font-semibold text-white bg-[#ff1744]/80 hover:bg-[#ff1744] border-2 border-[#ff1744] shadow-[0_0_15px_rgba(255,23,68,0.3)] hover:shadow-[0_0_25px_rgba(255,23,68,0.5)] transition-all duration-200 touch-manipulation"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}

@@ -11,6 +11,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { FloatingPip } from "@/components/floating-pip";
 import { FloatingOrb } from "@/components/floating-orb";
 import { AfterDarkWrapper } from "@/components/after-dark-wrapper";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,8 +23,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://spydernetwork.com";
+
 export const metadata: Metadata = {
-  manifest: "/manifest.json",
+  metadataBase: new URL(BASE_URL),
+  manifest: "/manifest.webmanifest",
   title: {
     default: "Spyder Network | Lake of the Ozarks Live Cams",
     template: "%s | Spyder Network",
@@ -35,6 +39,15 @@ export const metadata: Metadata = {
     title: "Spyder Network | Lake of the Ozarks Live Cams",
     description: "The largest network of live cameras at the Lake of the Ozarks. Real-time views 24/7.",
     type: "website",
+    url: BASE_URL,
+    siteName: "Spyder Network",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
@@ -53,7 +66,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans min-h-[100dvh] bg-[#0a1428] overflow-x-hidden`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} font-sans min-h-[100dvh] bg-background overflow-x-hidden`}>
         <ThemeProvider>
           <PipProvider>
             <FavoritesProvider>
@@ -66,6 +79,7 @@ export default function RootLayout({
                 </div>
                 <FloatingPip />
                 <FloatingOrb />
+                <Toaster position="bottom-center" richColors closeButton theme="dark" />
               </TooltipProvider>
             </FavoritesProvider>
           </PipProvider>
