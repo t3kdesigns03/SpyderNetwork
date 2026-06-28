@@ -206,8 +206,8 @@ export function CamStation() {
               </div>
             </div>
 
-            {/* Video area — 16:9 on mobile (capped), fills remaining on desktop */}
-            <div className="relative bg-black min-h-0 aspect-video max-h-[38svh] lg:max-h-none lg:flex-1 lg:aspect-auto">
+            {/* Video area — taller on mobile so the feed feels immersive */}
+            <div className="relative bg-black min-h-0 aspect-video max-h-[52svh] lg:max-h-none lg:flex-1 lg:aspect-auto">
               {selected ? (
                 <CamEmbed cam={selected} key={selected.id} autoplay />
               ) : (
@@ -234,8 +234,8 @@ export function CamStation() {
               />
             </div>
 
-            {/* Controls bar */}
-            <div className="flex flex-wrap items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-spyder-navy-card border-t border-white/10 shrink-0 min-h-[48px]">
+            {/* Controls bar — single row on all breakpoints */}
+            <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 bg-spyder-navy-card border-t border-white/10 shrink-0 min-h-[48px] overflow-x-auto scrollbar-hide">
               {/* Prev / Next */}
               <button
                 onClick={goPrev}
@@ -275,13 +275,13 @@ export function CamStation() {
               <div className="w-px h-5 bg-white/15" />
 
               {/* Interval picker */}
-              <div className="flex gap-1">
+              <div className="flex gap-1 shrink-0">
                 {INTERVALS.map(({ label, value }) => (
                   <button
                     key={value}
                     onClick={() => setIntervalSecs(value)}
                     className={clsx(
-                      "px-2 h-8 min-w-[32px] rounded text-xs font-mono transition-all touch-manipulation",
+                      "px-1.5 sm:px-2 h-8 min-w-[28px] sm:min-w-[32px] rounded text-xs font-mono transition-all touch-manipulation",
                       intervalSecs === value
                         ? "bg-spyder-red text-white"
                         : "bg-white/10 text-spyder-gray hover:text-white"
@@ -517,6 +517,78 @@ export function CamStation() {
   );
 }
 
+// ─── SpyderSwitch ─────────────────────────────────────────────────────────────
+// A branded toggle that uses a mini spider icon as its knob.
+// Track glows red with web-thread decoration when active.
+function SpyderSwitch({
+  checked,
+  onToggle,
+  label,
+}: {
+  checked: boolean;
+  onToggle: () => void;
+  label?: string;
+}) {
+  return (
+    <button
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      onClick={onToggle}
+      className={clsx(
+        "relative shrink-0 w-11 h-6 rounded-full border transition-all duration-300 touch-manipulation",
+        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-spyder-red",
+        checked
+          ? "bg-spyder-red/20 border-spyder-red/60 shadow-[0_0_8px_rgba(204,0,0,0.35)]"
+          : "bg-white/8 border-white/15"
+      )}
+    >
+      {/* Web-thread lines on the track when active */}
+      {checked && (
+        <span className="absolute inset-0 rounded-full overflow-hidden opacity-30 pointer-events-none" aria-hidden>
+          <svg width="100%" height="100%" viewBox="0 0 44 24" preserveAspectRatio="none">
+            <line x1="0" y1="12" x2="44" y2="12" stroke="#cc0000" strokeWidth="0.8" strokeDasharray="3 4" />
+            <line x1="11" y1="0" x2="11" y2="24" stroke="#cc0000" strokeWidth="0.5" strokeDasharray="2 3" />
+            <line x1="22" y1="0" x2="22" y2="24" stroke="#cc0000" strokeWidth="0.5" strokeDasharray="2 3" />
+            <line x1="33" y1="0" x2="33" y2="24" stroke="#cc0000" strokeWidth="0.5" strokeDasharray="2 3" />
+          </svg>
+        </span>
+      )}
+
+      {/* Spider knob */}
+      <span
+        aria-hidden
+        className={clsx(
+          "absolute top-0.5 left-0.5 w-5 h-5 rounded-full flex items-center justify-center",
+          "shadow-md transition-all duration-300",
+          checked
+            ? "translate-x-5 bg-spyder-red shadow-[0_0_6px_rgba(204,0,0,0.8)]"
+            : "translate-x-0 bg-[#1e2433]"
+        )}
+      >
+        {/* Mini spider SVG — legs + body + lens */}
+        <svg viewBox="0 0 20 20" width="13" height="13" fill="none">
+          {/* Legs */}
+          <path d="M7.5 7.5 Q5 5 3 3"   stroke={checked ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.18)"} strokeWidth="1.1" strokeLinecap="round" />
+          <path d="M7 10   Q4 9.5 2 10"  stroke={checked ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.18)"} strokeWidth="1.1" strokeLinecap="round" />
+          <path d="M7.5 12.5 Q5 15 3 17" stroke={checked ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.18)"} strokeWidth="1.1" strokeLinecap="round" />
+          <path d="M12.5 7.5 Q15 5 17 3"   stroke={checked ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.18)"} strokeWidth="1.1" strokeLinecap="round" />
+          <path d="M13 10   Q16 9.5 18 10"  stroke={checked ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.18)"} strokeWidth="1.1" strokeLinecap="round" />
+          <path d="M12.5 12.5 Q15 15 17 17" stroke={checked ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.18)"} strokeWidth="1.1" strokeLinecap="round" />
+          {/* Body shell */}
+          <circle cx="10" cy="10" r="4.5" fill={checked ? "white" : "#3a4055"} />
+          {/* Lens chamber */}
+          <circle cx="10" cy="10" r="2.6" fill={checked ? "#cc0000" : "#1a1f2e"} />
+          {/* Pupil */}
+          <circle cx="10" cy="10" r="1.2" fill={checked ? "white" : "#2a2f40"} />
+          {/* Catchlight */}
+          <circle cx="8.9" cy="8.9" r="0.6" fill={checked ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.1)"} />
+        </svg>
+      </span>
+    </button>
+  );
+}
+
 // ─── Cam row ─────────────────────────────────────────────────────────────────
 function CamRow({
   cam,
@@ -542,29 +614,18 @@ function CamRow({
       id={`cam-row-${cam.id}`}
       className={clsx(
         "flex items-center gap-2 px-3 py-2.5 border-b border-white/5 transition-all duration-150 min-h-[48px]",
-        !showBusiness && "pl-7", // indent sub-cams under business header
+        !showBusiness && "pl-8", // indent sub-cams under business header
         isSelected
           ? "bg-spyder-red/10 border-l-2 border-l-spyder-red"
           : "hover:bg-white/[0.04] border-l-2 border-l-transparent"
       )}
     >
-      {/* Toggle switch */}
-      <button
-        onClick={onToggleEnabled}
-        className={clsx(
-          "relative shrink-0 w-9 h-5 rounded-full transition-colors duration-200 touch-manipulation",
-          isEnabled ? "bg-spyder-red" : "bg-white/20"
-        )}
-        aria-label={isEnabled ? "Remove from cycle" : "Add to cycle"}
-        aria-pressed={isEnabled}
-      >
-        <span
-          className={clsx(
-            "absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200",
-            isEnabled && "translate-x-4"
-          )}
-        />
-      </button>
+      {/* Spyder switch */}
+      <SpyderSwitch
+        checked={isEnabled}
+        onToggle={onToggleEnabled}
+        label={isEnabled ? "Remove from cycle" : "Add to cycle"}
+      />
 
       {/* Favorite */}
       <button
