@@ -1,0 +1,190 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap');
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --spyder-black: #000000;
+  --spyder-navy: #0a0e1a;
+  --spyder-navy-light: #111827;
+  --spyder-navy-card: #0d1526;
+  --spyder-red: #cc0000;
+  --spyder-red-bright: #ff1a1a;
+  --spyder-gold: #f5a623;
+  --spyder-teal: #0ea5e9;
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-spyder-navy text-white antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+    overscroll-behavior: none;
+  }
+
+  /* Mobile-friendly focus styles */
+  :focus-visible {
+    @apply outline-2 outline-spyder-red outline-offset-2;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-spyder-navy-light;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-spyder-red rounded-full;
+  }
+}
+
+@layer components {
+  /* Live badge */
+  .live-badge {
+    @apply inline-flex items-center gap-1 bg-spyder-red text-white text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full;
+  }
+
+  .live-dot {
+    @apply w-1.5 h-1.5 bg-white rounded-full animate-pulse;
+  }
+
+  /* Touch-optimized button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-spyder-red hover:bg-spyder-red-bright
+           text-white font-semibold px-6 py-3 rounded-xl min-h-[48px]
+           transition-all duration-200 active:scale-95 touch-manipulation;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20
+           border border-white/20 text-white font-semibold px-6 py-3 rounded-xl min-h-[48px]
+           transition-all duration-200 active:scale-95 touch-manipulation;
+  }
+
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-12 h-12 rounded-xl
+           bg-white/10 hover:bg-white/20 border border-white/10
+           transition-all duration-200 active:scale-95 touch-manipulation;
+  }
+
+  /* Category pill */
+  .category-pill {
+    @apply inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium
+           border transition-all duration-200 whitespace-nowrap min-h-[40px]
+           touch-manipulation active:scale-95;
+  }
+
+  .category-pill-active {
+    @apply bg-spyder-red border-spyder-red text-white;
+  }
+
+  .category-pill-inactive {
+    @apply bg-white/5 border-white/10 text-spyder-gray hover:border-white/30 hover:text-white;
+  }
+
+  /* Card base */
+  .cam-card {
+    @apply relative overflow-hidden rounded-2xl bg-spyder-navy-card border border-white/10
+           transition-all duration-300 hover:border-spyder-red/50 hover:shadow-card-hover
+           active:scale-[0.98] touch-manipulation cursor-pointer;
+  }
+
+  /* Glass panel */
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
+  }
+
+  /* Section heading */
+  .section-heading {
+    @apply font-display text-2xl sm:text-3xl font-bold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  /* Hide scrollbar but keep scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Aspect ratio for video embeds */
+  .aspect-video-cam {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Full bleed on mobile */
+  .full-bleed-mobile {
+    @apply -mx-4 sm:mx-0;
+  }
+
+  /* Safe area padding for notched phones */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
+
+/* Leaflet map overrides */
+.leaflet-container {
+  background: var(--spyder-navy) !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.leaflet-tile-pane {
+  filter: hue-rotate(180deg) saturate(0.8) brightness(0.7);
+}
+
+.spyder-map-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 12px rgba(204,0,0,0.4);
+}
+
+.spyder-map-marker-inner {
+  transform: rotate(45deg);
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Twitch embed */
+.twitch-embed-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Smooth page transitions */
+.page-enter {
+  animation: fade-in 0.3s ease-out;
+}

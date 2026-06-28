@@ -1,0 +1,684 @@
+import type { Cam } from "@/types";
+
+// ─── Channel map (scraped from spydernetwork.com) ────────────────────────────
+// backwater-jacks-pool        → spydernetwork3
+// backwater-jacks-stage       → spydernetwork5
+// backwater-jacks-dock        → spydernetwork12
+// backwater-jacks-dock-1      → spydernetwork13
+// backwater-jacks-level-five  → spydernetwork66
+// dog-days-pool               → spydernetwork31
+// dog-days-stage              → spydernetwork27
+// dog-days-dock               → spydernetwork29
+// dog-days-dock-1             → spydernetwork28
+// lazy-gators-pool            → spydernetwork4
+// lazy-gators (stage)         → spydernetwork15
+// lazy-gators-dock-1          → spydernetwork16
+// lazy-gators-dock-2          → spydernetwork17
+// fish-and-company-stage      → spydernetwork35
+// fish-and-company-patio      → spydernetwork11
+// fish-and-company-dock-1     → spydernetwork23
+// fish-and-company (dock 2)   → spydernetwork26
+// alley-cats-north            → spydernetwork43
+// alley-cats-south            → spydernetwork42
+// alhonna-indoor-pool         → spydernetwork65
+// alhonna-outdoor-pool        → spydernetwork61
+// encore-stage                → spydernetwork10
+// encore-pool                 → spydernetwork9
+// encore-pool-bar             → spydernetwork8
+// neon-taco-stage             → spydernetwork18
+// neon-taco-docks             → spydernetwork19
+// neon-taco-bar               → spydernetwork20
+// wicked-willies-bar          → spydernetwork1
+// wicked-willies-restaurant   → spydernetwork36
+// wicked-willies-patio        → spydernetwork49
+// krms-studio                 → spydernetwork53
+// krms-north                  → spydernetwork50
+// krms-east                   → spydernetwork51
+// krms-southeast              → spydernetwork52
+// tucker-shuckers-north       → spydernetwork2
+// tucker-shuckers-south       → spydernetwork32
+// jb-hooks-bridge             → ipcamlive iframe
+// jb-hooks-left               → ipcamlive iframe
+
+export const CAMS: Cam[] = [
+  // ── HERO / FEATURED ───────────────────────────────────────────────────────
+  // spydernetwork68 is the primary SpyderNetwork broadcast channel.
+  // Shown as the hero feed above the grouped cam list.
+  {
+    id: "hero-featured",
+    name: "Featured",
+    business: "SpyderNetwork",
+    slug: "featured",
+    category: "lake-view",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork68",
+    isFeatured: true,
+    isLive: true,
+    description: "SpyderNetwork flagship live feed — Lake of the Ozarks",
+    spyderPageUrl: "https://spydernetwork.com",
+    lat: 38.1030,
+    lng: -92.6272,
+  },
+
+  // ── BACKWATER JACKS ───────────────────────────────────────────────────────
+  {
+    id: "bwj-pool",
+    name: "Pool",
+    business: "Backwater Jacks",
+    slug: "backwater-jacks-pool",
+    category: "pool",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork3",
+    isLive: true,
+    description: "Pool deck & swim area — poolside cocktails, live music, legendary sunsets",
+    websiteUrl: "https://backwaterjacks.com",
+    spyderPageUrl: "https://spydernetwork.com/backwater-jacks-pool/",
+    lat: 38.169,
+    lng: -92.620,
+  },
+  {
+    id: "bwj-stage",
+    name: "Stage",
+    business: "Backwater Jacks",
+    slug: "backwater-jacks-stage",
+    category: "stage",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork5",
+    isLive: true,
+    description: "Stage & patio — live bands, crowds, Lake Ozarks nightlife",
+    websiteUrl: "https://backwaterjacks.com",
+    spyderPageUrl: "https://spydernetwork.com/backwater-jacks-stage/",
+    lat: 38.169,
+    lng: -92.620,
+  },
+  {
+    id: "bwj-dock1",
+    name: "Dock",
+    business: "Backwater Jacks",
+    slug: "backwater-jacks-dock",
+    category: "dock",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork12",
+    isLive: true,
+    description: "Main dock — boat traffic & waterfront activity",
+    websiteUrl: "https://backwaterjacks.com",
+    spyderPageUrl: "https://spydernetwork.com/backwater-jacks-dock/",
+    lat: 38.169,
+    lng: -92.621,
+  },
+  {
+    id: "bwj-dock2",
+    name: "Dock 2",
+    business: "Backwater Jacks",
+    slug: "backwater-jacks-dock-1",
+    category: "dock",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork13",
+    isLive: true,
+    description: "Boat parking dock — check availability before you arrive",
+    websiteUrl: "https://backwaterjacks.com",
+    spyderPageUrl: "https://spydernetwork.com/backwater-jacks-dock-1/",
+    lat: 38.1685,
+    lng: -92.621,
+  },
+  {
+    id: "bwj-level5",
+    name: "Level Five",
+    business: "Backwater Jacks",
+    slug: "backwater-jacks-level-five",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork66",
+    isLive: true,
+    description: "Level Five rooftop bar — elevated views, pool parties, dance floor",
+    websiteUrl: "https://www.level5loz.com",
+    spyderPageUrl: "https://spydernetwork.com/backwater-jacks-level-five-lake-ozarks/",
+    lat: 38.1692,
+    lng: -92.6205,
+  },
+
+  // ── DOG DAYS ──────────────────────────────────────────────────────────────
+  {
+    id: "dd-pool",
+    name: "Pool",
+    business: "Dog Days",
+    slug: "dog-days-pool",
+    category: "pool",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork31",
+    isLive: true,
+    description: "Poolside at Dog Days — the ultimate lakeside experience",
+    websiteUrl: "https://dogdays.ws",
+    spyderPageUrl: "https://spydernetwork.com/dog-days-pool/",
+    lat: 38.1048,
+    lng: -92.6291,
+  },
+  {
+    id: "dd-stage",
+    name: "Stage",
+    business: "Dog Days",
+    slug: "dog-days-stage",
+    category: "stage",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork27",
+    isLive: true,
+    description: "Live entertainment stage — cocktails, crowds & music",
+    websiteUrl: "https://dogdays.ws",
+    spyderPageUrl: "https://spydernetwork.com/dog-days-stage/",
+    lat: 38.1048,
+    lng: -92.6291,
+  },
+  {
+    id: "dd-dock1",
+    name: "Dock",
+    business: "Dog Days",
+    slug: "dog-days-dock",
+    category: "dock",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork29",
+    isLive: true,
+    description: "Dock & lakefront — see boat parking availability",
+    websiteUrl: "https://dogdays.ws",
+    spyderPageUrl: "https://spydernetwork.com/dog-days-dock/",
+    lat: 38.1043,
+    lng: -92.6296,
+  },
+  {
+    id: "dd-dock2",
+    name: "Dock 2",
+    business: "Dog Days",
+    slug: "dog-days-dock-1",
+    category: "dock",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork28",
+    isLive: true,
+    description: "Second dock view — waterfront lake activity",
+    websiteUrl: "https://dogdays.ws",
+    spyderPageUrl: "https://spydernetwork.com/dog-days-dock-1/",
+    lat: 38.1040,
+    lng: -92.6298,
+  },
+
+  // ── LAZY GATORS ───────────────────────────────────────────────────────────
+  {
+    id: "lg-pool",
+    name: "Pool",
+    business: "Lazy Gators",
+    slug: "lazy-gators-pool",
+    category: "pool",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork4",
+    isLive: true,
+    description: "Pool cam — fun in the sun at Lazy Gators",
+    websiteUrl: "https://lazygators.com",
+    spyderPageUrl: "https://spydernetwork.com/lazy-gators-pool/",
+    lat: 38.1318,
+    lng: -92.6481,
+  },
+  {
+    id: "lg-stage",
+    name: "Stage",
+    business: "Lazy Gators",
+    slug: "lazy-gators-stage",
+    category: "stage",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork15",
+    isLive: true,
+    description: "Stage & bar area — live music and waterfront vibes",
+    websiteUrl: "https://lazygators.com",
+    spyderPageUrl: "https://spydernetwork.com/lazy-gators/",
+    lat: 38.1318,
+    lng: -92.648,
+  },
+  {
+    id: "lg-dock1",
+    name: "Dock",
+    business: "Lazy Gators",
+    slug: "lazy-gators-dock-1",
+    category: "dock",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork16",
+    isLive: true,
+    description: "Dock cam — boat parking and lake views",
+    websiteUrl: "https://lazygators.com",
+    spyderPageUrl: "https://spydernetwork.com/lazy-gators-dock-1/",
+    lat: 38.1315,
+    lng: -92.6485,
+  },
+  {
+    id: "lg-dock2",
+    name: "Dock 2",
+    business: "Lazy Gators",
+    slug: "lazy-gators-dock-2",
+    category: "dock",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork17",
+    isLive: true,
+    description: "Second dock — additional boat parking view",
+    websiteUrl: "https://lazygators.com",
+    spyderPageUrl: "https://spydernetwork.com/lazy-gators-dock-2/",
+    lat: 38.1312,
+    lng: -92.6487,
+  },
+
+  // ── FISH AND COMPANY ──────────────────────────────────────────────────────
+  {
+    id: "fc-stage",
+    name: "Stage",
+    business: "Fish and Company",
+    slug: "fish-and-company-stage",
+    category: "stage",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork35",
+    isLive: true,
+    description: "\"Dale Blue\" stage — live entertainment at this 31MM landmark",
+    websiteUrl: "https://thefishandcompany.com",
+    spyderPageUrl: "https://spydernetwork.com/fish-and-company-stage/",
+    lat: 38.1601,
+    lng: -92.6667,
+  },
+  {
+    id: "fc-patio",
+    name: "Patio",
+    business: "Fish and Company",
+    slug: "fish-and-company-patio",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork11",
+    isLive: true,
+    description: "Restaurant patio — dining, dancing, great food at the lake",
+    websiteUrl: "https://thefishandcompany.com",
+    spyderPageUrl: "https://spydernetwork.com/fish-and-company-patio/",
+    lat: 38.1601,
+    lng: -92.6668,
+  },
+  {
+    id: "fc-dock1",
+    name: "Dock",
+    business: "Fish and Company",
+    slug: "fish-and-company-dock-1",
+    category: "dock",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork23",
+    isLive: true,
+    description: "Dock with waverunner lifts — boat activity at this popular destination",
+    websiteUrl: "https://thefishandcompany.com",
+    spyderPageUrl: "https://spydernetwork.com/fish-and-company-dock-1/",
+    lat: 38.1598,
+    lng: -92.6671,
+  },
+  {
+    id: "fc-dock2",
+    name: "Dock 2",
+    business: "Fish and Company",
+    slug: "fish-and-company-dock-2",
+    category: "dock",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork26",
+    isLive: true,
+    description: "Boat parking dock — real-time availability view",
+    websiteUrl: "https://thefishandcompany.com",
+    spyderPageUrl: "https://spydernetwork.com/fish-and-company/",
+    lat: 38.1596,
+    lng: -92.6673,
+  },
+
+  // ── ALLEY CATS ────────────────────────────────────────────────────────────
+  {
+    id: "ac-north",
+    name: "North",
+    business: "Alley Cats",
+    slug: "alley-cats-north",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork43",
+    isLive: true,
+    description: "Bagnell Strip street view north — crowds, traffic, nightlife",
+    websiteUrl: "https://www.alleycatsonthestrip.com",
+    spyderPageUrl: "https://spydernetwork.com/alley-cats-north/",
+    lat: 38.1943,
+    lng: -92.6122,
+  },
+  {
+    id: "ac-south",
+    name: "South",
+    business: "Alley Cats",
+    slug: "alley-cats-south",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork42",
+    isLive: true,
+    description: "Bagnell Strip street view south — voted best pizza at the lake",
+    websiteUrl: "https://www.alleycatsonthestrip.com",
+    spyderPageUrl: "https://spydernetwork.com/alley-cats-south/",
+    lat: 38.1940,
+    lng: -92.6124,
+  },
+
+  // ── ALHONNA RESORT & MARINA ───────────────────────────────────────────────
+  {
+    id: "alhonna-indoor",
+    name: "Indoor Pool",
+    business: "Alhonna Resort & Marina",
+    slug: "alhonna-indoor-pool",
+    category: "pool",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork65",
+    isLive: true,
+    description: "Indoor pool — famous Alhonna resort, featured in TV show Ozark",
+    websiteUrl: "https://thealhonnaresort.com",
+    spyderPageUrl: "https://spydernetwork.com/alhonna-resort-marina-indoor-pool/",
+    lat: 38.178,
+    lng: -92.614,
+  },
+  {
+    id: "alhonna-outdoor",
+    name: "Outdoor Pool",
+    business: "Alhonna Resort & Marina",
+    slug: "alhonna-outdoor-pool",
+    category: "pool",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork61",
+    isLive: true,
+    description: "Outdoor pool & lake conditions — home of the Blue Cat Lounge",
+    websiteUrl: "https://thealhonnaresort.com",
+    spyderPageUrl: "https://spydernetwork.com/alhonna-resort-marina-outdoor-pool/",
+    lat: 38.1782,
+    lng: -92.6138,
+  },
+
+  // ── ENCORE LAKESIDE GRILL ─────────────────────────────────────────────────
+  {
+    id: "encore-stage",
+    name: "Stage",
+    business: "Encore",
+    slug: "encore-stage",
+    category: "stage",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork10",
+    isLive: true,
+    description: "Encore Skybar stage — top bands, outdoor venue, Lake Ozarks",
+    websiteUrl: "https://theencoregrill.com",
+    spyderPageUrl: "https://spydernetwork.com/encore-lakeside-grill-stage-live-cam-top-bands-lake-of-the-ozarks/",
+    lat: 38.1218,
+    lng: -92.6315,
+  },
+  {
+    id: "encore-pool",
+    name: "Pool",
+    business: "Encore",
+    slug: "encore-pool",
+    category: "pool",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork9",
+    isLive: true,
+    description: "Pool bar — Encore's famous outdoor pool entertainment complex",
+    websiteUrl: "https://theencoregrill.com",
+    spyderPageUrl: "https://spydernetwork.com/encore-lakeside-grill-pool-bar-live-cam-top-bands-lake-of-the-ozarks/",
+    lat: 38.1220,
+    lng: -92.6313,
+  },
+  {
+    id: "encore-poolbar",
+    name: "Pool Bar",
+    business: "Encore",
+    slug: "encore-pool-bar",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork8",
+    isLive: true,
+    description: "Pool bar view — live music, dancing, amazing sunsets",
+    websiteUrl: "https://theencoregrill.com",
+    spyderPageUrl: "https://spydernetwork.com/encore-lakeside-grill-pool-live-cam-top-bands-lake-of-the-ozarks/",
+    lat: 38.1222,
+    lng: -92.6311,
+  },
+
+  // ── NEON TACO ─────────────────────────────────────────────────────────────
+  {
+    id: "nt-stage",
+    name: "Stage",
+    business: "Neon Taco",
+    slug: "neon-taco-stage",
+    category: "stage",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork18",
+    isLive: true,
+    description: "Neon Taco stage — live music on the Bagnell Dam Strip",
+    websiteUrl: "https://www.theneontaco.com",
+    spyderPageUrl: "https://spydernetwork.com/neon-taco-stage/",
+    lat: 38.1962,
+    lng: -92.6110,
+  },
+  {
+    id: "nt-docks",
+    name: "Docks",
+    business: "Neon Taco",
+    slug: "neon-taco-docks",
+    category: "dock",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork19",
+    isLive: true,
+    description: "Dock cam — boat parking and lake views on the strip",
+    websiteUrl: "https://www.theneontaco.com",
+    spyderPageUrl: "https://spydernetwork.com/neon-taco-docks/",
+    lat: 38.1960,
+    lng: -92.6112,
+  },
+  {
+    id: "nt-bar",
+    name: "Bar",
+    business: "Neon Taco",
+    slug: "neon-taco-bar",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork20",
+    isLive: true,
+    description: "Lakeside bar — relaxed atmosphere, tacos, Bagnell Dam Strip",
+    websiteUrl: "https://www.theneontaco.com",
+    spyderPageUrl: "https://spydernetwork.com/neon-taco-bar/",
+    lat: 38.1963,
+    lng: -92.6108,
+  },
+
+  // ── WICKED WILLIE'S ───────────────────────────────────────────────────────
+  {
+    id: "ww-bar",
+    name: "Bar",
+    business: "Wicked Willie's",
+    slug: "wicked-willies-bar",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork1",
+    isLive: true,
+    description: "Sports bar with 36 HD TVs — the go-to spot in Osage Beach",
+    websiteUrl: "https://wickedwilliessportsgrill.com",
+    spyderPageUrl: "https://spydernetwork.com/wicked-willies-bar/",
+    lat: 38.1038,
+    lng: -92.6298,
+  },
+  {
+    id: "ww-restaurant",
+    name: "Restaurant",
+    business: "Wicked Willie's",
+    slug: "wicked-willies-restaurant",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork36",
+    isLive: true,
+    description: "Dining room — sports, food & family fun in Osage Beach",
+    websiteUrl: "https://wickedwilliessportsgrill.com",
+    spyderPageUrl: "https://spydernetwork.com/wicked-willies-restaurant/",
+    lat: 38.1040,
+    lng: -92.6296,
+  },
+  {
+    id: "ww-patio",
+    name: "Patio",
+    business: "Wicked Willie's",
+    slug: "wicked-willies-patio",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork49",
+    isLive: true,
+    description: "Outdoor patio — 3 massive projection screens, live sports",
+    websiteUrl: "https://wickedwilliessportsgrill.com",
+    spyderPageUrl: "https://spydernetwork.com/wicked-willies-patio/",
+    lat: 38.1036,
+    lng: -92.6300,
+  },
+
+  // ── KRMS RADIO ────────────────────────────────────────────────────────────
+  {
+    id: "krms-studio",
+    name: "Studio",
+    business: "KRMS Radio",
+    slug: "krms-studio",
+    category: "radio",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork53",
+    isLive: true,
+    description: "Live broadcast studio — Lake of the Ozarks local radio",
+    websiteUrl: "https://www.krmsradio.com",
+    spyderPageUrl: "https://spydernetwork.com/krms-radio/",
+    lat: 38.1052,
+    lng: -92.6381,
+  },
+  {
+    id: "krms-north",
+    name: "North Tower",
+    business: "KRMS Radio",
+    slug: "krms-north",
+    category: "lake-view",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork50",
+    isLive: true,
+    description: "Panoramic north view from KRMS tower — expansive Osage Beach skyline",
+    websiteUrl: "https://www.krmsradio.com",
+    spyderPageUrl: "https://spydernetwork.com/krms-radio-north/",
+    lat: 38.1054,
+    lng: -92.6379,
+  },
+  {
+    id: "krms-east",
+    name: "East Tower",
+    business: "KRMS Radio",
+    slug: "krms-east",
+    category: "lake-view",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork51",
+    isLive: true,
+    description: "East view from KRMS tower — city and lake panorama",
+    websiteUrl: "https://www.krmsradio.com",
+    spyderPageUrl: "https://spydernetwork.com/krms-radio-east/",
+    lat: 38.1056,
+    lng: -92.6377,
+  },
+  {
+    id: "krms-southeast",
+    name: "SE Tower",
+    business: "KRMS Radio",
+    slug: "krms-southeast",
+    category: "lake-view",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork52",
+    isLive: true,
+    description: "Southeast view from KRMS tower — stunning aerial lake view",
+    websiteUrl: "https://www.krmsradio.com",
+    spyderPageUrl: "https://spydernetwork.com/krms-radio-south-east/",
+    lat: 38.1050,
+    lng: -92.6375,
+  },
+
+  // ── TUCKER'S SHUCKERS ─────────────────────────────────────────────────────
+  {
+    id: "ts-north",
+    name: "North",
+    business: "Tucker's Shuckers",
+    slug: "tucker-shuckers-north",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork2",
+    isLive: true,
+    description: "Bagnell Strip street view north — fresh oysters, 28 beers on tap",
+    websiteUrl: "https://tuckersshuckers.com",
+    spyderPageUrl: "https://spydernetwork.com/tucker-shuckers-north/",
+    lat: 38.1921,
+    lng: -92.6132,
+  },
+  {
+    id: "ts-south",
+    name: "South",
+    business: "Tucker's Shuckers",
+    slug: "tucker-shuckers-south",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork32",
+    isLive: true,
+    description: "Bagnell Strip street view south — historic strip live action",
+    websiteUrl: "https://tuckersshuckers.com",
+    spyderPageUrl: "https://spydernetwork.com/tucker-shuckers-south/",
+    lat: 38.1919,
+    lng: -92.6134,
+  },
+
+  // ── JB HOOKS ──────────────────────────────────────────────────────────────
+  // JB Hooks uses ipcamlive (not Twitch) — embedded as iframes
+  {
+    id: "jbh-bridge",
+    name: "Bridge View",
+    business: "JB Hooks",
+    slug: "jb-hooks-bridge",
+    category: "lake-view",
+    streamProvider: "iframe",
+    iframeUrl: "https://g1.ipcamlive.com/player/player.php?alias=jbhooksbridge",
+    isLive: true,
+    description: "Bridge cam — scenic lake and dam views at JB Hooks",
+    websiteUrl: "https://www.jbhooks.com",
+    spyderPageUrl: "https://spydernetwork.com/jb-hooks/",
+    lat: 38.1938,
+    lng: -92.6118,
+  },
+  {
+    id: "jbh-left",
+    name: "Left Cam",
+    business: "JB Hooks",
+    slug: "jb-hooks-left",
+    category: "bar-grill",
+    streamProvider: "iframe",
+    iframeUrl: "https://g1.ipcamlive.com/player/player.php?alias=jbhooksleft",
+    isLive: true,
+    description: "Restaurant & dock left cam — fine dining, Bagnell Dam area",
+    websiteUrl: "https://www.jbhooks.com",
+    spyderPageUrl: "https://spydernetwork.com/jb-hooks/",
+    lat: 38.1936,
+    lng: -92.6120,
+  },
+];
+
+// ── Grouping helpers ──────────────────────────────────────────────────────────
+
+/** The hero / featured cam */
+export const HERO_CAM = CAMS.find((c) => c.isFeatured)!;
+
+/** All non-hero cams for cycling and cam lists */
+export const ALL_CAMS = CAMS.filter((c) => !c.isFeatured);
+
+/** Unique business names in display order (hero excluded) */
+export const CAM_BUSINESSES = Array.from(
+  new Set(ALL_CAMS.map((c) => c.business))
+);
+
+/** Cams keyed by business name */
+export const CAMS_BY_BUSINESS = CAM_BUSINESSES.reduce<Record<string, Cam[]>>(
+  (acc, biz) => {
+    acc[biz] = ALL_CAMS.filter((c) => c.business === biz);
+    return acc;
+  },
+  {}
+);
+
+/** Look up any cam (including hero) by its slug */
+export function getCamBySlug(slug: string) {
+  return CAMS.find((c) => c.slug === slug);
+}
