@@ -144,14 +144,15 @@ export function CamStation() {
             key={key}
             onClick={() => setTab(key)}
             className={clsx(
-              "flex items-center gap-2 px-5 py-3 text-xs font-bold tracking-widest border-b-2 transition-all min-h-[44px]",
+              "flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold tracking-widest border-b-2 transition-all min-h-[48px] touch-manipulation",
               tab === key
                 ? "text-white border-spyder-red"
                 : "text-spyder-gray border-transparent hover:text-white hover:border-white/20"
             )}
           >
             <Icon className="w-3.5 h-3.5" />
-            {label}
+            <span className="hidden xs:inline">{label}</span>
+            <span className="xs:hidden">{label.slice(0, 4)}</span>
           </button>
         ))}
       </div>
@@ -205,8 +206,8 @@ export function CamStation() {
               </div>
             </div>
 
-            {/* Video area — fills remaining height */}
-            <div className="relative flex-1 bg-black min-h-0 aspect-video lg:aspect-auto">
+            {/* Video area — 16:9 on mobile (capped), fills remaining on desktop */}
+            <div className="relative bg-black min-h-0 aspect-video max-h-[38svh] lg:max-h-none lg:flex-1 lg:aspect-auto">
               {selected ? (
                 <CamEmbed cam={selected} key={selected.id} autoplay />
               ) : (
@@ -216,7 +217,10 @@ export function CamStation() {
                   </div>
                   <div>
                     <p className="text-white font-semibold text-base">Pick a cam to start</p>
-                    <p className="text-spyder-gray text-sm mt-1">Select any camera from the list →</p>
+                    <p className="text-spyder-gray text-sm mt-1">
+                      <span className="lg:hidden">Select a camera from the list below ↓</span>
+                      <span className="hidden lg:inline">Select a camera from the list →</span>
+                    </p>
                   </div>
                 </div>
               )}
@@ -231,7 +235,7 @@ export function CamStation() {
             </div>
 
             {/* Controls bar */}
-            <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 bg-spyder-navy-card border-t border-white/10 shrink-0">
+            <div className="flex flex-wrap items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-spyder-navy-card border-t border-white/10 shrink-0 min-h-[48px]">
               {/* Prev / Next */}
               <button
                 onClick={goPrev}
@@ -277,7 +281,7 @@ export function CamStation() {
                     key={value}
                     onClick={() => setIntervalSecs(value)}
                     className={clsx(
-                      "px-2 h-7 rounded text-xs font-mono transition-all",
+                      "px-2 h-8 min-w-[32px] rounded text-xs font-mono transition-all touch-manipulation",
                       intervalSecs === value
                         ? "bg-spyder-red text-white"
                         : "bg-white/10 text-spyder-gray hover:text-white"
@@ -392,7 +396,19 @@ export function CamStation() {
             </div>
 
             {/* Scrollable cam list */}
-            <div className="flex-1 overflow-y-auto overscroll-contain">
+            <div className="flex-1 overflow-y-auto overscroll-contain pb-safe">
+
+              {/* ── Sticky now-playing strip (mobile only) ── */}
+              {selected && (
+                <div className="sticky top-0 z-10 lg:hidden flex items-center gap-2 px-3 py-2 bg-spyder-black/90 backdrop-blur border-b border-spyder-red/30">
+                  <span className="w-1.5 h-1.5 rounded-full bg-spyder-red animate-pulse shrink-0" />
+                  <span className="text-xs text-white font-medium truncate">
+                    {selected.business}{selected.name ? ` · ${selected.name}` : ""}
+                  </span>
+                  <span className="ml-auto text-xs text-spyder-red font-bold shrink-0">LIVE</span>
+                </div>
+              )}
+
               {/* ── Hero / Featured cam ── */}
               <button
                 onClick={() => { setSelected(HERO_CAM); setIsCycling(false); }}
@@ -449,8 +465,8 @@ export function CamStation() {
                       <button
                         onClick={() => toggleGroup(biz)}
                         className={clsx(
-                          "w-full flex items-center gap-2 px-3 py-2.5 border-b border-white/5 transition-all",
-                          "bg-spyder-navy hover:bg-white/[0.04]"
+                          "w-full flex items-center gap-2 px-3 py-2.5 border-b border-white/5 transition-all min-h-[44px] touch-manipulation",
+                          "bg-spyder-navy hover:bg-white/[0.04] active:bg-white/[0.07]"
                         )}
                       >
                         <ChevronDown
@@ -852,14 +868,12 @@ function ConditionsTab() {
               Normal pool elevation: 660 ft (NGVD). Data via USGS gauge at Bagnell Dam.
             </p>
           </div>
-
-          {/* Radar */}
           <div className="bg-spyder-navy-card rounded-xl overflow-hidden border border-white/10">
             <p className="text-xs text-spyder-gray uppercase tracking-widest p-3 pb-0">
               Radar
             </p>
             <iframe
-              src="https://embed.windy.com/embed2.html?lat=38.103&lon=-92.627&detailLat=38.103&detailLon=-92.627&width=100%&height=280&zoom=8&level=surface&overlay=rain&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=mph&metricTemp=%C2%B0F&radarRange=-1"
+              src="https://embed.windy.com/embed2.html?lat=38.103&lon=-92.627&detailLat=38.103&detailLon=-92.627&width=100%25&height=280&zoom=8&level=surface&overlay=rain&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=mph&metricTemp=%25C2%25B0F&radarRange=-1"
               className="w-full h-64 border-t border-white/10"
               title="Lake of the Ozarks Radar"
             />
