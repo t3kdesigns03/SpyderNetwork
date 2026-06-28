@@ -23,7 +23,8 @@ type Tab = "cams" | "map" | "conditions";
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export function CamStation() {
-  const [selected, setSelected] = useState<Cam | null>(null);
+  // Pre-select hero cam so iframe loads with the page navigation gesture — enables mobile autoplay
+  const [selected, setSelected] = useState<Cam | null>(HERO_CAM);
   const [enabled, setEnabled] = useState<Set<string>>(
     () => new Set(ALL_CAMS.map((c) => c.id))
   );
@@ -159,55 +160,50 @@ export function CamStation() {
 
       {/* ── CAMS tab ─────────────────────────────────────── */}
       {tab === "cams" && (
-        <div className="flex flex-col lg:flex-row flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain lg:overflow-hidden lg:flex lg:flex-row">
 
           {/* LEFT: Player ──────────────────────────────── */}
-          <div className="flex flex-col lg:flex-1 min-h-0">
-            {/* Player header */}
-            <div className="flex items-center justify-between px-4 py-2.5 bg-spyder-navy-card border-b border-white/10 shrink-0">
+          <div className="flex flex-col lg:flex-1 lg:min-h-0 shrink-0">
+            {/* Player header — hero bar */}
+            <div className="flex items-center justify-between px-3 sm:px-4 py-2 shrink-0 border-b border-spyder-red/25"
+                 style={{ background: "linear-gradient(90deg,#080c18 0%,#0d1526 100%)", borderLeft: "3px solid #cc0000" }}>
               <div className="flex items-center gap-2 min-w-0">
-                <span className={clsx("w-2 h-2 rounded-full shrink-0", selected ? "bg-spyder-red animate-pulse" : "bg-white/20")} />
-                <span className="font-display font-bold text-white text-sm tracking-wider uppercase truncate">
-                  {selected ? (
-                    <>
+                {selected ? (
+                  <>
+                    <span className="live-badge shrink-0 text-[10px]"><span className="live-dot" />LIVE</span>
+                    <span className="font-display font-bold text-white text-sm tracking-wider uppercase truncate">
                       {selected.business}
-                      {selected.name && (
-                        <span className="text-spyder-gray font-normal normal-case tracking-normal ml-2 text-xs">
-                          — {selected.name}
-                        </span>
-                      )}
-                    </>
-                  ) : (
-                    <span className="text-spyder-gray font-normal normal-case tracking-normal text-xs">
-                      Select a cam from the list →
                     </span>
-                  )}
-                </span>
+                    {selected.name && (
+                      <span className="text-spyder-gray text-xs truncate hidden xs:inline">&nbsp;— {selected.name}</span>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-spyder-gray text-xs">Select a cam below ↓</span>
+                )}
               </div>
               <div className="flex items-center gap-3 shrink-0">
                 {isCycling && cycleList.length > 0 && (
-                  <span className="text-xs text-spyder-gray tabular-nums">
-                    {cycleIdx + 1} / {cycleList.length}
-                  </span>
+                  <span className="text-xs text-spyder-gray tabular-nums font-mono">{cycleIdx + 1}/{cycleList.length}</span>
                 )}
                 {selected?.twitchChannel && (
                   <a
                     href={`https://player.twitch.tv/?channel=${selected.twitchChannel}&parent=spydernetwork.com`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-xs text-spyder-gray hover:text-white transition-colors"
+                    className="flex items-center gap-1.5 text-xs text-spyder-gray hover:text-white transition-colors min-h-[36px] px-1"
                     title="Cast to TV"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Cast className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Cast</span>
+                    <span className="hidden sm:inline text-xs">Cast</span>
                   </a>
                 )}
               </div>
             </div>
 
-            {/* Video area — taller on mobile so the feed feels immersive */}
-            <div className="relative bg-black min-h-0 aspect-video max-h-[52svh] lg:max-h-none lg:flex-1 lg:aspect-auto">
+            {/* Video area — natural 16:9 on mobile, fills height on desktop */}
+            <div className="relative bg-black w-full aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0">
               {selected ? (
                 <CamEmbed cam={selected} key={selected.id} autoplay />
               ) : (
@@ -310,7 +306,7 @@ export function CamStation() {
           </div>
 
           {/* RIGHT: Cam list ────────────────────────────── */}
-          <div className="flex flex-col w-full lg:w-72 xl:w-80 border-t lg:border-t-0 lg:border-l border-white/10 bg-spyder-navy-card min-h-0">
+          <div className="flex flex-col w-full lg:w-72 xl:w-80 border-t lg:border-t-0 lg:border-l border-white/10 bg-spyder-navy-card lg:min-h-0">
 
             {/* List header */}
             <div className="px-3 pt-3 pb-2 border-b border-white/10 shrink-0 space-y-2">
@@ -395,8 +391,8 @@ export function CamStation() {
               </button>
             </div>
 
-            {/* Scrollable cam list */}
-            <div className="flex-1 overflow-y-auto overscroll-contain pb-safe">
+            {/* Mobile: expands naturally; desktop: scrolls inside sidebar */}
+            <div className="flex-1 lg:overflow-y-auto overscroll-contain pb-safe">
 
               {/* ── Sticky now-playing strip (mobile only) ── */}
               {selected && (
@@ -588,6 +584,7 @@ function SpyderSwitch({
     </button>
   );
 }
+
 
 // ─── Cam row ─────────────────────────────────────────────────────────────────
 function CamRow({
