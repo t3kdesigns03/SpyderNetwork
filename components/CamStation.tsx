@@ -28,9 +28,9 @@ export function CamStation() {
   const [enabled, setEnabled] = useState<Set<string>>(
     () => new Set(ALL_CAMS.map((c) => c.id))
   );
-  // Track which business groups are expanded (all open by default)
+  // Track which business groups are expanded (all collapsed by default)
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
-    () => new Set(CAM_BUSINESSES)
+    () => new Set<string>()
   );
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [isCycling, setIsCycling] = useState(false);
