@@ -131,9 +131,9 @@ export function CamStation() {
   const progressPct = Math.min((elapsed / intervalSecs) * 100, 100);
 
   return (
-    <div className="flex flex-col" style={{ height: "calc(100dvh - 56px)" }}>
+    <div className="web-bg flex flex-col" style={{ height: "calc(100dvh - 56px)" }}>
       {/* ── Tab bar ─────────────────────────────────────── */}
-      <div className="flex shrink-0 border-b border-white/10 bg-spyder-black">
+      <div className="flex shrink-0" style={{ background: "#050810", borderBottom: "1px solid rgba(0,212,255,0.18)", boxShadow: "0 2px 16px rgba(0,0,0,0.5)" }}>
         {(
           [
             { key: "cams", label: "CAMS", Icon: Video },
@@ -146,9 +146,7 @@ export function CamStation() {
             onClick={() => setTab(key)}
             className={clsx(
               "flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold tracking-widest border-b-2 transition-all min-h-[48px] touch-manipulation",
-              tab === key
-                ? "text-white border-spyder-red"
-                : "text-spyder-gray border-transparent hover:text-white hover:border-white/20"
+              tab === key ? "tab-active" : "text-spyder-gray border-transparent hover:text-white hover:border-white/20"
             )}
           >
             <Icon className="w-3.5 h-3.5" />
@@ -203,7 +201,7 @@ export function CamStation() {
             </div>
 
             {/* Video area — natural 16:9 on mobile, fills height on desktop */}
-            <div className="relative bg-black w-full aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0">
+            <div className="relative bg-black w-full aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0 video-frame-glow">
               {selected ? (
                 <CamEmbed cam={selected} key={selected.id} autoplay />
               ) : (

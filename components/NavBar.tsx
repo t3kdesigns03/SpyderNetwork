@@ -40,14 +40,17 @@ export function NavBar() {
       >
         {/* ── Logo ── */}
         <Link href="/" className="shrink-0 mr-6 group" onClick={() => setOpen(false)}>
-          <Image
-            src="/images/SpyderLogo.png"
-            alt="SpyderNetwork"
-            width={160}
-            height={44}
-            priority
-            className="h-9 w-auto object-contain transition-opacity duration-200 group-hover:opacity-90"
-          />
+          {/* logo-lightning: white streak sweeps across every ~4 s */}
+          <div className="logo-lightning rounded overflow-hidden">
+            <Image
+              src="/images/SpyderLogo.png"
+              alt="SpyderNetwork"
+              width={160}
+              height={44}
+              priority
+              className="h-9 w-auto object-contain block"
+            />
+          </div>
         </Link>
 
         {/* ── Live cam count badge ── */}
