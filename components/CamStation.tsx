@@ -144,7 +144,7 @@ export function CamStation() {
   return (
     <div className="web-bg flex flex-col" style={{ height: "calc(100dvh - 56px)" }}>
       {/* ── Tab bar ─────────────────────────────────────── */}
-      <div className="flex shrink-0" style={{ background: "#050810", borderBottom: "1px solid rgba(0,212,255,0.18)", boxShadow: "0 2px 16px rgba(0,0,0,0.5)" }}>
+      <div className="flex shrink-0" style={{ background: "#050810", borderBottom: "2px solid rgba(0,212,255,0.35)", boxShadow: "0 0 20px rgba(0,212,255,0.2), 0 4px 20px rgba(0,0,0,0.6)" }}>
         {(
           [
             { key: "cams", label: "CAMS", Icon: Video },
@@ -156,9 +156,10 @@ export function CamStation() {
             key={key}
             onClick={() => setTab(key)}
             className={clsx(
-              "flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold tracking-widest border-b-2 transition-all min-h-[48px] touch-manipulation",
-              tab === key ? "tab-active" : "text-spyder-gray border-transparent hover:text-white hover:border-white/20"
+              "flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold tracking-widest border-b-[3px] transition-all min-h-[48px] touch-manipulation",
+              tab === key ? "border-spyder-cyan text-spyder-cyan" : "text-spyder-gray border-transparent"
             )}
+            style={tab === key ? { textShadow: "0 0 10px #00d4ff, 0 0 24px rgba(0,212,255,0.5)", filter: "drop-shadow(0 2px 6px rgba(0,212,255,0.4))" } : {}}
           >
             <Icon className="w-3.5 h-3.5" />
             <span className="hidden xs:inline">{label}</span>
@@ -178,7 +179,7 @@ export function CamStation() {
               <div className="flex items-center gap-2 min-w-0">
                 {selected ? (
                   <>
-                    <span className="live-badge shrink-0 text-[10px]"><span className="live-dot" />LIVE</span>
+                    <span className="live-badge shrink-0 text-[10px]" style={{ boxShadow: "0 0 8px rgba(204,0,0,0.9), 0 0 20px rgba(204,0,0,0.5), 0 0 40px rgba(204,0,0,0.2)" }}><span className="live-dot" />LIVE</span>
                     <span className="font-display font-bold text-white text-sm tracking-wider uppercase truncate">
                       {selected.business}
                     </span>
@@ -212,13 +213,6 @@ export function CamStation() {
 
             {/* Video area — natural 16:9 on mobile, fills height on desktop */}
             <div className="neon-frame relative bg-black w-full aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0">
-              {/* Neon corner brackets */}
-              <span className="corner corner-tl" aria-hidden="true" />
-              <span className="corner corner-tr" aria-hidden="true" />
-              <span className="corner corner-bl" aria-hidden="true" />
-              <span className="corner corner-br" aria-hidden="true" />
-              {/* Scan line — sweeps up across the video */}
-              <span className="scan-line" aria-hidden="true" />
               {selected ? (
                 <CamEmbed cam={selected} key={selected.id} autoplay />
               ) : (
@@ -321,12 +315,12 @@ export function CamStation() {
           </div>
 
           {/* RIGHT: Cam list ────────────────────────────── */}
-          <div className="neon-sidebar relative flex flex-col w-full lg:w-72 xl:w-80 lg:min-h-0">
+          <div className="neon-sidebar relative flex flex-col w-full lg:w-72 xl:w-80 lg:min-h-0" style={{ borderTop: "2px solid rgba(168,85,247,0.4)", boxShadow: "0 -4px 20px rgba(168,85,247,0.15)" }}>
 
             {/* List header */}
             <div className="neon-list-header px-3 pt-3 pb-2 shrink-0 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-display text-xs font-bold tracking-widest" style={{ color: "#a855f7", textShadow: "0 0 8px rgba(168,85,247,0.7)" }}>
+                <span className="font-display text-xs font-bold tracking-widest uppercase" style={{ color: "#a855f7", textShadow: "0 0 10px #a855f7, 0 0 24px rgba(168,85,247,0.6)", letterSpacing: "0.15em" }}>
                   {ALL_CAMS.length} CAMS · {CAM_BUSINESSES.length} LOCATIONS
                 </span>
               </div>
@@ -475,8 +469,11 @@ export function CamStation() {
                       {/* Business group header */}
                       <button
                         onClick={() => toggleGroup(biz)}
-                        className={clsx("biz-header w-full flex items-center gap-2 px-3 py-2.5 transition-all min-h-[44px] touch-manipulation active:bg-white/[0.07]", activeCam && "biz-header-has-active")}
-                        style={activeCam ? {} : { borderLeft: "2px solid transparent" }}
+                        className="biz-header w-full flex items-center gap-2 px-3 py-2.5 transition-all min-h-[44px] touch-manipulation active:bg-white/[0.07]"
+                        style={activeCam
+                          ? { borderLeft: "3px solid #00d4ff", boxShadow: "inset 4px 0 16px rgba(0,212,255,0.15)", background: "linear-gradient(90deg,rgba(0,212,255,0.09) 0%,rgba(9,13,28,0.97) 100%)" }
+                          : { borderLeft: "3px solid transparent" }
+                        }
                       >
                         <ChevronDown
                           className={clsx(
@@ -484,14 +481,17 @@ export function CamStation() {
                             !isOpen && "-rotate-90"
                           )}
                         />
-                        <span className={clsx("biz-name flex-1 text-left text-xs font-bold tracking-wide truncate", activeCam ? "text-spyder-cyan" : "text-white")}>
+                        <span
+                          className="biz-name flex-1 text-left text-xs font-bold tracking-wide truncate"
+                          style={activeCam ? { color: "#00d4ff", textShadow: "0 0 8px #00d4ff, 0 0 20px rgba(0,212,255,0.5)" } : { color: "white" }}
+                        >
                           {biz}
                         </span>
                         <span className="text-xs text-spyder-gray shrink-0">
                           {cams.length}
                         </span>
                         {activeCam && (
-                          <span className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse" style={{ background: "var(--neon-cyan)", boxShadow: "0 0 6px rgba(0,212,255,0.8)" }} />
+                          <span className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ background: "#00d4ff", boxShadow: "0 0 8px #00d4ff, 0 0 16px rgba(0,212,255,0.7)" }} />
                         )}
                       </button>
                       {/* Sub-cams */}
@@ -625,8 +625,10 @@ function CamRow({
       className={clsx(
         "cam-row-hover flex items-center gap-2 px-3 py-2.5 border-b border-white/5 transition-all duration-150 min-h-[48px]",
         !showBusiness && "pl-8",
-        isSelected ? "cam-row-selected border-l-2" : "border-l-2 border-l-transparent"
+        "border-l-[3px]",
+        isSelected ? "cam-row-selected" : "border-l-transparent"
       )}
+      style={isSelected ? { background: "linear-gradient(90deg,rgba(0,212,255,0.14) 0%,rgba(0,212,255,0.03) 100%)", borderLeftColor: "#00d4ff", boxShadow: "inset 4px 0 20px rgba(0,212,255,0.18)" } : {}}
     >
       {/* Spyder switch */}
       <SpyderSwitch
@@ -653,13 +655,13 @@ function CamRow({
       <button onClick={onSelect} className="flex-1 text-left min-w-0">
         {showBusiness ? (
           <>
-            <p className={clsx("cam-name text-sm font-medium leading-snug truncate transition-colors", isSelected ? "text-spyder-cyan" : "text-white/80")}>
+            <p className="cam-name text-sm font-medium leading-snug truncate transition-colors" style={isSelected ? { color: "#00d4ff", textShadow: "0 0 8px #00d4ff" } : { color: "rgba(255,255,255,0.8)" }}>
               {cam.business}
             </p>
             <p className="text-xs text-spyder-gray truncate">{cam.name}</p>
           </>
         ) : (
-          <p className={clsx("cam-name text-sm leading-snug truncate transition-colors", isSelected ? "text-spyder-cyan font-medium" : "text-spyder-gray")}>
+          <p className="cam-name text-sm leading-snug truncate transition-colors" style={isSelected ? { color: "#00d4ff", textShadow: "0 0 8px #00d4ff", fontWeight: 600 } : { color: "#9ca3af" }}>
             {cam.name}
           </p>
         )}
