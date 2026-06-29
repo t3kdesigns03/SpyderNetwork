@@ -5,62 +5,68 @@ import { AlertCircle, Play } from "lucide-react";
 import { clsx } from "clsx";
 import type { Cam } from "@/types";
 
+// ─── All domains where this embed may be hosted ───────────────────────────────
+// Twitch requires parent= to exactly match the page hostname.
+// Listing all environments here means no async hostname detection is needed —
+// the iframe can render immediately with autoplay=true on the first paint.
+const TWITCH_PARENTS = [
+  "spydernetwork.com",
+  "www.spydernetwork.com",
+  "spydern3twork.netlify.app",
+  "localhost",
+  "127.0.0.1",
+];
+
+function buildTwitchUrl(channel: string, autoplay: boolean): string {
+  const params = new URLSearchParams({
+    channel,
+    autoplay: autoplay ? "true" : "false",
+    muted:    "true",   // required by all browser autoplay policies
+  });
+  // Twitch accepts multiple parent= values in a single URL
+  TWITCH_PARENTS.forEach((p) => params.append("parent", p));
+  return `https://player.twitch.tv/?${params.toString()}`;
+}
+
 interface CamEmbedProps {
-  cam: Cam;
-  onLoad?: () => void;
+  cam:      Cam;
+  onLoad?:  () => void;
   autoplay?: boolean;
 }
 
 export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
-  const [error, setError] = useState(false);
-  const [hostname, setHostname] = useState("spydernetwork.com");
+  const [error,          setError]          = useState(false);
   const [overlayVisible, setOverlayVisible] = useState(true);
-  const [overlayFading, setOverlayFading] = useState(false);
-  const [iframeKey, setIframeKey] = useState(0);
-  const [ready, setReady] = useState(false);
+  const [overlayFading,  setOverlayFading]  = useState(false);
+  const [iframeKey,      setIframeKey]      = useState(0);
 
-  // Set hostname after hydration (SSR-safe)
-  useEffect(() => {
-    setHostname(window.location.hostname || "spydernetwork.com");
-    setReady(true);
-  }, []);
+  // Build embed URL once — no async hostname lookup needed
+  const embedUrl =
+    cam.streamProvider === "twitch" && cam.twitchChannel
+      ? buildTwitchUrl(cam.twitchChannel, autoplay)
+      : (cam.iframeUrl ?? "");
 
-  // Reset overlay on cam change; auto-fade once Twitch's info card clears
+  // ── Overlay lifecycle ───────────────────────────────────────────────────────
+  // Resets on every cam change. Auto-fades at 2.8 s (Twitch info card clears).
   useEffect(() => {
     setError(false);
     setOverlayVisible(true);
     setOverlayFading(false);
 
-    const t1 = setTimeout(() => setOverlayFading(true), 2800);
+    const t1 = setTimeout(() => setOverlayFading(true),   2800);
     const t2 = setTimeout(() => setOverlayVisible(false), 3400);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [cam.id]);
 
-  // Tap overlay to dismiss immediately (also reloads iframe in gesture context
-  // which helps on any browser that needed a gesture for unmuting later)
+  // Tap: dismiss overlay immediately + reload iframe inside a user-gesture
+  // context — satisfies iOS Safari's autoplay policy for muted video.
   const handleOverlayTap = () => {
     setOverlayFading(true);
     setTimeout(() => setOverlayVisible(false), 350);
     setIframeKey((k) => k + 1);
   };
 
-  const getEmbedUrl = (): string => {
-    if (cam.streamProvider === "twitch" && cam.twitchChannel) {
-      const p = new URLSearchParams({
-        channel: cam.twitchChannel,
-        parent: hostname,
-        autoplay: autoplay ? "true" : "false",
-        muted: "true",
-      });
-      return `https://player.twitch.tv/?${p.toString()}`;
-    }
-    if (cam.iframeUrl) return cam.iframeUrl;
-    return "";
-  };
-
-  const embedUrl = ready ? getEmbedUrl() : "";
-
-  if (ready && !embedUrl) {
+  if (!embedUrl) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-spyder-navy-card text-spyder-gray">
         <AlertCircle className="w-8 h-8" />
@@ -72,6 +78,25 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
   return (
     <div className="relative w-full h-full min-h-[200px] bg-black">
 
+      {/*
+        ── iframe — FIRST child, no ready-state gate ─────────────────────────
+        Rendering the iframe first (before the overlay) means the browser
+        registers it as the primary content on page load. autoplay=true +
+        muted=true satisfies Chrome/Firefox autoplay policy immediately.
+        Multiple parent= params remove the need for any async hostname lookup.
+      */}
+      <iframe
+        key={`${cam.id}-${iframeKey}`}
+        src={embedUrl}
+        className="twitch-embed-frame"
+        allowFullScreen
+        allow="autoplay; fullscreen; picture-in-picture; web-share"
+        referrerPolicy="origin"
+        title={`${cam.business}${cam.name ? ` – ${cam.name}` : ""} live cam`}
+        onLoad={() => onLoad?.()}
+        onError={() => { setError(true); setOverlayVisible(false); }}
+      />
+
       {/* Error state */}
       {error && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-spyder-navy-card z-10 px-4 text-center">
@@ -82,9 +107,10 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
       )}
 
       {/*
-        Branded overlay — covers Twitch's Follow button / info card that
-        appears on first load. Auto-fades at 2.8 s on all devices.
-        Tapping it dismisses immediately and reloads the iframe.
+        ── Branded overlay — rendered AFTER the iframe ────────────────────────
+        z-20 puts it visually on top. Auto-fades at 2.8 s revealing the
+        already-playing video. Tap reloads the iframe in a gesture context
+        (helps on iOS Safari which sometimes needs the gesture hint for audio).
       */}
       {overlayVisible && !error && (
         <button
@@ -152,21 +178,6 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
             <span className="text-white text-xs font-medium">Tap to skip wait</span>
           </div>
         </button>
-      )}
-
-      {/* iframe — always mounted; muted autoplay works on Android + desktop.
-          On iOS Safari the Twitch player handles muted autoplay internally. */}
-      {ready && embedUrl && (
-        <iframe
-          key={`${cam.id}-${iframeKey}`}
-          src={embedUrl}
-          className="twitch-embed-frame"
-          allowFullScreen
-          allow="autoplay; fullscreen; picture-in-picture; web-share"
-          title={`${cam.business}${cam.name ? ` – ${cam.name}` : ""} live cam`}
-          onLoad={() => onLoad?.()}
-          onError={() => { setError(true); setOverlayVisible(false); }}
-        />
       )}
     </div>
   );
