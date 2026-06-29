@@ -43,6 +43,7 @@ export function CamStation() {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const playerRef = useRef<HTMLDivElement>(null);
 
   const toggleGroup = (biz: string) =>
     setExpandedGroups((prev) => {
@@ -89,12 +90,22 @@ export function CamStation() {
     };
   }, [isCycling, intervalSecs, goNext, cycleList.length]);
 
-  // Scroll selected row into view
+  // Scroll selected cam row into sidebar view
   useEffect(() => {
     if (!selected) return;
     document
       .getElementById(`cam-row-${selected.id}`)
       ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selected]);
+
+  // Scroll player into view when a cam is selected on mobile.
+  // On mobile the layout is a single scrolling column; the player is at the top
+  // but the cam list is below it, so after picking a cam the player is offscreen.
+  useEffect(() => {
+    if (!selected || !playerRef.current) return;
+    // Only scroll on narrow viewports (mobile/tablet single-column layout)
+    if (window.innerWidth >= 1024) return; // lg breakpoint = side-by-side, no scroll needed
+    playerRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [selected]);
 
   const toggleEnabled = (id: string) =>
@@ -201,7 +212,7 @@ export function CamStation() {
             </div>
 
             {/* Video area — natural 16:9 on mobile, fills height on desktop */}
-            <div className="relative bg-black w-full aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0 video-frame-glow">
+            <div ref={playerRef} className="relative bg-black w-full aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0 video-frame-glow">
               {selected ? (
                 <CamEmbed cam={selected} key={selected.id} autoplay />
               ) : (
