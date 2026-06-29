@@ -165,8 +165,8 @@ export function CamStation() {
           {/* LEFT: Player ──────────────────────────────── */}
           <div className="flex flex-col lg:flex-1 lg:min-h-0 shrink-0">
             {/* Player header — hero bar */}
-            <div className="flex items-center justify-between px-3 sm:px-4 py-2 shrink-0 border-b border-spyder-red/25"
-                 style={{ background: "linear-gradient(90deg,#080c18 0%,#0d1526 100%)", borderLeft: "3px solid #cc0000" }}>
+            <div className="flex items-center justify-between px-3 sm:px-4 py-2 shrink-0"
+                 style={{ background: "linear-gradient(90deg,#040710 0%,#0a0e1a 100%)", borderBottom: "1px solid rgba(0,212,255,0.12)", borderLeft: "3px solid #cc0000", boxShadow: "inset 0 -1px 0 rgba(0,212,255,0.06)" }}>
               <div className="flex items-center gap-2 min-w-0">
                 {selected ? (
                   <>
@@ -231,7 +231,7 @@ export function CamStation() {
             </div>
 
             {/* Controls bar — single row on all breakpoints */}
-            <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 bg-spyder-navy-card border-t border-white/10 shrink-0 min-h-[48px] overflow-x-auto scrollbar-hide">
+            <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 shrink-0 min-h-[48px] overflow-x-auto scrollbar-hide" style={{ background: "linear-gradient(90deg,#070b18,#0d1526)", borderTop: "1px solid rgba(0,212,255,0.1)" }}>
               {/* Prev / Next */}
               <button
                 onClick={goPrev}
@@ -306,7 +306,7 @@ export function CamStation() {
           </div>
 
           {/* RIGHT: Cam list ────────────────────────────── */}
-          <div className="flex flex-col w-full lg:w-72 xl:w-80 border-t lg:border-t-0 lg:border-l border-white/10 bg-spyder-navy-card lg:min-h-0">
+          <div className="flex flex-col w-full lg:w-72 xl:w-80 lg:min-h-0" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", borderLeft: "1px solid rgba(0,212,255,0.08)", background: "linear-gradient(180deg,#0a0e1a 0%,#070b16 100%)" }}>
 
             {/* List header */}
             <div className="px-3 pt-3 pb-2 border-b border-white/10 shrink-0 space-y-2">
@@ -460,10 +460,8 @@ export function CamStation() {
                       {/* Business group header */}
                       <button
                         onClick={() => toggleGroup(biz)}
-                        className={clsx(
-                          "w-full flex items-center gap-2 px-3 py-2.5 border-b border-white/5 transition-all min-h-[44px] touch-manipulation",
-                          "bg-spyder-navy hover:bg-white/[0.04] active:bg-white/[0.07]"
-                        )}
+                        className="biz-header w-full flex items-center gap-2 px-3 py-2.5 transition-all min-h-[44px] touch-manipulation active:bg-white/[0.07]"
+                        style={activeCam ? { borderLeft: "2px solid rgba(0,212,255,0.6)", boxShadow: "inset 2px 0 8px rgba(0,212,255,0.1)" } : { borderLeft: "2px solid transparent" }}
                       >
                         <ChevronDown
                           className={clsx(
@@ -478,7 +476,7 @@ export function CamStation() {
                           {cams.length}
                         </span>
                         {activeCam && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-spyder-red shrink-0 animate-pulse" />
+                          <span className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse" style={{ background: "var(--neon-cyan)", boxShadow: "0 0 6px rgba(0,212,255,0.8)" }} />
                         )}
                       </button>
                       {/* Sub-cams */}
@@ -613,8 +611,8 @@ function CamRow({
         "flex items-center gap-2 px-3 py-2.5 border-b border-white/5 transition-all duration-150 min-h-[48px]",
         !showBusiness && "pl-8", // indent sub-cams under business header
         isSelected
-          ? "bg-spyder-red/10 border-l-2 border-l-spyder-red"
-          : "hover:bg-white/[0.04] border-l-2 border-l-transparent"
+          ? "cam-row-selected border-l-2"
+          : "hover:bg-white/[0.04] border-l-2 border-l-transparent hover:border-l-[rgba(0,212,255,0.2)]"
       )}
     >
       {/* Spyder switch */}
@@ -655,8 +653,8 @@ function CamRow({
       </button>
 
       {/* Live indicator */}
-      {cam.isLive && isSelected && (
-        <span className="w-1.5 h-1.5 rounded-full bg-spyder-red shrink-0 animate-pulse" />
+      {cam.isLive && (
+        <span className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse" style={isSelected ? { background: "var(--neon-cyan)", boxShadow: "0 0 6px rgba(0,212,255,0.8)" } : { background: "#cc0000", boxShadow: "0 0 4px rgba(204,0,0,0.6)" }} />
       )}
     </div>
   );
