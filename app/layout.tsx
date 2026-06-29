@@ -23,10 +23,7 @@ export const metadata: Metadata = {
     siteName: "SpyderNetwork",
     title: "SpyderNetwork – Live Lake of the Ozarks Web Cams",
     description: "The largest network of live webcams at Lake of the Ozarks. Watch 60+ live streams free.",
-    images: [{
-      url: "https://spydernetwork.com/wp-content/uploads/2025/01/Spydernetwork.com1_.webp",
-      width: 1200, height: 630, alt: "SpyderNetwork Live Cams",
-    }],
+    // og:image is auto-generated from app/opengraph-image.tsx (1200×630)
   },
   twitter: {
     card: "summary_large_image",
