@@ -17,61 +17,33 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
   const [overlayVisible, setOverlayVisible] = useState(true);
   const [overlayFading, setOverlayFading] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
+  const [ready, setReady] = useState(false);
 
-  // Pessimistic default: treat as mobile until hydration proves otherwise.
-  // This prevents the desktop auto-fade timer from firing before we know
-  // the device type, and ensures the iframe is never mounted outside a
-  // user gesture on mobile.
-  const [isMobile, setIsMobile] = useState(true);
-
-  // iframeReady = false on mobile until the user taps (gesture required).
-  // On desktop it flips to true immediately after hydration.
-  const [iframeReady, setIframeReady] = useState(false);
-
-  // ── Hydration: detect real device, unlock iframe gate on desktop ──────────
+  // Set hostname after hydration (SSR-safe)
   useEffect(() => {
-    const h = window.location.hostname || "spydernetwork.com";
-    setHostname(h);
-
-    // coarse pointer = touch device
-    const mobile = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
-    setIsMobile(mobile);
-
-    if (!mobile) {
-      // Desktop: mount iframe immediately — autoplay works without gesture.
-      setIframeReady(true);
-    }
-    // Mobile: iframeReady stays false until user taps the overlay.
+    setHostname(window.location.hostname || "spydernetwork.com");
+    setReady(true);
   }, []);
 
-  // ── Reset on cam change ───────────────────────────────────────────────────
+  // Reset overlay on cam change; auto-fade once Twitch's info card clears
   useEffect(() => {
     setError(false);
     setOverlayVisible(true);
     setOverlayFading(false);
 
-    if (isMobile) {
-      // Mobile: gate the new cam behind a fresh tap — new iframe needs a new gesture.
-      setIframeReady(false);
-      return;
-    }
-
-    // Desktop: auto-fade overlay once Twitch's info card has dismissed (~2.8 s).
     const t1 = setTimeout(() => setOverlayFading(true), 2800);
     const t2 = setTimeout(() => setOverlayVisible(false), 3400);
     return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [cam.id, isMobile]);
+  }, [cam.id]);
 
-  // ── Overlay tap ───────────────────────────────────────────────────────────
-  // Runs inside a user-gesture stack → browser allows autoplay.
+  // Tap overlay to dismiss immediately (also reloads iframe in gesture context
+  // which helps on any browser that needed a gesture for unmuting later)
   const handleOverlayTap = () => {
-    setIframeReady(true);        // mount (or keep) the iframe
-    setIframeKey((k) => k + 1); // force a fresh mount inside this gesture
     setOverlayFading(true);
     setTimeout(() => setOverlayVisible(false), 350);
+    setIframeKey((k) => k + 1);
   };
 
-  // ── Embed URL ─────────────────────────────────────────────────────────────
   const getEmbedUrl = (): string => {
     if (cam.streamProvider === "twitch" && cam.twitchChannel) {
       const p = new URLSearchParams({
@@ -86,9 +58,9 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
     return "";
   };
 
-  const embedUrl = getEmbedUrl();
+  const embedUrl = ready ? getEmbedUrl() : "";
 
-  if (!embedUrl) {
+  if (ready && !embedUrl) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-spyder-navy-card text-spyder-gray">
         <AlertCircle className="w-8 h-8" />
@@ -110,12 +82,9 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
       )}
 
       {/*
-        Branded overlay
-        ─────────────────────────────────────────────────────────────────────
-        Desktop: auto-fades at 2.8 s (Twitch info card gone, video playing).
-        Mobile:  stays until tapped. The tap IS the user gesture that satisfies
-                 iOS Safari / Android Chrome autoplay policy. The iframe is not
-                 rendered until after the tap.
+        Branded overlay — covers Twitch's Follow button / info card that
+        appears on first load. Auto-fades at 2.8 s on all devices.
+        Tapping it dismisses immediately and reloads the iframe.
       */}
       {overlayVisible && !error && (
         <button
@@ -171,28 +140,23 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
             {cam.name && <p className="text-spyder-gray text-xs mt-0.5">{cam.name}</p>}
           </div>
 
-          {/* Status */}
+          {/* Connecting pulse */}
           <div className="flex items-center gap-2 text-spyder-gray text-xs">
             <span className="w-1.5 h-1.5 rounded-full bg-spyder-red animate-ping shrink-0" />
-            {isMobile ? "Live now — tap to watch" : "Connecting to live feed…"}
+            Connecting to live feed…
           </div>
 
-          {/* Play pill */}
-          <div className="flex items-center gap-2 bg-spyder-red/90 border border-spyder-red rounded-full px-5 py-2.5 mt-1 shadow-[0_0_12px_rgba(204,0,0,0.5)]">
-            <Play className="w-4 h-4 text-white fill-white shrink-0" />
-            <span className="text-white text-sm font-semibold">
-              {isMobile ? "Tap to play" : "Tap to play now"}
-            </span>
+          {/* Tap-to-skip pill */}
+          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 mt-1">
+            <Play className="w-3.5 h-3.5 text-white fill-white shrink-0" />
+            <span className="text-white text-xs font-medium">Tap to skip wait</span>
           </div>
         </button>
       )}
 
-      {/*
-        iframe — only rendered when iframeReady=true.
-        On mobile that only happens AFTER handleOverlayTap fires (user gesture),
-        satisfying iOS Safari + Android Chrome autoplay policy.
-      */}
-      {iframeReady && (
+      {/* iframe — always mounted; muted autoplay works on Android + desktop.
+          On iOS Safari the Twitch player handles muted autoplay internally. */}
+      {ready && embedUrl && (
         <iframe
           key={`${cam.id}-${iframeKey}`}
           src={embedUrl}
