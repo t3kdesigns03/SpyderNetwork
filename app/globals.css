@@ -528,3 +528,30 @@
   border-top: 1px solid rgba(0,212,255,0.15);
   box-shadow: 0 -2px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(0,212,255,0.06);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LANDSCAPE MOBILE VIDEO MODE
+   The CamStation root gets position:fixed when isLandscape is true (via JS).
+   These rules smooth the chrome overlays that appear on top of the video.
+   The rotation animation itself provides the primary visual transition —
+   we just ensure the gradient bars fade in cleanly once orientation settles.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Gradient chrome bars that float over the video in landscape */
+.landscape-chrome-enter {
+  animation: landscape-chrome-fade-in 0.35s ease-out forwards;
+}
+@keyframes landscape-chrome-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Keep the video area's neon-frame glow subtle in fullscreen so it
+   doesn't fight the gradient bars — override the animated border */
+@media (orientation: landscape) and (max-height: 599px) {
+  .neon-frame::before,
+  .neon-frame::after {
+    opacity: 0.4 !important;
+    animation: none !important;
+  }
+}

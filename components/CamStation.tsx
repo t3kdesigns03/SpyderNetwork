@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
-  Star, Search, Play, Pause, SkipBack, SkipForward,
+  Star, Search, Play, Pause, SkipBack, SkipForward, RotateCcw,
   Map, Video, Thermometer, X, Cast, ExternalLink, ChevronDown, Zap, Loader2,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { ALL_CAMS, CAMS_BY_BUSINESS, CAM_BUSINESSES, HERO_CAM } from "@/lib/cams";
 import { CamEmbed } from "./CamEmbed";
 import type { Cam } from "@/types";
+import { useIsLandscapeMobile } from "@/hooks/useOrientation";
 
 // ─── Interval options ─────────────────────────────────────────────────────────
 const INTERVALS = [
@@ -40,6 +41,8 @@ export function CamStation() {
   const [search, setSearch] = useState("");
   const [favOnly, setFavOnly] = useState(false);
   const [tab, setTab] = useState<Tab>("cams");
+  // Landscape mobile: video goes fullscreen, all other UI collapses
+  const isLandscape = useIsLandscapeMobile();
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -142,9 +145,16 @@ export function CamStation() {
   const progressPct = Math.min((elapsed / intervalSecs) * 100, 100);
 
   return (
-    <div className="web-bg flex flex-col" style={{ height: "calc(100dvh - 56px)" }}>
-      {/* ── Tab bar ─────────────────────────────────────── */}
-      <div className="flex shrink-0" style={{ background: "#050810", borderBottom: "2px solid rgba(0,212,255,0.35)", boxShadow: "0 0 20px rgba(0,212,255,0.2), 0 4px 20px rgba(0,0,0,0.6)" }}>
+    <div
+      className={clsx(
+        "web-bg flex flex-col",
+        // In landscape mobile: fixed overlay covers navbar + everything else
+        isLandscape && "fixed inset-0 z-[60] bg-black"
+      )}
+      style={isLandscape ? {} : { height: "calc(100dvh - 56px)" }}
+    >
+      {/* ── Tab bar — hidden in landscape mobile ─────────── */}
+      <div className={clsx("flex shrink-0", isLandscape && "!hidden")} style={{ background: "#050810", borderBottom: "2px solid rgba(0,212,255,0.35)", boxShadow: "0 0 20px rgba(0,212,255,0.2), 0 4px 20px rgba(0,0,0,0.6)" }}>
         {(
           [
             { key: "cams", label: "CAMS", Icon: Video },
@@ -168,14 +178,22 @@ export function CamStation() {
         ))}
       </div>
 
-      {/* ── CAMS tab ─────────────────────────────────────── */}
-      {tab === "cams" && (
-        <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain lg:overflow-hidden lg:flex lg:flex-row">
+      {/* ── CAMS tab — also shown (fullscreen video) when landscape mobile ── */}
+      {(tab === "cams" || isLandscape) && (
+        <div ref={scrollContainerRef} className={clsx(
+          "flex-1 min-h-0 overscroll-contain",
+          isLandscape
+            ? "overflow-hidden flex flex-col"
+            : "overflow-y-auto lg:overflow-hidden lg:flex lg:flex-row"
+        )}>
 
           {/* LEFT: Player ──────────────────────────────── */}
-          <div className="flex flex-col lg:flex-1 lg:min-h-0 shrink-0">
-            {/* Player header — hero bar */}
-            <div className="neon-player-header flex items-center justify-between px-3 sm:px-4 py-2 shrink-0">
+          <div className={clsx(
+            "flex flex-col shrink-0",
+            isLandscape ? "flex-1 min-h-0" : "lg:flex-1 lg:min-h-0"
+          )}>
+            {/* Player header — hero bar; hidden in landscape mobile */}
+            <div className={clsx("neon-player-header flex items-center justify-between px-3 sm:px-4 py-2 shrink-0", isLandscape && "!hidden")}>
               <div className="flex items-center gap-2 min-w-0">
                 {selected ? (
                   <>
@@ -211,8 +229,13 @@ export function CamStation() {
               </div>
             </div>
 
-            {/* Video area — natural 16:9 on mobile, fills height on desktop */}
-            <div className="neon-frame relative bg-black w-full aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0">
+            {/* Video area — 16:9 on mobile portrait, fills height on desktop, fullscreen in landscape mobile */}
+            <div className={clsx(
+              "neon-frame relative bg-black w-full",
+              isLandscape
+                ? "flex-1 min-h-0"
+                : "aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0"
+            )}>
               {selected ? (
                 <CamEmbed cam={selected} key={selected.id} autoplay />
               ) : (
@@ -229,18 +252,88 @@ export function CamStation() {
                   </div>
                 </div>
               )}
+
+              {/* ── Landscape mobile chrome ─────────────────────────────────
+                  Gradient bars float over the video — top shows cam identity,
+                  bottom has prev/next controls + a rotate-back hint.
+                  pointer-events-none on the top bar keeps taps reaching the video.
+              ──────────────────────────────────────────────────────────────── */}
+              {isLandscape && (
+                <>
+                  {/* Top bar — LIVE badge + cam name */}
+                  <div
+                    className="landscape-chrome-enter absolute inset-x-0 top-0 z-30 flex items-center gap-2 px-4 py-2.5 pointer-events-none"
+                    style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.82) 0%, transparent 100%)" }}
+                  >
+                    {selected ? (
+                      <>
+                        <span
+                          className="live-badge shrink-0 text-[10px]"
+                          style={{ boxShadow: "0 0 8px rgba(204,0,0,0.9), 0 0 20px rgba(204,0,0,0.5)" }}
+                        >
+                          <span className="live-dot" />LIVE
+                        </span>
+                        <span className="font-display font-bold text-white text-sm tracking-wider uppercase truncate drop-shadow-lg">
+                          {selected.business}
+                        </span>
+                        {selected.name && (
+                          <span className="text-white/55 text-xs truncate drop-shadow">
+                            &nbsp;— {selected.name}
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-white/40 text-xs">No cam selected</span>
+                    )}
+                  </div>
+
+                  {/* Bottom bar — prev / position / next + rotate hint */}
+                  <div
+                    className="landscape-chrome-enter absolute inset-x-0 bottom-0 z-30 flex items-center justify-center gap-5 px-4 py-2.5"
+                    style={{ background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 100%)" }}
+                  >
+                    <button
+                      onClick={goPrev}
+                      className="w-10 h-10 flex items-center justify-center rounded-full bg-white/15 active:bg-white/25 transition-colors touch-manipulation"
+                      aria-label="Previous cam"
+                    >
+                      <SkipBack className="w-5 h-5 text-white" />
+                    </button>
+
+                    {cycleList.length > 0 && (
+                      <span className="text-white/70 text-xs tabular-nums font-mono min-w-[36px] text-center drop-shadow">
+                        {cycleIdx + 1} / {cycleList.length}
+                      </span>
+                    )}
+
+                    <button
+                      onClick={goNext}
+                      className="w-10 h-10 flex items-center justify-center rounded-full bg-white/15 active:bg-white/25 transition-colors touch-manipulation"
+                      aria-label="Next cam"
+                    >
+                      <SkipForward className="w-5 h-5 text-white" />
+                    </button>
+
+                    {/* Subtle rotate-back hint — right edge */}
+                    <div className="absolute right-3 flex items-center gap-1 text-white/30 text-[10px] select-none pointer-events-none">
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Portrait</span>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
-            {/* Progress bar */}
-            <div className="h-0.5 bg-white/10 shrink-0">
+            {/* Progress bar — hidden in landscape mobile */}
+            <div className={clsx("h-0.5 bg-white/10 shrink-0", isLandscape && "!hidden")}>
               <div
                 className="h-full bg-spyder-red transition-all duration-1000 ease-linear"
                 style={{ width: isCycling ? `${progressPct}%` : "0%" }}
               />
             </div>
 
-            {/* Controls bar — single row on all breakpoints */}
-            <div className="neon-controls flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 shrink-0 min-h-[48px] overflow-x-auto scrollbar-hide">
+            {/* Controls bar — single row on all breakpoints; hidden in landscape mobile */}
+            <div className={clsx("neon-controls flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 shrink-0 min-h-[48px] overflow-x-auto scrollbar-hide", isLandscape && "!hidden")}>
               {/* Prev / Next */}
               <button
                 onClick={goPrev}
@@ -314,8 +407,8 @@ export function CamStation() {
             </div>
           </div>
 
-          {/* RIGHT: Cam list ────────────────────────────── */}
-          <div className="neon-sidebar relative flex flex-col w-full lg:w-72 xl:w-80 lg:min-h-0" style={{ borderTop: "2px solid rgba(168,85,247,0.4)", boxShadow: "0 -4px 20px rgba(168,85,247,0.15)" }}>
+          {/* RIGHT: Cam list — hidden in landscape mobile ── */}
+          <div className={clsx("neon-sidebar relative flex flex-col w-full lg:w-72 xl:w-80 lg:min-h-0", isLandscape && "!hidden")} style={{ borderTop: "2px solid rgba(168,85,247,0.4)", boxShadow: "0 -4px 20px rgba(168,85,247,0.15)" }}>
 
             {/* List header */}
             <div className="neon-list-header px-3 pt-3 pb-2 shrink-0 space-y-2">
@@ -517,11 +610,11 @@ export function CamStation() {
         </div>
       )}
 
-      {/* ── MAP tab ──────────────────────────────────────── */}
-      {tab === "map" && <MapTab onSelectCam={(cam) => { setSelected(cam); setTab("cams"); }} />}
+      {/* ── MAP tab — not rendered in landscape (video already fullscreen) ── */}
+      {!isLandscape && tab === "map" && <MapTab onSelectCam={(cam) => { setSelected(cam); setTab("cams"); }} />}
 
       {/* ── CONDITIONS tab ───────────────────────────────── */}
-      {tab === "conditions" && <ConditionsTab />}
+      {!isLandscape && tab === "conditions" && <ConditionsTab />}
     </div>
   );
 }
