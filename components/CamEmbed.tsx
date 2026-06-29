@@ -14,51 +14,71 @@ interface CamEmbedProps {
 export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
   const [error, setError] = useState(false);
   const [hostname, setHostname] = useState("spydernetwork.com");
-
-  // Overlay covers Twitch's info card / Follow button friction.
-  // After ~2.8 s the Twitch info card has auto-dismissed, so we fade our overlay
-  // and reveal a cleanly-playing video. On iOS Safari where autoplay may be
-  // blocked, the "Tap to play" button reloads the iframe *inside* a user-gesture
-  // context, satisfying the browser policy.
   const [overlayVisible, setOverlayVisible] = useState(true);
   const [overlayFading, setOverlayFading] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
 
+  // Pessimistic default: treat as mobile until hydration proves otherwise.
+  // This prevents the desktop auto-fade timer from firing before we know
+  // the device type, and ensures the iframe is never mounted outside a
+  // user gesture on mobile.
+  const [isMobile, setIsMobile] = useState(true);
+
+  // iframeReady = false on mobile until the user taps (gesture required).
+  // On desktop it flips to true immediately after hydration.
+  const [iframeReady, setIframeReady] = useState(false);
+
+  // ── Hydration: detect real device, unlock iframe gate on desktop ──────────
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setHostname(window.location.hostname || "spydernetwork.com");
+    const h = window.location.hostname || "spydernetwork.com";
+    setHostname(h);
+
+    // coarse pointer = touch device
+    const mobile = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+    setIsMobile(mobile);
+
+    if (!mobile) {
+      // Desktop: mount iframe immediately — autoplay works without gesture.
+      setIframeReady(true);
     }
+    // Mobile: iframeReady stays false until user taps the overlay.
   }, []);
 
-  // Reset on cam change
+  // ── Reset on cam change ───────────────────────────────────────────────────
   useEffect(() => {
     setError(false);
     setOverlayVisible(true);
     setOverlayFading(false);
 
-    // Twitch info card fades on its own after ~3 s; we mirror that timing
-    const fadeAt = setTimeout(() => setOverlayFading(true), 2800);
-    const hideAt = setTimeout(() => setOverlayVisible(false), 3400);
-    return () => {
-      clearTimeout(fadeAt);
-      clearTimeout(hideAt);
-    };
-  }, [cam.id]);
+    if (isMobile) {
+      // Mobile: gate the new cam behind a fresh tap — new iframe needs a new gesture.
+      setIframeReady(false);
+      return;
+    }
 
-  // User taps overlay → dismiss immediately + reload iframe in user-gesture context
+    // Desktop: auto-fade overlay once Twitch's info card has dismissed (~2.8 s).
+    const t1 = setTimeout(() => setOverlayFading(true), 2800);
+    const t2 = setTimeout(() => setOverlayVisible(false), 3400);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [cam.id, isMobile]);
+
+  // ── Overlay tap ───────────────────────────────────────────────────────────
+  // Runs inside a user-gesture stack → browser allows autoplay.
   const handleOverlayTap = () => {
+    setIframeReady(true);        // mount (or keep) the iframe
+    setIframeKey((k) => k + 1); // force a fresh mount inside this gesture
     setOverlayFading(true);
     setTimeout(() => setOverlayVisible(false), 350);
-    setIframeKey((k) => k + 1); // forces a fresh iframe mount — autoplay now works
   };
 
+  // ── Embed URL ─────────────────────────────────────────────────────────────
   const getEmbedUrl = (): string => {
     if (cam.streamProvider === "twitch" && cam.twitchChannel) {
       const p = new URLSearchParams({
         channel: cam.twitchChannel,
         parent: hostname,
         autoplay: autoplay ? "true" : "false",
-        muted: "true", // required for browser autoplay policy; Twitch shows its own unmute btn
+        muted: "true",
       });
       return `https://player.twitch.tv/?${p.toString()}`;
     }
@@ -90,11 +110,12 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
       )}
 
       {/*
-        ── Branded overlay ──────────────────────────────────────────────────
-        Sits over the Twitch iframe, hiding the "Follow / info card" layer
-        that Twitch always shows on first load. Auto-fades after 2.8 s once
-        the Twitch card has dismissed. Tapping it dismisses immediately AND
-        reloads the iframe in the user-gesture context (fixes iOS Safari autoplay).
+        Branded overlay
+        ─────────────────────────────────────────────────────────────────────
+        Desktop: auto-fades at 2.8 s (Twitch info card gone, video playing).
+        Mobile:  stays until tapped. The tap IS the user gesture that satisfies
+                 iOS Safari / Android Chrome autoplay policy. The iframe is not
+                 rendered until after the tap.
       */}
       {overlayVisible && !error && (
         <button
@@ -107,8 +128,8 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
             overlayFading ? "opacity-0 pointer-events-none" : "opacity-100"
           )}
         >
-          {/* Subtle spider-web background */}
-          <div className="absolute inset-0 opacity-[0.05] pointer-events-none" aria-hidden>
+          {/* Spider-web bg */}
+          <div className="absolute inset-0 opacity-[0.05] pointer-events-none" aria-hidden="true">
             <svg width="100%" height="100%" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice">
               <g stroke="#cc0000" strokeWidth="0.5" fill="none">
                 {[20, 40, 60, 80, 100].map((r) => (
@@ -117,26 +138,18 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
                 {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => {
                   const rad = (deg * Math.PI) / 180;
                   return (
-                    <line
-                      key={deg}
-                      x1="100" y1="100"
+                    <line key={deg} x1="100" y1="100"
                       x2={100 + 110 * Math.cos(rad)}
-                      y2={100 + 110 * Math.sin(rad)}
-                    />
+                      y2={100 + 110 * Math.sin(rad)} />
                   );
                 })}
               </g>
             </svg>
           </div>
 
-          {/* Mini spider icon */}
-          <svg
-            width="52" height="52"
-            viewBox="0 0 80 80"
-            fill="none"
-            className="drop-shadow-[0_0_10px_rgba(204,0,0,0.7)]"
-            aria-hidden
-          >
+          {/* Spider icon */}
+          <svg width="52" height="52" viewBox="0 0 80 80" fill="none"
+            className="drop-shadow-[0_0_10px_rgba(204,0,0,0.7)]" aria-hidden="true">
             <g stroke="#cc0000" strokeWidth="3" strokeLinecap="round" opacity="0.7">
               <path d="M29 33 Q18 22 7 15" />
               <path d="M27 40 Q13 37 3 41" />
@@ -154,38 +167,43 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
 
           {/* Cam info */}
           <div className="text-center px-6">
-            <p className="text-white font-bold text-sm tracking-wide leading-tight">
-              {cam.business}
-            </p>
-            {cam.name && (
-              <p className="text-spyder-gray text-xs mt-0.5">{cam.name}</p>
-            )}
+            <p className="text-white font-bold text-sm tracking-wide leading-tight">{cam.business}</p>
+            {cam.name && <p className="text-spyder-gray text-xs mt-0.5">{cam.name}</p>}
           </div>
 
-          {/* Connecting indicator */}
+          {/* Status */}
           <div className="flex items-center gap-2 text-spyder-gray text-xs">
             <span className="w-1.5 h-1.5 rounded-full bg-spyder-red animate-ping shrink-0" />
-            Connecting to live feed…
+            {isMobile ? "Live now — tap to watch" : "Connecting to live feed…"}
           </div>
 
-          {/* Tap-to-play pill */}
-          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 mt-1">
-            <Play className="w-3.5 h-3.5 text-white fill-white shrink-0" />
-            <span className="text-white text-xs font-medium">Tap to play now</span>
+          {/* Play pill */}
+          <div className="flex items-center gap-2 bg-spyder-red/90 border border-spyder-red rounded-full px-5 py-2.5 mt-1 shadow-[0_0_12px_rgba(204,0,0,0.5)]">
+            <Play className="w-4 h-4 text-white fill-white shrink-0" />
+            <span className="text-white text-sm font-semibold">
+              {isMobile ? "Tap to play" : "Tap to play now"}
+            </span>
           </div>
         </button>
       )}
 
-      <iframe
-        key={`${cam.id}-${iframeKey}`}
-        src={embedUrl}
-        className="twitch-embed-frame"
-        allowFullScreen
-        allow="autoplay; fullscreen; picture-in-picture; web-share"
-        title={`${cam.business} – ${cam.name} live cam`}
-        onLoad={() => onLoad?.()}
-        onError={() => { setError(true); setOverlayVisible(false); }}
-      />
+      {/*
+        iframe — only rendered when iframeReady=true.
+        On mobile that only happens AFTER handleOverlayTap fires (user gesture),
+        satisfying iOS Safari + Android Chrome autoplay policy.
+      */}
+      {iframeReady && (
+        <iframe
+          key={`${cam.id}-${iframeKey}`}
+          src={embedUrl}
+          className="twitch-embed-frame"
+          allowFullScreen
+          allow="autoplay; fullscreen; picture-in-picture; web-share"
+          title={`${cam.business}${cam.name ? ` – ${cam.name}` : ""} live cam`}
+          onLoad={() => onLoad?.()}
+          onError={() => { setError(true); setOverlayVisible(false); }}
+        />
+      )}
     </div>
   );
 }
