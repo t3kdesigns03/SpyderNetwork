@@ -174,8 +174,7 @@ export function CamStation() {
           {/* LEFT: Player ──────────────────────────────── */}
           <div className="flex flex-col lg:flex-1 lg:min-h-0 shrink-0">
             {/* Player header — hero bar */}
-            <div className="flex items-center justify-between px-3 sm:px-4 py-2 shrink-0"
-                 style={{ background: "linear-gradient(90deg,#040710 0%,#0a0e1a 100%)", borderBottom: "1px solid rgba(0,212,255,0.12)", borderLeft: "3px solid #cc0000", boxShadow: "inset 0 -1px 0 rgba(0,212,255,0.06)" }}>
+            <div className="neon-player-header flex items-center justify-between px-3 sm:px-4 py-2 shrink-0">
               <div className="flex items-center gap-2 min-w-0">
                 {selected ? (
                   <>
@@ -212,7 +211,14 @@ export function CamStation() {
             </div>
 
             {/* Video area — natural 16:9 on mobile, fills height on desktop */}
-            <div className="relative bg-black w-full aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0 video-frame-glow">
+            <div className="neon-frame relative bg-black w-full aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0">
+              {/* Neon corner brackets */}
+              <span className="corner corner-tl" aria-hidden="true" />
+              <span className="corner corner-tr" aria-hidden="true" />
+              <span className="corner corner-bl" aria-hidden="true" />
+              <span className="corner corner-br" aria-hidden="true" />
+              {/* Scan line — sweeps up across the video */}
+              <span className="scan-line" aria-hidden="true" />
               {selected ? (
                 <CamEmbed cam={selected} key={selected.id} autoplay />
               ) : (
@@ -240,7 +246,7 @@ export function CamStation() {
             </div>
 
             {/* Controls bar — single row on all breakpoints */}
-            <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 shrink-0 min-h-[48px] overflow-x-auto scrollbar-hide" style={{ background: "linear-gradient(90deg,#070b18,#0d1526)", borderTop: "1px solid rgba(0,212,255,0.1)" }}>
+            <div className="neon-controls flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 shrink-0 min-h-[48px] overflow-x-auto scrollbar-hide">
               {/* Prev / Next */}
               <button
                 onClick={goPrev}
@@ -315,12 +321,12 @@ export function CamStation() {
           </div>
 
           {/* RIGHT: Cam list ────────────────────────────── */}
-          <div className="flex flex-col w-full lg:w-72 xl:w-80 lg:min-h-0" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", borderLeft: "1px solid rgba(0,212,255,0.08)", background: "linear-gradient(180deg,#0a0e1a 0%,#070b16 100%)" }}>
+          <div className="neon-sidebar relative flex flex-col w-full lg:w-72 xl:w-80 lg:min-h-0">
 
             {/* List header */}
-            <div className="px-3 pt-3 pb-2 border-b border-white/10 shrink-0 space-y-2">
+            <div className="neon-list-header px-3 pt-3 pb-2 shrink-0 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-display text-xs font-bold tracking-widest text-white">
+                <span className="font-display text-xs font-bold tracking-widest" style={{ color: "#a855f7", textShadow: "0 0 8px rgba(168,85,247,0.7)" }}>
                   {ALL_CAMS.length} CAMS · {CAM_BUSINESSES.length} LOCATIONS
                 </span>
               </div>
@@ -335,7 +341,7 @@ export function CamStation() {
                   className={clsx(
                     "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all min-h-[36px] border",
                     cycleMode === "selected" && isCycling
-                      ? "bg-spyder-red border-spyder-red text-white"
+                      ? "neon-cycle-active"
                       : "bg-white/5 border-white/10 text-white hover:bg-white/10"
                   )}
                 >
@@ -469,8 +475,8 @@ export function CamStation() {
                       {/* Business group header */}
                       <button
                         onClick={() => toggleGroup(biz)}
-                        className="biz-header w-full flex items-center gap-2 px-3 py-2.5 transition-all min-h-[44px] touch-manipulation active:bg-white/[0.07]"
-                        style={activeCam ? { borderLeft: "2px solid rgba(0,212,255,0.6)", boxShadow: "inset 2px 0 8px rgba(0,212,255,0.1)" } : { borderLeft: "2px solid transparent" }}
+                        className={clsx("biz-header w-full flex items-center gap-2 px-3 py-2.5 transition-all min-h-[44px] touch-manipulation active:bg-white/[0.07]", activeCam && "biz-header-has-active")}
+                        style={activeCam ? {} : { borderLeft: "2px solid transparent" }}
                       >
                         <ChevronDown
                           className={clsx(
@@ -478,7 +484,7 @@ export function CamStation() {
                             !isOpen && "-rotate-90"
                           )}
                         />
-                        <span className="flex-1 text-left text-xs font-bold text-white tracking-wide truncate">
+                        <span className={clsx("biz-name flex-1 text-left text-xs font-bold tracking-wide truncate", activeCam ? "text-spyder-cyan" : "text-white")}>
                           {biz}
                         </span>
                         <span className="text-xs text-spyder-gray shrink-0">
@@ -617,11 +623,9 @@ function CamRow({
     <div
       id={`cam-row-${cam.id}`}
       className={clsx(
-        "flex items-center gap-2 px-3 py-2.5 border-b border-white/5 transition-all duration-150 min-h-[48px]",
-        !showBusiness && "pl-8", // indent sub-cams under business header
-        isSelected
-          ? "cam-row-selected border-l-2"
-          : "hover:bg-white/[0.04] border-l-2 border-l-transparent hover:border-l-[rgba(0,212,255,0.2)]"
+        "cam-row-hover flex items-center gap-2 px-3 py-2.5 border-b border-white/5 transition-all duration-150 min-h-[48px]",
+        !showBusiness && "pl-8",
+        isSelected ? "cam-row-selected border-l-2" : "border-l-2 border-l-transparent"
       )}
     >
       {/* Spyder switch */}
@@ -649,13 +653,13 @@ function CamRow({
       <button onClick={onSelect} className="flex-1 text-left min-w-0">
         {showBusiness ? (
           <>
-            <p className={clsx("text-sm font-medium leading-snug truncate transition-colors", isSelected ? "text-white" : "text-white/80")}>
+            <p className={clsx("cam-name text-sm font-medium leading-snug truncate transition-colors", isSelected ? "text-spyder-cyan" : "text-white/80")}>
               {cam.business}
             </p>
             <p className="text-xs text-spyder-gray truncate">{cam.name}</p>
           </>
         ) : (
-          <p className={clsx("text-sm leading-snug truncate transition-colors", isSelected ? "text-white font-medium" : "text-spyder-gray")}>
+          <p className={clsx("cam-name text-sm leading-snug truncate transition-colors", isSelected ? "text-spyder-cyan font-medium" : "text-spyder-gray")}>
             {cam.name}
           </p>
         )}
