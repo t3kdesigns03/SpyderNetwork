@@ -90,8 +90,8 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
         src={embedUrl}
         className="twitch-embed-frame"
         allowFullScreen
-        allow="autoplay; fullscreen; picture-in-picture; web-share"
-        referrerPolicy="origin"
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+        referrerPolicy="no-referrer-when-downgrade"
         title={`${cam.business}${cam.name ? ` – ${cam.name}` : ""} live cam`}
         onLoad={() => onLoad?.()}
         onError={() => { setError(true); setOverlayVisible(false); }}
