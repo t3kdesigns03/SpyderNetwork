@@ -8,6 +8,7 @@ import {
 import { clsx } from "clsx";
 import { ALL_CAMS, CAMS_BY_BUSINESS, CAM_BUSINESSES, HERO_CAM } from "@/lib/cams";
 import { CamEmbed } from "./CamEmbed";
+import { SponsorBadge } from "./SponsorBadge";
 import type { Cam } from "@/types";
 import { useIsLandscapeMobile } from "@/hooks/useOrientation";
 
@@ -657,6 +658,8 @@ export function CamStation() {
                         >
                           {biz}
                         </span>
+                        {/* Sponsor tier badge — shown only when business has a paid tier */}
+                        {(() => { const t = cams[0]?.sponsorTier; return t && t !== "basic" ? <SponsorBadge tier={t} size="sm" /> : null; })()}
                         <span className="text-xs text-spyder-gray shrink-0">
                           {cams.length}
                         </span>
@@ -1135,11 +1138,14 @@ interface CondCardProps {
 function CondCard({ label, value, note, highlight }: CondCardProps) {
   return (
     <div className="bg-spyder-black/40 rounded-lg p-3">
-      <p className="text-xs text-spyder-gray mb-1">{label}</p>
-      <p className={clsx("font-display font-bold text-lg", highlight ? "text-green-400" : "text-white")}>
+      <p className="text-[10px] text-spyder-gray uppercase tracking-wider mb-1">{label}</p>
+      <p
+        className="font-display text-lg font-bold leading-none"
+        style={highlight ? { color: "#00d4ff", textShadow: "0 0 8px rgba(0,212,255,0.6)" } : { color: "white" }}
+      >
         {value}
       </p>
-      {note && <p className="text-xs text-spyder-gray mt-0.5">{note}</p>}
+      {note && <p className="text-[10px] text-spyder-gray/60 mt-1 leading-tight">{note}</p>}
     </div>
   );
 }

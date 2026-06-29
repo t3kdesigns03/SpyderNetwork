@@ -12,6 +12,9 @@ export type CamCategory =
 
 export type StreamProvider = "twitch" | "youtube" | "iframe" | "direct";
 
+/** Broadcaster tier — drives badge visibility and placement priority */
+export type SponsorTier = "basic" | "featured" | "premium";
+
 export interface Cam {
   id: string;
   name: string;
@@ -27,6 +30,8 @@ export interface Cam {
   lng?: number;
   isLive?: boolean;
   isFeatured?: boolean;
+  /** Paid broadcaster tier — shows a badge and affects placement priority */
+  sponsorTier?: SponsorTier;
   thumbnailUrl?: string;
   websiteUrl?: string;
   spyderPageUrl?: string; // original spydernetwork.com page

@@ -70,6 +70,8 @@ export const CAMS: Cam[] = [
     streamProvider: "twitch",
     twitchChannel: "spydernetwork3",
     isLive: true,
+    isFeatured: true,
+    sponsorTier: "premium",
     description: "Pool deck & swim area — poolside cocktails, live music, legendary sunsets",
     websiteUrl: "https://backwaterjacks.com",
     spyderPageUrl: "https://spydernetwork.com/backwater-jacks-pool/",
@@ -147,6 +149,8 @@ export const CAMS: Cam[] = [
     streamProvider: "twitch",
     twitchChannel: "spydernetwork31",
     isLive: true,
+    isFeatured: true,
+    sponsorTier: "featured",
     description: "Poolside at Dog Days — the ultimate lakeside experience",
     websiteUrl: "https://dogdays.ws",
     spyderPageUrl: "https://spydernetwork.com/dog-days-pool/",
@@ -209,6 +213,8 @@ export const CAMS: Cam[] = [
     streamProvider: "twitch",
     twitchChannel: "spydernetwork4",
     isLive: true,
+    isFeatured: true,
+    sponsorTier: "featured",
     description: "Pool cam — fun in the sun at Lazy Gators",
     websiteUrl: "https://lazygators.com",
     spyderPageUrl: "https://spydernetwork.com/lazy-gators-pool/",
@@ -675,10 +681,8 @@ export const CAMS_BY_BUSINESS = CAM_BUSINESSES.reduce<Record<string, Cam[]>>(
     acc[biz] = ALL_CAMS.filter((c) => c.business === biz);
     return acc;
   },
-  {}
-);
+  {});
 
-/** Look up any cam (including hero) by its slug */
-export function getCamBySlug(slug: string) {
+export function getCamBySlug(slug: string): Cam | undefined {
   return CAMS.find((c) => c.slug === slug);
 }
