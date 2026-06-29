@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
-  Star, Search, Play, Pause, SkipBack, SkipForward, RotateCcw,
+  Star, Search, Play, Pause, SkipBack, SkipForward, RotateCcw, Maximize2,
   Map, Video, Thermometer, X, Cast, ExternalLink, ChevronDown, Zap, Loader2,
 } from "lucide-react";
 import { clsx } from "clsx";
@@ -43,6 +43,41 @@ export function CamStation() {
   const [tab, setTab] = useState<Tab>("cams");
   // Landscape mobile: video goes fullscreen, all other UI collapses
   const isLandscape = useIsLandscapeMobile();
+
+  // 1. Toggle a class on <html> so CSS can hide the NavBar header as a
+  //    belt-and-suspenders measure (our z-9999 overlay already covers it,
+  //    but this removes it from the paint tree on iOS too).
+  useEffect(() => {
+    if (isLandscape) {
+      document.documentElement.classList.add("landscape-video-mode");
+    } else {
+      document.documentElement.classList.remove("landscape-video-mode");
+      // If we entered native fullscreen, exit it when rotating back.
+      if (document.fullscreenElement) {
+        document.exitFullscreen?.().catch(() => {});
+      }
+    }
+    return () => { document.documentElement.classList.remove("landscape-video-mode"); };
+  }, [isLandscape]);
+
+  // 2. Attempt native browser fullscreen directly inside the orientationchange
+  //    event handler. Calling it from the event (not via useEffect) gives
+  //    Android Chrome the best chance of treating it as a user gesture.
+  useEffect(() => {
+    const onOrientationChange = () => {
+      const mq = window.matchMedia("(orientation: landscape)");
+      const isTouch = window.matchMedia("(pointer: coarse)").matches;
+      if (mq.matches && isTouch && window.innerHeight < 600) {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen?.({ navigationUI: "hide" }).catch(() => {});
+        }
+      } else if (document.fullscreenElement) {
+        document.exitFullscreen?.().catch(() => {});
+      }
+    };
+    window.addEventListener("orientationchange", onOrientationChange);
+    return () => window.removeEventListener("orientationchange", onOrientationChange);
+  }, []);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -149,7 +184,10 @@ export function CamStation() {
       className={clsx(
         "web-bg flex flex-col",
         // In landscape mobile: fixed overlay covers navbar + everything else
-        isLandscape && "fixed inset-0 z-[60] bg-black"
+        // !fixed uses Tailwind's important modifier so it wins over the
+        // unlayered ".web-bg { position: relative }" in globals.css.
+        // z-[9999] beats the NavBar header's z-50.
+        isLandscape && "!fixed inset-0 z-[9999] bg-black"
       )}
       style={isLandscape ? {} : { height: "calc(100dvh - 56px)" }}
     >
@@ -314,11 +352,25 @@ export function CamStation() {
                       <SkipForward className="w-5 h-5 text-white" />
                     </button>
 
-                    {/* Subtle rotate-back hint — right edge */}
-                    <div className="absolute right-3 flex items-center gap-1 text-white/30 text-[10px] select-none pointer-events-none">
-                      <RotateCcw className="w-3 h-3" />
-                      <span>Portrait</span>
-                    </div>
+                    {/* Fullscreen button — tapping enters native browser fullscreen
+                        which hides the address bar (Android Chrome).
+                        On iOS the iframe's own ⛶ button does the same. */}
+                    <button
+                      onClick={() => {
+                        if (!document.fullscreenElement) {
+                          document.documentElement
+                            .requestFullscreen?.({ navigationUI: "hide" })
+                            .catch(() => {});
+                        } else {
+                          document.exitFullscreen?.().catch(() => {});
+                        }
+                      }}
+                      className="absolute right-3 flex items-center gap-1.5 text-white/50 active:text-white text-[11px] touch-manipulation transition-colors"
+                      aria-label="Enter fullscreen"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                      <span>Fullscreen</span>
+                    </button>
                   </div>
                 </>
               )}

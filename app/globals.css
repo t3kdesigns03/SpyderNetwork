@@ -537,6 +537,15 @@
    we just ensure the gradient bars fade in cleanly once orientation settles.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* ── Landscape mobile video mode: hide NavBar header ────────────────────────
+   Belt-and-suspenders on top of our z-[9999] overlay.
+   The fixed overlay already covers the NavBar visually; this removes it from
+   the paint tree so iOS Safari doesn't bleed it through.
+   ─────────────────────────────────────────────────────────────────────────── */
+html.landscape-video-mode header {
+  display: none !important;
+}
+
 /* Gradient chrome bars that float over the video in landscape */
 .landscape-chrome-enter {
   animation: landscape-chrome-fade-in 0.35s ease-out forwards;
