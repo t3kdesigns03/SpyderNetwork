@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   Star, Search, Play, Pause, SkipBack, SkipForward, RotateCcw, Maximize2,
-  Map, Video, Thermometer, X, Cast, ExternalLink, ChevronDown, Zap, Loader2,
+  Map, Video, Thermometer, X, Cast, ExternalLink, ChevronDown, Zap, Loader2, Tv2,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { ALL_CAMS, CAMS_BY_BUSINESS, CAM_BUSINESSES, HERO_CAM } from "@/lib/cams";
@@ -635,38 +635,103 @@ export function CamStation() {
                   if (!cams.length) return null;
                   const isOpen = expandedGroups.has(biz);
                   const activeCam = cams.find((c) => c.id === selected?.id);
+
+                  // Pull business-level metadata from first cam (shared across the group)
+                  const bizUrl     = cams[0]?.websiteUrl;
+                  const bizTier    = cams[0]?.sponsorTier;
+                  const bizTwitch  = cams.find((c) => c.twitchChannel)?.twitchChannel;
+                  const hasPaidTier = bizTier && bizTier !== "basic";
+
+                  // Left border shifts: active > premium > featured > none
+                  const headerStyle = activeCam
+                    ? { borderLeft: "3px solid #00d4ff", boxShadow: "inset 4px 0 16px rgba(0,212,255,0.15)", background: "linear-gradient(90deg,rgba(0,212,255,0.09) 0%,rgba(9,13,28,0.97) 100%)" }
+                    : bizTier === "premium"
+                    ? { borderLeft: "3px solid rgba(168,85,247,0.45)" }
+                    : bizTier === "featured"
+                    ? { borderLeft: "3px solid rgba(0,212,255,0.3)" }
+                    : { borderLeft: "3px solid transparent" };
+
                   return (
                     <div key={biz}>
-                      {/* Business group header */}
-                      <button
-                        onClick={() => toggleGroup(biz)}
-                        className="biz-header w-full flex items-center gap-2 px-3 py-2.5 transition-all min-h-[44px] touch-manipulation active:bg-white/[0.07]"
-                        style={activeCam
-                          ? { borderLeft: "3px solid #00d4ff", boxShadow: "inset 4px 0 16px rgba(0,212,255,0.15)", background: "linear-gradient(90deg,rgba(0,212,255,0.09) 0%,rgba(9,13,28,0.97) 100%)" }
-                          : { borderLeft: "3px solid transparent" }
-                        }
+                      {/* Business group header — split into toggle zone + link zone */}
+                      <div
+                        className="biz-header flex items-center gap-1 pr-2 transition-all active:bg-white/[0.05]"
+                        style={headerStyle}
                       >
-                        <ChevronDown
-                          className={clsx(
-                            "w-3.5 h-3.5 text-spyder-gray transition-transform shrink-0",
-                            !isOpen && "-rotate-90"
-                          )}
-                        />
-                        <span
-                          className="biz-name flex-1 text-left text-xs font-bold tracking-wide truncate"
-                          style={activeCam ? { color: "#00d4ff", textShadow: "0 0 8px #00d4ff, 0 0 20px rgba(0,212,255,0.5)" } : { color: "white" }}
+                        {/* Toggle button (chevron + name) */}
+                        <button
+                          onClick={() => toggleGroup(biz)}
+                          className="flex items-center gap-2 flex-1 min-w-0 pl-3 py-2.5 min-h-[44px] text-left touch-manipulation"
                         >
-                          {biz}
-                        </span>
-                        {/* Sponsor tier badge — shown only when business has a paid tier */}
-                        {(() => { const t = cams[0]?.sponsorTier; return t && t !== "basic" ? <SponsorBadge tier={t} size="sm" /> : null; })()}
-                        <span className="text-xs text-spyder-gray shrink-0">
-                          {cams.length}
-                        </span>
+                          <ChevronDown
+                            className={clsx(
+                              "w-3.5 h-3.5 text-spyder-gray transition-transform shrink-0",
+                              !isOpen && "-rotate-90"
+                            )}
+                          />
+                          <span
+                            className="biz-name flex-1 text-left text-xs font-bold tracking-wide truncate"
+                            style={activeCam ? { color: "#00d4ff", textShadow: "0 0 8px #00d4ff, 0 0 20px rgba(0,212,255,0.5)" } : { color: "white" }}
+                          >
+                            {biz}
+                          </span>
+                        </button>
+
+                        {/* Sponsor badge */}
+                        {hasPaidTier && <SponsorBadge tier={bizTier!} size="sm" />}
+
+                        {/* Website link icon — shown for every business that has one */}
+                        {bizUrl && (
+                          <a
+                            href={bizUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={`Visit ${biz}`}
+                            className="shrink-0 flex items-center justify-center w-7 h-7 rounded text-spyder-gray/40 hover:text-white transition-colors touch-manipulation"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+
+                        <span className="text-xs text-spyder-gray/70 shrink-0 tabular-nums">{cams.length}</span>
                         {activeCam && (
                           <span className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ background: "#00d4ff", boxShadow: "0 0 8px #00d4ff, 0 0 16px rgba(0,212,255,0.7)" }} />
                         )}
-                      </button>
+                      </div>
+
+                      {/* Paid-tier action strip — appears when group is expanded */}
+                      {isOpen && hasPaidTier && (bizUrl || bizTwitch) && (
+                        <div className="flex gap-2 px-3 pb-2 pt-0.5 flex-wrap">
+                          {bizUrl && (
+                            <a
+                              href={bizUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all touch-manipulation hover:brightness-125"
+                              style={bizTier === "premium"
+                                ? { background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)", color: "#a855f7" }
+                                : { background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.25)", color: "#00d4ff" }
+                              }
+                            >
+                              <ExternalLink className="w-2.5 h-2.5" />
+                              Visit Website
+                            </a>
+                          )}
+                          {bizTwitch && (
+                            <a
+                              href={`https://twitch.tv/${bizTwitch}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all touch-manipulation hover:brightness-125"
+                              style={{ background: "rgba(145,70,255,0.1)", border: "1px solid rgba(145,70,255,0.25)", color: "#9147ff" }}
+                            >
+                              <Tv2 className="w-2.5 h-2.5" />
+                              Watch on Twitch
+                            </a>
+                          )}
+                        </div>
+                      )}
+
                       {/* Sub-cams */}
                       {isOpen && cams.map((cam) => (
                         <CamRow

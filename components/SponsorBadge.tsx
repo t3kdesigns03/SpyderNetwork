@@ -19,14 +19,14 @@ export function SponsorBadge({ tier, className, size = "sm" }: Props) {
 
   const base = clsx(
     "inline-flex items-center gap-0.5 font-bold uppercase tracking-wider rounded shrink-0",
-    size === "sm" ? "text-[8px] px-1 py-[1px]" : "text-[10px] px-1.5 py-0.5"
+    size === "sm" ? "text-[9px] px-1.5 py-[2px]" : "text-[10px] px-1.5 py-0.5"
   );
 
   if (tier === "featured") {
     return (
       <span
-        className={clsx(base, "text-spyder-cyan border border-spyder-cyan/30", className)}
-        style={{ background: "rgba(0,212,255,0.08)" }}
+        className={clsx(base, "text-spyder-cyan border border-spyder-cyan/40", className)}
+        style={{ background: "rgba(0,212,255,0.12)", textShadow: "0 0 6px rgba(0,212,255,0.5)" }}
         title="Featured Partner"
       >
         ★ Featured
@@ -36,8 +36,8 @@ export function SponsorBadge({ tier, className, size = "sm" }: Props) {
 
   return (
     <span
-      className={clsx(base, "text-spyder-purple border border-spyder-purple/30", className)}
-      style={{ background: "rgba(168,85,247,0.08)" }}
+      className={clsx(base, "text-spyder-purple border border-spyder-purple/40", className)}
+      style={{ background: "rgba(168,85,247,0.14)", textShadow: "0 0 6px rgba(168,85,247,0.5)" }}
       title="Premium Broadcaster"
     >
       ◆ Premium
