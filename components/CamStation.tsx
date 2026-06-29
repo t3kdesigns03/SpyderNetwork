@@ -60,23 +60,48 @@ export function CamStation() {
     return () => { document.documentElement.classList.remove("landscape-video-mode"); };
   }, [isLandscape]);
 
-  // 2. Attempt native browser fullscreen directly inside the orientationchange
-  //    event handler. Calling it from the event (not via useEffect) gives
-  //    Android Chrome the best chance of treating it as a user gesture.
+  // 2. Fire requestFullscreen() from ALL three orientation-change event
+  //    surfaces simultaneously. Different Android Chrome versions treat
+  //    different events as "user gesture" context — covering all three
+  //    maximises the chance that at least one call is granted permission.
+  //    Calls are synchronous (no setTimeout) to stay in the gesture stack.
+  //    iOS Safari ignores requestFullscreen on non-<video> elements — for
+  //    iOS our z-[9999] CSS overlay + header hiding is the fallback.
   useEffect(() => {
-    const onOrientationChange = () => {
-      const mq = window.matchMedia("(orientation: landscape)");
-      const isTouch = window.matchMedia("(pointer: coarse)").matches;
-      if (mq.matches && isTouch && window.innerHeight < 600) {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen?.({ navigationUI: "hide" }).catch(() => {});
-        }
-      } else if (document.fullscreenElement) {
+    const isMobileLandscape = () =>
+      window.matchMedia("(orientation: landscape)").matches &&
+      window.matchMedia("(pointer: coarse)").matches &&
+      window.innerHeight < 600;
+
+    const tryEnter = () => {
+      if (isMobileLandscape() && !document.fullscreenElement) {
+        document.documentElement
+          .requestFullscreen?.({ navigationUI: "hide" })
+          .catch(() => {}); // Silently ignore — blocked on iOS / strict Android
+      }
+    };
+
+    const tryExit = () => {
+      if (!isMobileLandscape() && document.fullscreenElement) {
         document.exitFullscreen?.().catch(() => {});
       }
     };
-    window.addEventListener("orientationchange", onOrientationChange);
-    return () => window.removeEventListener("orientationchange", onOrientationChange);
+
+    const onOrientationEvent = () => { tryEnter(); tryExit(); };
+
+    // Surface 1: legacy orientationchange (widest browser support)
+    window.addEventListener("orientationchange", onOrientationEvent);
+    // Surface 2: matchMedia orientation change (Chrome 79+)
+    const mq = window.matchMedia("(orientation: landscape)");
+    mq.addEventListener("change", onOrientationEvent);
+    // Surface 3: Screen Orientation API (Chrome 38+, Firefox 43+)
+    try { screen.orientation?.addEventListener("change", onOrientationEvent); } catch {}
+
+    return () => {
+      window.removeEventListener("orientationchange", onOrientationEvent);
+      mq.removeEventListener("change", onOrientationEvent);
+      try { screen.orientation?.removeEventListener("change", onOrientationEvent); } catch {}
+    };
   }, []);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -189,7 +214,7 @@ export function CamStation() {
         // z-[9999] beats the NavBar header's z-50.
         isLandscape && "!fixed inset-0 z-[9999] bg-black"
       )}
-      style={isLandscape ? {} : { height: "calc(100dvh - 56px)" }}
+      style={isLandscape ? { height: "100dvh", width: "100dvw" } : { height: "calc(100dvh - 56px)" }}
     >
       {/* ── Tab bar — hidden in landscape mobile ─────────── */}
       <div className={clsx("flex shrink-0", isLandscape && "!hidden")} style={{ background: "#050810", borderBottom: "2px solid rgba(0,212,255,0.35)", boxShadow: "0 0 20px rgba(0,212,255,0.2), 0 4px 20px rgba(0,0,0,0.6)" }}>
