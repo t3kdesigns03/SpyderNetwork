@@ -43,7 +43,7 @@ export function CamStation() {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const playerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const toggleGroup = (biz: string) =>
     setExpandedGroups((prev) => {
@@ -98,14 +98,14 @@ export function CamStation() {
       ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [selected]);
 
-  // Scroll player into view when a cam is selected on mobile.
-  // On mobile the layout is a single scrolling column; the player is at the top
-  // but the cam list is below it, so after picking a cam the player is offscreen.
+  // When a cam is selected on mobile, jump the scroll container back to the top
+  // so the video is immediately visible without any manual scrolling.
+  // We ref the overflow-y-auto container directly and call scrollTo — much more
+  // reliable than scrollIntoView on a child inside a custom scroll container.
   useEffect(() => {
-    if (!selected || !playerRef.current) return;
-    // Only scroll on narrow viewports (mobile/tablet single-column layout)
-    if (window.innerWidth >= 1024) return; // lg breakpoint = side-by-side, no scroll needed
-    playerRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (!selected || !scrollContainerRef.current) return;
+    if (window.innerWidth >= 1024) return; // desktop: side-by-side, always visible
+    scrollContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
   }, [selected]);
 
   const toggleEnabled = (id: string) =>
@@ -169,7 +169,7 @@ export function CamStation() {
 
       {/* ── CAMS tab ─────────────────────────────────────── */}
       {tab === "cams" && (
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain lg:overflow-hidden lg:flex lg:flex-row">
+        <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain lg:overflow-hidden lg:flex lg:flex-row">
 
           {/* LEFT: Player ──────────────────────────────── */}
           <div className="flex flex-col lg:flex-1 lg:min-h-0 shrink-0">
@@ -212,7 +212,7 @@ export function CamStation() {
             </div>
 
             {/* Video area — natural 16:9 on mobile, fills height on desktop */}
-            <div ref={playerRef} className="relative bg-black w-full aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0 video-frame-glow">
+            <div className="relative bg-black w-full aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0 video-frame-glow">
               {selected ? (
                 <CamEmbed cam={selected} key={selected.id} autoplay />
               ) : (
