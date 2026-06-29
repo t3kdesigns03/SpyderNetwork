@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Wifi, Map, Video, Thermometer, Radio, Phone, Tv2, BookOpen } from "lucide-react";
+import { Wifi, Map, Video, Thermometer, Radio, Phone, Tv2 } from "lucide-react";
 
 export function Footer() {
   return (
@@ -35,7 +35,6 @@ export function Footer() {
                 { href: "/#map", label: "Map", icon: Map },
                 { href: "/#conditions", label: "Lake Conditions", icon: Thermometer },
                 { href: "/radar", label: "Radar", icon: Radio },
-                { href: "/video-collection", label: "Saved Videos", icon: BookOpen },
               ].map(({ href, label, icon: Icon }) => (
                 <Link
                   key={href}

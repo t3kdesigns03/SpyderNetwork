@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Tv2, Menu, X, Info, Phone, Film } from "lucide-react";
+import { Tv2, Menu, X, Info, Phone } from "lucide-react";
 import Image from "next/image";
 import { clsx } from "clsx";
 import { CAMS } from "@/lib/cams";
@@ -11,7 +11,6 @@ const LIVE_COUNT = CAMS.filter((c) => c.isLive).length;
 
 const NAV_ITEMS = [
   { href: "/about-us", label: "About", Icon: Info },
-  { href: "/video-collection", label: "Saved Videos", Icon: Film },
   { href: "/become-a-broadcaster", label: "Become a Broadcaster", Icon: Tv2 },
   { href: "/contact", label: "Contact", Icon: Phone },
 ];
