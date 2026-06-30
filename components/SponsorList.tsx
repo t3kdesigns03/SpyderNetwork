@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ExternalLink, Tv2, ArrowRight } from "lucide-react";
+import { withUTM, trackPartnerSite, toUTMContent } from "@/lib/analytics";
 
 interface Partner {
   name: string;
@@ -53,11 +54,17 @@ function PartnerCard({ partner, size = "sm" }: { partner: Partner; size?: "sm" |
   const badgeColor = isPremium ? "#a855f7" : "#00d4ff";
   const badgeLabel = isPremium ? "◆ Premium" : "★ Featured";
 
+  const trackedUrl = withUTM(partner.url, {
+    content: toUTMContent(partner.name),
+    term: "sponsor-list",
+  });
+
   return (
     <a
-      href={partner.url}
+      href={trackedUrl}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={() => trackPartnerSite(partner.name, trackedUrl, "sponsor-list")}
       className="group flex items-center justify-between gap-3 rounded-xl transition-all duration-200 touch-manipulation hover:brightness-110"
       style={{
         background: "rgba(13,21,38,0.7)",

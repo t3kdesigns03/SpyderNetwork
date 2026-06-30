@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 import { ALL_CAMS, CAMS_BY_BUSINESS, CAM_BUSINESSES, HERO_CAM } from "@/lib/cams";
+import { withUTM, trackPartnerSite, trackTwitchClick, trackCastClick, toUTMContent } from "@/lib/analytics";
 import { CamEmbed } from "./CamEmbed";
 import { SponsorBadge } from "./SponsorBadge";
 import type { Cam } from "@/types";
@@ -284,7 +285,10 @@ export function CamStation() {
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 text-xs text-spyder-gray hover:text-white transition-colors min-h-[36px] px-1"
                     title="Cast to TV"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      trackCastClick(selected.twitchChannel!, "cast-button");
+                    }}
                   >
                     <Cast className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline text-xs">Cast</span>
@@ -472,9 +476,17 @@ export function CamStation() {
               <div className="ml-auto">
                 {selected?.websiteUrl && (
                   <a
-                    href={selected.websiteUrl}
+                    href={withUTM(selected.websiteUrl, {
+                      content: toUTMContent(selected.business),
+                      term: "player-bar",
+                    })}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => trackPartnerSite(
+                      selected.business,
+                      selected.websiteUrl!,
+                      "player-bar"
+                    )}
                     className="flex items-center gap-1.5 text-xs text-spyder-gray hover:text-white transition-colors min-h-[36px] px-2"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -683,10 +695,14 @@ export function CamStation() {
                         {/* Website link icon — shown for every business that has one */}
                         {bizUrl && (
                           <a
-                            href={bizUrl}
+                            href={withUTM(bizUrl, {
+                              content: toUTMContent(biz),
+                              term: "cam-sidebar",
+                            })}
                             target="_blank"
                             rel="noopener noreferrer"
                             title={`Visit ${biz}`}
+                            onClick={() => trackPartnerSite(biz, bizUrl, "cam-sidebar")}
                             className="shrink-0 flex items-center justify-center w-7 h-7 rounded text-spyder-gray/40 hover:text-white transition-colors touch-manipulation"
                           >
                             <ExternalLink className="w-3 h-3" />
@@ -704,9 +720,13 @@ export function CamStation() {
                         <div className="flex gap-2 px-3 pb-2 pt-0.5 flex-wrap">
                           {bizUrl && (
                             <a
-                              href={bizUrl}
+                              href={withUTM(bizUrl, {
+                                content: toUTMContent(biz),
+                                term: "cam-sidebar",
+                              })}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={() => trackPartnerSite(biz, bizUrl, "cam-sidebar")}
                               className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all touch-manipulation hover:brightness-125"
                               style={bizTier === "premium"
                                 ? { background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)", color: "#a855f7" }
@@ -722,6 +742,7 @@ export function CamStation() {
                               href={`https://twitch.tv/${bizTwitch}`}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={() => trackTwitchClick(bizTwitch, "twitch-strip")}
                               className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all touch-manipulation hover:brightness-125"
                               style={{ background: "rgba(145,70,255,0.1)", border: "1px solid rgba(145,70,255,0.25)", color: "#9147ff" }}
                             >

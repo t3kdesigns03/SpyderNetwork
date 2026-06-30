@@ -1,6 +1,17 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
+
+const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "";
+
+// Build once at module load — no JSX interpolation needed inside Script children
+const GA_INIT_SCRIPT = GA_ID
+  ? "window.dataLayer=window.dataLayer||[];" +
+    "function gtag(){dataLayer.push(arguments);}" +
+    "gtag('js',new Date());" +
+    "gtag('config','" + GA_ID + "',{send_page_view:true,anonymize_ip:true});"
+  : "";
 
 export const metadata: Metadata = {
   title: {
@@ -45,6 +56,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="scroll-smooth">
       <body className="min-h-screen bg-spyder-navy text-white overflow-x-hidden">
+
+        {GA_ID && (
+          <>
+            <Script
+              src={"https://www.googletagmanager.com/gtag/js?id=" + GA_ID}
+              strategy="afterInteractive"
+            />
+            <Script id="ga4-init" strategy="afterInteractive">
+              {GA_INIT_SCRIPT}
+            </Script>
+          </>
+        )}
+
         <NavBar />
         {/* pt-14 = navbar height */}
         <main id="main" className="pt-14">
