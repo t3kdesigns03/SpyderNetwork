@@ -913,117 +913,131 @@ function CamRow({
   );
 }
 
-// ─── Map tab (inline, full height) ───────────────────────────────────────────
+// ─── Map tab (Google My Maps embed) ──────────────────────────────────────────
+// Displays the classic SpyderNetwork Google My Maps — all cam locations marked
+// with the iconic red spider icons, exactly as seen on the original site.
+//
+// ── HOW TO GET THE MAP ID ────────────────────────────────────────────────────
+// 1. Visit spydernetwork.com in your browser
+// 2. Right-click the Google map → "View Frame Source" (or Inspect Element)
+// 3. Find the iframe src — it contains "maps/d/embed?mid=XXXXXXXXX"
+// 4. Copy the value after "mid=" and paste it below
+// ─────────────────────────────────────────────────────────────────────────────
+const SPYDER_MAP_MID = "1LUHg37sagphltfKVv_DVM1ZtCyFerPA";
+
 function MapTab({ onSelectCam }: { onSelectCam: (cam: Cam) => void }) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const leafletMapRef = useRef<import("leaflet").Map | null>(null);
-  const [ready, setReady] = useState(false);
-  const [hoveredCam, setHoveredCam] = useState<Cam | null>(null);
-
-  const mappedCams = ALL_CAMS.filter((c) => c.lat && c.lng);
-
-  const CAT_COLORS: Record<string, string> = {
-    "bar-grill": "#cc0000",
-    marina: "#0ea5e9",
-    pool: "#22d3ee",
-    dock: "#f5a623",
-    stage: "#a855f7",
-    shop: "#22c55e",
-    "real-estate": "#f59e0b",
-    radio: "#ec4899",
-    "lake-view": "#64748b",
-  };
-  const CAT_EMOJI: Record<string, string> = {
-    "bar-grill": "🍺", marina: "⛵", pool: "🏊", dock: "⚓",
-    stage: "🎸", shop: "🛍️", "real-estate": "🏠", radio: "📻", "lake-view": "🌊",
-  };
-
-  useEffect(() => {
-    if (leafletMapRef.current || !mapRef.current) return;
-    let alive = true;
-
-    (async () => {
-      const L = (await import("leaflet")).default;
-      // leaflet CSS loaded via globals.css
-      if (!alive || !mapRef.current) return;
-
-      const map = L.map(mapRef.current, {
-        center: [38.175, -92.635],
-        zoom: 12,
-        zoomControl: false,
-        attributionControl: false,
-      });
-
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-      }).addTo(map);
-
-      L.control.zoom({ position: "bottomright" }).addTo(map);
-      L.control.attribution({ position: "bottomleft", prefix: "© OpenStreetMap" }).addTo(map);
-
-      for (const cam of mappedCams) {
-        const color = CAT_COLORS[cam.category] ?? "#cc0000";
-        const emoji = CAT_EMOJI[cam.category] ?? "📹";
-        const icon = L.divIcon({
-          className: "",
-          html: `<div style="width:34px;height:34px;background:${color};border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.5),0 0 10px ${color}55;display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);font-size:13px">${emoji}</span></div>`,
-          iconSize: [34, 34],
-          iconAnchor: [17, 34],
-        });
-        L.marker([cam.lat!, cam.lng!], { icon })
-          .addTo(map)
-          .on("click", () => {
-            setHoveredCam(cam);
-            map.flyTo([cam.lat!, cam.lng!], 15, { animate: true, duration: 0.6 });
-          });
-      }
-
-      leafletMapRef.current = map;
-      setReady(true);
-    })();
-
-    return () => { alive = false; };
-  }, []);
-
-  useEffect(() => () => { leafletMapRef.current?.remove(); leafletMapRef.current = null; }, []);
+  const mappedCamCount = ALL_CAMS.filter((c) => c.lat && c.lng).length;
+  const hasMapId = SPYDER_MAP_MID.length > 0;
 
   return (
-    <div className="relative flex-1 bg-spyder-navy">
-      <div ref={mapRef} className="w-full h-full min-h-[400px]" />
+    <div className="flex-1 flex flex-col min-h-0" style={{ background: "#050810" }}>
 
-      {!ready && (
-        <div className="absolute inset-0 flex items-center justify-center bg-spyder-navy z-10">
-          <div className="text-center">
-            <Map className="w-8 h-8 text-spyder-red mx-auto mb-2 animate-bounce" />
-            <p className="text-spyder-gray text-sm">Loading map…</p>
-          </div>
+      {/* ── Branded header ──────────────────────────────────────────────────── */}
+      <div
+        className="shrink-0 flex items-center gap-3 px-4 py-3 border-b"
+        style={{ borderColor: "rgba(204,0,0,0.3)", boxShadow: "0 2px 16px rgba(204,0,0,0.1)" }}
+      >
+        {/* Spider icon badge */}
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+          style={{ background: "rgba(204,0,0,0.15)", border: "1px solid rgba(204,0,0,0.4)" }}
+        >
+          <svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden>
+            <path d="M7.5 7.5 Q5 5 3 3"      stroke="#cc0000" strokeWidth="1.3" strokeLinecap="round" />
+            <path d="M7 10 Q4 9.5 2 10"       stroke="#cc0000" strokeWidth="1.3" strokeLinecap="round" />
+            <path d="M7.5 12.5 Q5 15 3 17"    stroke="#cc0000" strokeWidth="1.3" strokeLinecap="round" />
+            <path d="M12.5 7.5 Q15 5 17 3"    stroke="#cc0000" strokeWidth="1.3" strokeLinecap="round" />
+            <path d="M13 10 Q16 9.5 18 10"    stroke="#cc0000" strokeWidth="1.3" strokeLinecap="round" />
+            <path d="M12.5 12.5 Q15 15 17 17" stroke="#cc0000" strokeWidth="1.3" strokeLinecap="round" />
+            <circle cx="10" cy="10" r="4.5" fill="#cc0000" />
+            <circle cx="10" cy="10" r="2.6"  fill="rgba(0,0,0,0.75)" />
+            <circle cx="10" cy="10" r="1.2"  fill="white" />
+            <circle cx="8.9" cy="8.9" r="0.55" fill="rgba(255,255,255,0.9)" />
+          </svg>
         </div>
-      )}
 
-      {hoveredCam && (
-        <div className="absolute bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-72 z-20
-                        bg-spyder-black/95 backdrop-blur border border-white/20 rounded-xl p-4 shadow-2xl">
-          <div className="flex items-start justify-between gap-2 mb-3">
-            <div>
-              <p className="font-semibold text-white text-sm">{hoveredCam.business}</p>
-                   <p className="text-xs text-spyder-gray mt-0.5">{hoveredCam.name}</p>
-              {hoveredCam.mile && (
-                <p className="text-xs text-spyder-teal mt-1">Mile {hoveredCam.mile}</p>
-              )}
-            </div>
-            <button onClick={() => setHoveredCam(null)} className="text-spyder-gray hover:text-white">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-          <button
-            onClick={() => { onSelectCam(hoveredCam); setHoveredCam(null); }}
-            className="w-full btn-primary text-sm py-2.5"
+        <div className="min-w-0 flex-1">
+          <h3
+            className="font-display text-sm font-bold tracking-widest uppercase leading-tight"
+            style={{ color: "#ffffff", textShadow: "0 0 12px rgba(204,0,0,0.45)" }}
           >
-            <Play className="w-4 h-4 fill-white" />
-            Watch Live
-          </button>
+            SpyderNetwork Live Cams Map
+          </h3>
+          <p className="text-xs mt-0.5" style={{ color: "#6b7280" }}>
+            {ALL_CAMS.length} cams · {mappedCamCount} locations around Lake of the Ozarks
+          </p>
         </div>
-      )}
+
+        {/* Open full map externally */}
+        {hasMapId && (
+          <a
+            href={`https://www.google.com/maps/d/viewer?mid=${SPYDER_MAP_MID}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg transition-all touch-manipulation hover:brightness-125 active:scale-95"
+            style={{ background: "rgba(204,0,0,0.1)", border: "1px solid rgba(204,0,0,0.35)", color: "#cc0000" }}
+            title="Open full map in Google My Maps"
+          >
+            <ExternalLink className="w-3 h-3" />
+            <span className="hidden xs:inline text-[11px] font-semibold">Full Map</span>
+          </a>
+        )}
+      </div>
+
+      {/* ── Map area — fills all remaining height ────────────────────────────── */}
+      <div className="flex-1 min-h-0 relative">
+        {hasMapId ? (
+          /* Classic SpyderNetwork Google My Maps with red spider markers */
+          <iframe
+            title="SpyderNetwork Live Cams Map — Lake of the Ozarks"
+            src={`https://www.google.com/maps/d/embed?mid=${SPYDER_MAP_MID}&ll=38.175%2C-92.635&z=11`}
+            loading="lazy"
+            allowFullScreen
+            className="absolute inset-0 w-full h-full border-0"
+            style={{ colorScheme: "normal" }}
+          />
+        ) : (
+          /* Shown until SPYDER_MAP_MID is filled in */
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-6 text-center">
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center"
+              style={{ background: "rgba(204,0,0,0.1)", border: "1px solid rgba(204,0,0,0.3)" }}
+            >
+              <Map className="w-7 h-7 text-spyder-red" />
+            </div>
+            <div className="space-y-2 max-w-xs">
+              <p className="font-display font-bold text-white text-base tracking-wide">One step to activate</p>
+              <p className="text-spyder-gray text-sm leading-relaxed">
+                On spydernetwork.com, right-click the Google map → <em>View Frame Source</em>.
+                Find the value after <code className="text-spyder-cyan text-xs bg-white/5 px-1 py-0.5 rounded">mid=</code> and
+                paste it into <code className="text-spyder-cyan text-xs bg-white/5 px-1 py-0.5 rounded">SPYDER_MAP_MID</code> in{" "}
+                <code className="text-white/60 text-xs">CamStation.tsx</code>.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Footer bar ───────────────────────────────────────────────────────── */}
+      <div
+        className="shrink-0 flex items-center justify-between gap-3 px-4 py-2.5 border-t"
+        style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(5,8,16,0.98)" }}
+      >
+        <p className="text-xs leading-snug" style={{ color: "#6b7280" }}>
+          {hasMapId
+            ? "Tap a red spider icon on the map to see cam details"
+            : "Add the map ID above to show all cam locations"}
+        </p>
+        {/* Switches back to the CAMS tab and loads the featured cam */}
+        <button
+          onClick={() => onSelectCam(HERO_CAM)}
+          className="shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all touch-manipulation hover:brightness-125 active:scale-95"
+          style={{ background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff" }}
+        >
+          <Video className="w-3 h-3" />
+          Watch Live
+        </button>
+      </div>
     </div>
   );
 }
