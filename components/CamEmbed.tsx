@@ -12,6 +12,7 @@ import type { Cam } from "@/types";
 const TWITCH_PARENTS = [
   "spydernetwork.com",
   "www.spydernetwork.com",
+  "spydernetwork.t3kdesigns.app",
   "spydern3twork.netlify.app",
   "localhost",
   "127.0.0.1",
