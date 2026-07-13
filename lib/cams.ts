@@ -1,45 +1,109 @@
 import type { Cam } from "@/types";
 
-// ─── Channel map (scraped from spydernetwork.com) ────────────────────────────
-// backwater-jacks-pool        → spydernetwork3
-// backwater-jacks-stage       → spydernetwork5
-// backwater-jacks-dock        → spydernetwork12
-// backwater-jacks-dock-1      → spydernetwork13
-// backwater-jacks-level-five  → spydernetwork66
-// dog-days-pool               → spydernetwork31
-// dog-days-stage              → spydernetwork27
-// dog-days-dock               → spydernetwork29
-// dog-days-dock-1             → spydernetwork28
-// lazy-gators-pool            → spydernetwork4
-// lazy-gators (stage)         → spydernetwork15
-// lazy-gators-dock-1          → spydernetwork16
-// lazy-gators-dock-2          → spydernetwork17
-// fish-and-company-stage      → spydernetwork35
-// fish-and-company-patio      → spydernetwork11
-// fish-and-company-dock-1     → spydernetwork23
-// fish-and-company (dock 2)   → spydernetwork26
-// alley-cats-north            → spydernetwork43
-// alley-cats-south            → spydernetwork42
-// alhonna-indoor-pool         → spydernetwork65
-// alhonna-outdoor-pool        → spydernetwork61
-// encore-stage                → spydernetwork10
-// encore-pool                 → spydernetwork9
-// encore-pool-bar             → spydernetwork8
-// neon-taco-stage             → spydernetwork18
-// neon-taco-docks             → spydernetwork19
-// neon-taco-bar               → spydernetwork20
-// wicked-willies-bar          → spydernetwork1
-// wicked-willies-restaurant   → spydernetwork36
-// wicked-willies-patio        → spydernetwork49
-// krms-studio                 → spydernetwork53
-// krms-north                  → spydernetwork50
-// krms-east                   → spydernetwork51
-// krms-southeast              → spydernetwork52
-// tucker-shuckers-north       → spydernetwork2
-// tucker-shuckers-south       → spydernetwork32
-// jb-hooks-bridge             → ipcamlive iframe
-// jb-hooks-left               → ipcamlive iframe
-
+// ─── Channel map (scraped from spydernetwork.com – complete as of 2026-07-13) ──
+//
+// This is the single source of truth for every live stream we embed.
+// Keep this block updated whenever a new camera is added or a channel changes.
+// Format: slug / name                        → channel / provider
+//
+// ── HERO ────────────────────────────────────────────────────────────────────
+// featured                                   → spydernetwork68
+//
+// ── BACKWATER JACKS ─────────────────────────────────────────────────────────
+// backwater-jacks-pool                       → spydernetwork3
+// backwater-jacks-stage                      → spydernetwork5
+// backwater-jacks-dock                       → spydernetwork12
+// backwater-jacks-dock-1                     → spydernetwork13
+// backwater-jacks-level-five                 → spydernetwork66
+//
+// ── DOG DAYS ────────────────────────────────────────────────────────────────
+// dog-days-pool                              → spydernetwork31
+// dog-days-stage                             → spydernetwork27
+// dog-days-dock                              → spydernetwork29
+// dog-days-dock-1                            → spydernetwork28
+//
+// ── LAZY GATORS ─────────────────────────────────────────────────────────────
+// lazy-gators-pool                           → spydernetwork4
+// lazy-gators-stage                          → spydernetwork15
+// lazy-gators-dock-1                         → spydernetwork16
+// lazy-gators-dock-2                         → spydernetwork17
+//
+// ── FISH AND COMPANY ────────────────────────────────────────────────────────
+// fish-and-company-stage                     → spydernetwork35
+// fish-and-company-patio                     → spydernetwork11
+// fish-and-company-dock-1                    → spydernetwork23
+// fish-and-company-dock-2                    → spydernetwork26
+//
+// ── ALLEY CATS ──────────────────────────────────────────────────────────────
+// alley-cats-north                           → spydernetwork43
+// alley-cats-south                           → spydernetwork42
+//
+// ── ALHONNA RESORT & MARINA ─────────────────────────────────────────────────
+// alhonna-indoor-pool                        → spydernetwork65
+// alhonna-outdoor-pool                       → spydernetwork61
+//
+// ── ENCORE ──────────────────────────────────────────────────────────────────
+// encore-stage                               → spydernetwork10
+// encore-pool                                → spydernetwork9
+// encore-pool-bar                            → spydernetwork8
+//
+// ── NEON TACO ───────────────────────────────────────────────────────────────
+// neon-taco-stage                            → spydernetwork18
+// neon-taco-docks                            → spydernetwork19
+// neon-taco-bar                              → spydernetwork20
+//
+// ── WICKED WILLIE'S ─────────────────────────────────────────────────────────
+// wicked-willies-bar                         → spydernetwork1
+// wicked-willies-restaurant                  → spydernetwork36
+// wicked-willies-patio                       → spydernetwork49
+//
+// ── KRMS RADIO ──────────────────────────────────────────────────────────────
+// krms-studio                                → spydernetwork53
+// krms-north                                 → spydernetwork50
+// krms-east                                  → spydernetwork51
+// krms-southeast                             → spydernetwork52
+//
+// ── TUCKER'S SHUCKERS ───────────────────────────────────────────────────────
+// tucker-shuckers-north                      → spydernetwork2
+// tucker-shuckers-south                      → spydernetwork32
+//
+// ── JB HOOKS (non-Twitch) ───────────────────────────────────────────────────
+// jb-hooks-bridge                            → ipcamlive (jbhooksbridge)
+// jb-hooks-left                              → ipcamlive (jbhooksleft)
+//
+// ── NEW CAMERAS ADDED 2026-07-13 (28) ───────────────────────────────────────
+// angels-mexican-restaurant                  → spydernetwork72
+// annamarie-hopkins-real-estate              → spydernetwork33
+// bridgeview-marina                          → spydernetwork69
+// camdenton-glass-north                      → spydernetwork58
+// camdenton-glass-south                      → spydernetwork57
+// dock-glide                                 → spydernetwork21
+// dogwood-animal-shelter                     → spydernetwork59
+// double-ds-roadhouse                        → spydernetwork60
+// ellerman-mm17                              → spydernetwork34
+// lake-billiards                             → spydernetwork6
+// lake-and-land-inside                       → spydernetwork56
+// lake-and-land-outside                      → spydernetwork54
+// linn-creek-cove / spydernetwork-dock       → spydernetwork62
+// lucys-at-the-lake                          → spydernetwork63
+// marty-byrdes-street                        → spydernetwork24
+// marty-byrdes-bar                           → spydernetwork25
+// michaels-steak-chalet-patio                → spydernetwork39
+// michaels-steak-chalet-lake-view            → spydernetwork38
+// outlaws-mens-outpost                       → spydernetwork55
+// paradise-east                              → spydernetwork45
+// paradise-north                             → spydernetwork44
+// split-arrow-boutique                       → spydernetwork7
+// cactus-blossom-boutique                    → spydernetwork64
+// the-hatch                                  → spydernetwork14
+// topsider-condos                            → spydernetwork37
+// rip-tavern                                 → spydernetwork40
+// spydernetwork-ptz                          → spydernetwork70
+// roaming-cam                                → spydernetwork          (base channel)
+//
+// ── STILL UNMAPPED / NEEDS INVESTIGATION ────────────────────────────────────
+// spydernetwork22, 30, 41, 46, 47, 48, 67, 71  (and any higher numbers)
+// These channels exist but were not attached to a public business page at scrape time.
 export const CAMS: Cam[] = [
   // ── HERO / FEATURED ───────────────────────────────────────────────────────
   // spydernetwork68 is the primary SpyderNetwork broadcast channel.
@@ -659,6 +723,474 @@ export const CAMS: Cam[] = [
     spyderPageUrl: "https://spydernetwork.com/jb-hooks/",
     lat: 38.1936,
     lng: -92.6120,
+  },
+
+  // ── ANGELS MEXICAN RESTAURANT ─────────────────────────────────────────────
+  {
+    id: "angels-lakeview",
+    name: "Lake View",
+    business: "Angels Mexican Restaurant",
+    slug: "angels-mexican-restaurant",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork72",
+    isLive: true,
+    description: "Lake view from Angels Mexican Restaurant — Lake of the Ozarks",
+    websiteUrl: "https://www.facebook.com/profile.php?id=61577060969567",
+    spyderPageUrl: "https://spydernetwork.com/angels-mexican-restaurant-lake-view-lake-ozarks/",
+    lat: 38.1580,
+    lng: -92.6390,
+  },
+
+  // ── ANNAMARIE HOPKINS REAL ESTATE ─────────────────────────────────────────
+  {
+    id: "annamarie-hopkins",
+    name: "Strip View",
+    business: "Annamarie Hopkins Real Estate",
+    slug: "annamarie-hopkins-real-estate",
+    category: "real-estate",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork33",
+    isLive: true,
+    description: "Bagnell Dam Strip street view — sponsored by Anna Marie Hopkins Real Estate",
+    websiteUrl: "https://asmartermove.com",
+    spyderPageUrl: "https://spydernetwork.com/annamarie-hopkins-smarter-move-real-estate/",
+    lat: 38.1958,
+    lng: -92.6116,
+  },
+
+  // ── BRIDGEVIEW MARINA ─────────────────────────────────────────────────────
+  {
+    id: "bridgeview-marina",
+    name: "Gas Dock",
+    business: "Bridgeview Marina",
+    slug: "bridgeview-marina",
+    category: "marina",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork69",
+    isLive: true,
+    description: "Fuel dock & waterfront — best marina and staff on the lake",
+    websiteUrl: "https://www.facebook.com/pages/Bridgeview%20Marina/157000694367289/",
+    spyderPageUrl: "https://spydernetwork.com/bridgeview-marina/",
+    lat: 38.1300,
+    lng: -92.6900,
+  },
+
+  // ── CAMDENTON GLASS ───────────────────────────────────────────────────────
+  {
+    id: "camdenton-glass-north",
+    name: "North",
+    business: "Camdenton Glass",
+    slug: "camdenton-glass-north",
+    category: "shop",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork58",
+    isLive: true,
+    description: "Hwy 54 street view north through Camdenton — sponsored by Camdenton Glass",
+    websiteUrl: "https://camdentonglass.com",
+    spyderPageUrl: "https://spydernetwork.com/camdenton-glass-north/",
+    lat: 38.0080,
+    lng: -92.7440,
+  },
+  {
+    id: "camdenton-glass-south",
+    name: "South",
+    business: "Camdenton Glass",
+    slug: "camdenton-glass-south",
+    category: "shop",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork57",
+    isLive: true,
+    description: "Hwy 54 street view south through Camdenton — sponsored by Camdenton Glass",
+    websiteUrl: "https://camdentonglass.com",
+    spyderPageUrl: "https://spydernetwork.com/camdenton-glass-south/",
+    lat: 38.0050,
+    lng: -92.7445,
+  },
+
+  // ── DOCK GLIDE ────────────────────────────────────────────────────────────
+  {
+    id: "dock-glide",
+    name: "Lake View",
+    business: "Dock Glide",
+    slug: "dock-glide",
+    category: "lake-view",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork21",
+    isLive: true,
+    mile: "4",
+    description: "Live lake view at Mile Marker 4 — sponsored by Dock Glide",
+    websiteUrl: "https://dockglide.com",
+    spyderPageUrl: "https://spydernetwork.com/dock-glide/",
+    lat: 38.1980,
+    lng: -92.6280,
+  },
+
+  // ── DOGWOOD ANIMAL SHELTER ────────────────────────────────────────────────
+  {
+    id: "dogwood-shelter",
+    name: "Puppy Cam",
+    business: "Dogwood Animal Shelter",
+    slug: "dogwood-animal-shelter",
+    category: "shelter",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork59",
+    isLive: true,
+    description: "Watch playful pups live — adopt a pet at Dogwood Animal Shelter",
+    websiteUrl: "https://www.daslakeoftheozarks.com",
+    spyderPageUrl: "https://spydernetwork.com/dogwood-animal-shelter/",
+    lat: 38.1450,
+    lng: -92.6170,
+  },
+
+  // ── DOUBLE D'S ROADHOUSE ──────────────────────────────────────────────────
+  {
+    id: "double-ds",
+    name: "Bar",
+    business: "Double D's Roadhouse",
+    slug: "double-ds-roadhouse",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork60",
+    isLive: true,
+    description: "Neighborhood bar & grill — live music, karaoke and good times",
+    websiteUrl: "https://www.facebook.com/profile.php?id=61580721951243",
+    spyderPageUrl: "https://spydernetwork.com/double-ds-roadhouse/",
+    lat: 38.1500,
+    lng: -92.6600,
+  },
+
+  // ── ELLERMAN VRBO RENTAL ──────────────────────────────────────────────────
+  {
+    id: "ellerman-lakeview",
+    name: "Lake View",
+    business: "Ellerman VRBO Rental",
+    slug: "ellerman-lake-view",
+    category: "lake-view",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork34",
+    isLive: true,
+    mile: "17",
+    description: "Lake view from Ellerman VRBO vacation rental — Lake of the Ozarks",
+    websiteUrl: "https://www.vrbo.com/1342280?noDates=true",
+    spyderPageUrl: "https://spydernetwork.com/ellerman/",
+    lat: 38.0900,
+    lng: -92.7000,
+  },
+
+  // ── LAKE BILLIARDS SPORTS BAR & GRILL ─────────────────────────────────────
+  {
+    id: "lake-billiards",
+    name: "Sports Bar",
+    business: "Lake Billiards Sports Bar & Grill",
+    slug: "lake-billiards",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork6",
+    isLive: true,
+    description: "Pool tables, darts, great food — Lake Billiards in Osage Beach",
+    websiteUrl: "https://lakebilliards.com/index.html",
+    spyderPageUrl: "https://spydernetwork.com/lake-billiards/",
+    lat: 38.1350,
+    lng: -92.6570,
+  },
+
+  // ── LAKE & LAND TRADING COMPANY ───────────────────────────────────────────
+  {
+    id: "lake-land-inside",
+    name: "Inside",
+    business: "Lake & Land Trading Company",
+    slug: "lake-land-trading-inside",
+    category: "shop",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork56",
+    isLive: true,
+    description: "Inside the boutique — upscale lake decor, gear, clothing and gifts",
+    websiteUrl: "https://www.facebook.com/LakeandLandTradingCompany",
+    spyderPageUrl: "https://spydernetwork.com/lake-land-trading-company/",
+    lat: 38.1420,
+    lng: -92.6420,
+  },
+  {
+    id: "lake-land-outside",
+    name: "Outside",
+    business: "Lake & Land Trading Company",
+    slug: "lake-land-trading-outside",
+    category: "shop",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork54",
+    isLive: true,
+    description: "Outdoor view at Lake & Land Trading Company boutique — Osage Beach",
+    websiteUrl: "https://www.facebook.com/LakeandLandTradingCompany",
+    spyderPageUrl: "https://spydernetwork.com/lake-land-trading-company-lot/",
+    lat: 38.1421,
+    lng: -92.6421,
+  },
+
+  // ── LINN CREEK COVE (SpyderNetwork Dock) ──────────────────────────────────
+  {
+    id: "linn-creek-cove",
+    name: "Cove",
+    business: "Linn Creek Cove",
+    slug: "linn-creek-cove",
+    category: "lake-view",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork62",
+    isLive: true,
+    mile: "31",
+    description: "Linn Creek Cove & Fish & Company boat traffic at the 31MM",
+    websiteUrl: "https://spydernetwork.com",
+    spyderPageUrl: "https://spydernetwork.com/spydernetwork-dock/",
+    lat: 38.1595,
+    lng: -92.6665,
+  },
+
+  // ── LUCY'S AT THE LAKE ────────────────────────────────────────────────────
+  {
+    id: "lucys-at-the-lake",
+    name: "Strip View",
+    business: "Lucy's At The Lake",
+    slug: "lucys-at-the-lake",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork63",
+    isLive: true,
+    description: "Bagnell Dam Strip street view — the lake's only martini bar",
+    websiteUrl: "https://www.facebook.com/lucysbagnelldamstrip/",
+    spyderPageUrl: "https://spydernetwork.com/lucys-at-the-lake/",
+    lat: 38.1954,
+    lng: -92.6119,
+  },
+
+  // ── MARTY BYRDE'S GASTROPUB ───────────────────────────────────────────────
+  {
+    id: "marty-byrdes-street",
+    name: "Street",
+    business: "Marty Byrde's",
+    slug: "marty-byrdes-street",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork24",
+    isLive: true,
+    description: "Bagnell Dam Strip street view — Ozark-inspired gastropub, as seen on Ozark Law",
+    websiteUrl: "https://martybyrde.com",
+    spyderPageUrl: "https://spydernetwork.com/marty-byrds-outside/",
+    lat: 38.1951,
+    lng: -92.6121,
+  },
+  {
+    id: "marty-byrdes-bar",
+    name: "Bar",
+    business: "Marty Byrde's",
+    slug: "marty-byrdes-bar",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork25",
+    isLive: true,
+    description: "Outdoor bar area — signature cocktails inspired by the Netflix series Ozark",
+    websiteUrl: "https://martybyrde.com",
+    spyderPageUrl: "https://spydernetwork.com/marty-byrds-inside/",
+    lat: 38.1951,
+    lng: -92.6122,
+  },
+
+  // ── MICHAEL'S STEAK CHALET ────────────────────────────────────────────────
+  {
+    id: "michaels-patio",
+    name: "Patio",
+    business: "Michael's Steak Chalet",
+    slug: "michaels-steak-chalet-patio",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork39",
+    isLive: true,
+    description: "Outdoor patio live music — hand-cut steaks and chalet-style charm",
+    websiteUrl: "https://steakchalet.com",
+    spyderPageUrl: "https://spydernetwork.com/michaels-steak-chalet/",
+    lat: 38.1520,
+    lng: -92.6400,
+  },
+  {
+    id: "michaels-view",
+    name: "Lake View",
+    business: "Michael's Steak Chalet",
+    slug: "michaels-steak-chalet-view",
+    category: "lake-view",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork38",
+    isLive: true,
+    mile: "28",
+    description: "Stunning lake views and sunsets at the 28MM — Michael's Steak Chalet",
+    websiteUrl: "https://steakchalet.com",
+    spyderPageUrl: "https://spydernetwork.com/michaels-steak-chalet-view/",
+    lat: 38.1500,
+    lng: -92.6420,
+  },
+
+  // ── OUTLAW MEN'S OUTPOST ──────────────────────────────────────────────────
+  {
+    id: "outlaw-mens-outpost",
+    name: "Strip View",
+    business: "Outlaw Men's Outpost",
+    slug: "outlaw-mens-outpost",
+    category: "shop",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork55",
+    isLive: true,
+    description: "Bagnell Dam Strip street view — men's apparel and western decor, as seen on Ozark Law",
+    websiteUrl: "https://www.facebook.com/profile.php?id=100090091344256",
+    spyderPageUrl: "https://spydernetwork.com/outlaws-mens-outpost/",
+    lat: 38.1948,
+    lng: -92.6123,
+  },
+
+  // ── PARADISE RESTAURANT & BAR ─────────────────────────────────────────────
+  {
+    id: "paradise-east",
+    name: "East",
+    business: "Paradise Restaurant & Bar",
+    slug: "paradise-east",
+    category: "dock",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork45",
+    isLive: true,
+    mile: "24",
+    description: "Waterfront dock activity at the 24MM — Paradise Restaurant & Bar",
+    websiteUrl: "https://www.paradiseatthelake.com",
+    spyderPageUrl: "https://spydernetwork.com/paradise-restaurant-bar/",
+    lat: 38.1330,
+    lng: -92.6600,
+  },
+  {
+    id: "paradise-north",
+    name: "North",
+    business: "Paradise Restaurant & Bar",
+    slug: "paradise-north",
+    category: "dock",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork44",
+    isLive: true,
+    mile: "24",
+    description: "Dock & boating activity at the 24MM — Paradise Restaurant & Bar",
+    websiteUrl: "https://www.paradiseatthelake.com",
+    spyderPageUrl: "https://spydernetwork.com/paradise-restaurant-bar-2/",
+    lat: 38.1331,
+    lng: -92.6601,
+  },
+
+  // ── SPLIT ARROW BOUTIQUE ──────────────────────────────────────────────────
+  {
+    id: "split-arrow-boutique",
+    name: "Strip View",
+    business: "Split Arrow Boutique",
+    slug: "split-arrow-boutique",
+    category: "shop",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork7",
+    isLive: true,
+    description: "Bagnell Dam Strip street view — women's boutique, as seen on Ozark Law",
+    websiteUrl: "https://www.facebook.com/pages/Split-Arrow-Boutique/1952593311687661",
+    spyderPageUrl: "https://spydernetwork.com/split-arrow-boutique-3/",
+    lat: 38.1946,
+    lng: -92.6125,
+  },
+
+  // ── THE CACTUS BLOSSOM BOUTIQUE ───────────────────────────────────────────
+  {
+    id: "cactus-blossom-boutique",
+    name: "Strip View",
+    business: "The Cactus Blossom Boutique",
+    slug: "cactus-blossom-boutique",
+    category: "shop",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork64",
+    isLive: true,
+    description: "Bagnell Dam Strip street view — Southern charm meets Western chic boutique",
+    websiteUrl: "https://www.facebook.com/CactusBlossomBtq/",
+    spyderPageUrl: "https://spydernetwork.com/the-cactus-blossom-boutique/",
+    lat: 38.1944,
+    lng: -92.6126,
+  },
+
+  // ── THE HATCH AT MILLER'S LANDING ─────────────────────────────────────────
+  {
+    id: "the-hatch",
+    name: "Dock & Lake View",
+    business: "The Hatch at Miller's Landing",
+    slug: "the-hatch",
+    category: "marina",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork14",
+    isLive: true,
+    description: "Live activity and boat traffic at The Hatch at Miller's Landing Marina",
+    websiteUrl: "https://www.facebook.com/TheHatchLOZ",
+    spyderPageUrl: "https://spydernetwork.com/the-hatch/",
+    lat: 38.1480,
+    lng: -92.6550,
+  },
+
+  // ── TOPSIDER CONDOS ───────────────────────────────────────────────────────
+  {
+    id: "topsider-condos",
+    name: "Bridge View",
+    business: "Topsider Condos",
+    slug: "topsider-condos",
+    category: "lake-view",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork37",
+    isLive: true,
+    description: "Boating activity at the Phylicia Carson Memorial / Grand Glaze Bridge, Osage Beach",
+    websiteUrl: "https://www.paradiseatthelake.com",
+    spyderPageUrl: "https://spydernetwork.com/topsiders-condos/",
+    lat: 38.1380,
+    lng: -92.6360,
+  },
+
+  // ── RIP TAVERN ────────────────────────────────────────────────────────────
+  {
+    id: "rip-tavern",
+    name: "Strip View",
+    business: "RIP Tavern",
+    slug: "rip-tavern",
+    category: "bar-grill",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork40",
+    isLive: true,
+    description: "Bagnell Dam Strip street view from RIP Tavern — Lake Ozark",
+    websiteUrl: "https://www.facebook.com/profile.php?id=61557375811392",
+    spyderPageUrl: "https://spydernetwork.com/rip-tavern/",
+    lat: 38.1950,
+    lng: -92.6120,
+  },
+
+  // ── SPYDERNETWORK SPECIAL / ROAMING ───────────────────────────────────────
+  {
+    id: "spydernetwork-ptz",
+    name: "PTZ Cam",
+    business: "SpyderNetwork Special",
+    slug: "spydernetwork-ptz",
+    category: "lake-view",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork70",
+    isLive: true,
+    description: "SpyderNetwork PTZ / special events camera — Lake of the Ozarks",
+    spyderPageUrl: "https://spydernetwork.com/spydernetwork-ptz/",
+    lat: 38.1030,
+    lng: -92.6272,
+  },
+  {
+    id: "roaming-cam",
+    name: "Roaming Cam",
+    business: "SpyderNetwork Special",
+    slug: "roaming-cam",
+    category: "lake-view",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork",
+    isLive: true,
+    description: "SpyderNetwork roaming camera — live from around Lake of the Ozarks",
+    spyderPageUrl: "https://spydernetwork.com/roaming-cam/",
+    lat: 38.1030,
+    lng: -92.6272,
   },
 ];
 
