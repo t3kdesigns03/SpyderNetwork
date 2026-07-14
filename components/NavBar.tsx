@@ -43,10 +43,10 @@ export function NavBar() {
           {/* logo-lightning: white streak sweeps across every ~4 s */}
           <div className="logo-lightning rounded overflow-hidden">
             <Image
-              src="/images/SpyderLogo.png"
+              src="/images/SpyderNetworkLogo.png"
               alt="SpyderNetwork"
-              width={160}
-              height={44}
+              width={631}
+              height={200}
               priority
               className="h-9 w-auto object-contain block"
             />
