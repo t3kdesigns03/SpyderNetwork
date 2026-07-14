@@ -13,7 +13,14 @@ const GA_INIT_SCRIPT = GA_ID
     "gtag('config','" + GA_ID + "',{send_page_view:true,anonymize_ip:true});"
   : "";
 
+// Base URL used to resolve all relative metadata URLs (og:image, icons, etc.)
+// into absolute URLs for social crawlers. Point this at the domain that
+// actually serves this app. When the site moves to spydernetwork.com, update
+// this value (and the openGraph.url below) accordingly.
+const SITE_URL = "https://spydernetwork.t3kdesigns.app";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "SpyderNetwork – Live Lake of the Ozarks Web Cams",
     template: "%s | SpyderNetwork",
@@ -27,19 +34,56 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "SpyderNetwork" }],
   creator: "SpyderNetwork",
+  applicationName: "SpyderNetwork",
+  manifest: "/site.webmanifest",
+  // iOS "Add to Home Screen" behavior: standalone launch, short home-screen
+  // label, and a dark status bar that matches the app's theme.
+  appleWebApp: {
+    capable: true,
+    title: "SpyderNetwork",
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: { telephone: false },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+      { url: "/android-chrome-192x192.png", type: "image/png", sizes: "192x192" },
+      { url: "/android-chrome-512x512.png", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: [{ url: "/favicon.ico" }],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://spydernetwork.com",
+    url: SITE_URL,
     siteName: "SpyderNetwork",
     title: "SpyderNetwork – Live Lake of the Ozarks Web Cams",
     description: "The largest network of live webcams at Lake of the Ozarks. Watch 60+ live streams free.",
-    // og:image is auto-generated from app/opengraph-image.tsx (1200×630)
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "SpyderNetwork – Live Lake of the Ozarks Web Cams",
+        type: "image/png",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
+    site: "@spyder_network",
+    creator: "@spyder_network",
     title: "SpyderNetwork – Live Lake of the Ozarks Web Cams",
     description: "Watch 60+ live streams from Lake of the Ozarks.",
+    images: [
+      {
+        url: "/og-image.png",
+        alt: "SpyderNetwork – Live Lake of the Ozarks Web Cams",
+      },
+    ],
   },
   robots: { index: true, follow: true },
 };
