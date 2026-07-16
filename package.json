@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "hls.js": "^1.6.16",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.511.0",
     "next": "^15.3.6",
