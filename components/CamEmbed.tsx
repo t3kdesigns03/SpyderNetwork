@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, VolumeX } from "lucide-react";
 import type { Cam } from "@/types";
 
 // ─── All domains where this embed may be hosted ───────────────────────────────
@@ -17,11 +17,14 @@ const TWITCH_PARENTS = [
 // Where the persistent top-right branding links to.
 const SITE_URL = "https://spydernetwork.t3kdesigns.app";
 
-function buildTwitchUrl(channel: string, autoplay: boolean): string {
+function buildTwitchUrl(channel: string, autoplay: boolean, muted: boolean): string {
   const params = new URLSearchParams({
     channel,
     autoplay: autoplay ? "true" : "false",
-    muted:    "true",   // required by all browser autoplay policies
+    // muted=true is what lets the stream autostart with no user gesture. Once
+    // the viewer taps "Tap for sound" we rebuild this URL with muted=false —
+    // allowed because that tap counts as the required user gesture.
+    muted:    muted ? "true" : "false",
   });
   // Twitch accepts multiple parent= values in a single URL
   TWITCH_PARENTS.forEach((p) => params.append("parent", p));
@@ -46,17 +49,27 @@ interface CamEmbedProps {
  *   The previous tap-to-play / big play-button overlay (and the invisible
  *   first-tap catcher) have been removed so nothing blocks that automatic start.
  *   The muted-autoplay query params are exactly what makes this reliable across
- *   autoplay policies; the user can unmute via Twitch's own native controls.
+ *   autoplay policies.
+ *
+ *   Audio: browsers forbid gesture-free autoplay WITH sound, so the stream
+ *   starts muted. A small "Tap for sound" button reloads the iframe unmuted on
+ *   the user's tap (a valid gesture); after that the viewer uses Twitch's own
+ *   native controls to re-mute / adjust volume.
  */
 export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
   const [error, setError] = useState(false);
+  // Starts muted so the stream can autoplay with no gesture. The viewer flips
+  // this to false via "Tap for sound", which reloads the Twitch iframe with
+  // audio on. Resets per-cam because CamStation remounts CamEmbed on select.
+  const [muted, setMuted] = useState(true);
 
-  // Build embed URL once — no async hostname lookup needed. autoplay + muted
-  // satisfy browser autoplay policy so playback starts on first paint.
-  const embedUrl =
-    cam.streamProvider === "twitch" && cam.twitchChannel
-      ? buildTwitchUrl(cam.twitchChannel, autoplay)
-      : (cam.iframeUrl ?? "");
+  const isTwitch = cam.streamProvider === "twitch" && !!cam.twitchChannel;
+
+  // autoplay + muted satisfy browser autoplay policy so playback starts on the
+  // first paint. embedUrl is rebuilt whenever `muted` changes to toggle audio.
+  const embedUrl = isTwitch
+    ? buildTwitchUrl(cam.twitchChannel!, autoplay, muted)
+    : (cam.iframeUrl ?? "");
 
   if (!embedUrl) {
     return (
@@ -82,7 +95,7 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
         because there is no overlay sitting on top of them anymore.
       */}
       <iframe
-        key={cam.id}
+        key={`${cam.id}-${muted ? "muted" : "unmuted"}`}
         src={embedUrl}
         className="twitch-embed-frame"
         allowFullScreen
@@ -100,6 +113,32 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
           <p className="text-white text-sm font-semibold mt-2">Stream unavailable</p>
           <p className="text-spyder-gray text-xs mt-1">Check your connection or try again later.</p>
         </div>
+      )}
+
+      {/*
+        ── "Tap for sound" — lightweight unmute affordance ───────────────────
+        Shown only while the stream is muted (its natural autostart state) and
+        only for the Twitch player. Tapping reloads the iframe unmuted inside
+        the tap gesture, which browsers permit. It then disappears; the viewer
+        can re-mute via Twitch's own native controls. Bottom-LEFT so it clears
+        the top-right branding and Twitch's bottom-right control bar. ≥44px tap
+        target, safe-area aware for phones.
+      */}
+      {isTwitch && muted && !error && (
+        <button
+          type="button"
+          onClick={() => setMuted(false)}
+          aria-label={`Turn on sound for ${camLabel}`}
+          className="group/sound absolute bottom-3 left-3 z-30 flex items-center gap-2 rounded-full border border-white/20 bg-black/65 px-3.5 py-2.5 text-xs font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.55)] backdrop-blur-md transition-transform duration-150 hover:scale-105 active:scale-95"
+          style={{
+            left:   "max(0.75rem, env(safe-area-inset-left))",
+            bottom: "max(0.75rem, env(safe-area-inset-bottom))",
+          }}
+        >
+          <span aria-hidden className="animate-play-ring absolute inset-0 rounded-full" />
+          <VolumeX className="relative h-4 w-4 text-spyder-red" />
+          <span className="relative tracking-wide">Tap for sound</span>
+        </button>
       )}
 
       {/*
