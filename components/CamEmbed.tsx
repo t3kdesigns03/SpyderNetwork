@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AlertCircle, Play } from "lucide-react";
 import { clsx } from "clsx";
 import type { Cam } from "@/types";
+import { HlsPlayer } from "./HlsPlayer"; // TEMP · HLS PREVIEW (delete with the block below to revert)
 
 // ─── All domains where this embed may be hosted ───────────────────────────────
 // Twitch requires parent= to exactly match the page hostname.
@@ -17,6 +18,15 @@ const TWITCH_PARENTS = [
 
 // Where the persistent top-right branding links to.
 const SITE_URL = "https://spydernetwork.t3kdesigns.app";
+
+// ═══ TEMP · HLS PREVIEW — delete this block (and the import + return below) to
+// restore the normal Twitch embed everywhere. Swaps ONE camera to the new
+// HlsPlayer so it can be previewed live inside the real player UI. "featured" is
+// the hero cam shown on page load, so it appears immediately. Point it at a
+// different camera by changing TEST_HLS_SLUG to that cam's slug (see lib/cams.ts).
+const TEST_HLS_SLUG = "featured";
+const TEST_HLS_SRC  = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
+// ═════════════════════════════════════════════════════════════════════════════
 
 function buildTwitchUrl(channel: string, autoplay: boolean): string {
   const params = new URLSearchParams({
@@ -125,6 +135,13 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
     setIframeKey((k) => k + 1);
     window.setTimeout(() => { setOverlayVisible(false); setDismissed(true); }, 320);
   };
+
+  // TEMP · HLS PREVIEW — render the new HlsPlayer in place of one camera.
+  // Placed after all hooks (same position as the `!embedUrl` guard) so it never
+  // changes hook order. Delete this `if` block + the constants + import to revert.
+  if (cam.slug === TEST_HLS_SLUG) {
+    return <HlsPlayer src={TEST_HLS_SRC} autoPlay muted />;
+  }
 
   if (!embedUrl) {
     return (
