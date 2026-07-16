@@ -134,7 +134,9 @@ export const CAMS: Cam[] = [
     streamProvider: "twitch",
     twitchChannel: "spydernetwork3",
     isLive: true,
-    isFeatured: true,
+    // NOTE: isFeatured is reserved for the single hero cam only. Any cam with
+    // isFeatured:true is stripped from ALL_CAMS and would vanish from its
+    // business group — so pool cams must NOT set it (they use sponsorTier).
     sponsorTier: "premium",
     description: "Pool deck & swim area — poolside cocktails, live music, legendary sunsets",
     websiteUrl: "https://backwaterjacks.com",
@@ -213,7 +215,7 @@ export const CAMS: Cam[] = [
     streamProvider: "twitch",
     twitchChannel: "spydernetwork31",
     isLive: true,
-    isFeatured: true,
+    // isFeatured removed: reserved for the hero cam (see Backwater Jacks Pool note).
     sponsorTier: "featured",
     description: "Poolside at Dog Days — the ultimate lakeside experience",
     websiteUrl: "https://dogdays.ws",
@@ -277,7 +279,7 @@ export const CAMS: Cam[] = [
     streamProvider: "twitch",
     twitchChannel: "spydernetwork4",
     isLive: true,
-    isFeatured: true,
+    // isFeatured removed: reserved for the hero cam (see Backwater Jacks Pool note).
     sponsorTier: "featured",
     description: "Pool cam — fun in the sun at Lazy Gators",
     websiteUrl: "https://lazygators.com",
@@ -1202,10 +1204,10 @@ export const HERO_CAM = CAMS.find((c) => c.isFeatured)!;
 /** All non-hero cams for cycling and cam lists */
 export const ALL_CAMS = CAMS.filter((c) => !c.isFeatured);
 
-/** Unique business names in display order (hero excluded) */
+/** Unique business names in strict alphabetical (A–Z) display order (hero excluded) */
 export const CAM_BUSINESSES = Array.from(
   new Set(ALL_CAMS.map((c) => c.business))
-);
+).sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
 
 /** Cams keyed by business name */
 export const CAMS_BY_BUSINESS = CAM_BUSINESSES.reduce<Record<string, Cam[]>>(
