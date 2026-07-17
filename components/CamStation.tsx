@@ -1148,59 +1148,53 @@ function MapTab({ onSelectCam }: { onSelectCam: (cam: Cam) => void }) {
 interface Conditions {
   waterTempF: number | null;
   airTempF: number | null;
+  humidityPct: number | null;
   windSpeedMph: number | null;
+  windGustMph: number | null;
   windDir: string | null;
   lakeLevel: number | null;
   lakeLevelNormal: number | null;
+  lakeLevelValidTime: string | null;
   weatherDesc: string | null;
-  updatedAt: string | null;
+  updatedAt: string | null; // ISO timestamp of the reading
 }
 
+// Pulls live conditions from our cached server route (/api/conditions), which
+// aggregates Open-Meteo (weather) + NOAA NWPS Bagnell Dam gauge (lake level).
 function useConditions() {
   const [data, setData] = useState<Conditions>({
-    waterTempF: null, airTempF: null, windSpeedMph: null, windDir: null,
-    lakeLevel: null, lakeLevelNormal: null, weatherDesc: null, updatedAt: null,
+    waterTempF: null, airTempF: null, humidityPct: null,
+    windSpeedMph: null, windGustMph: null, windDir: null,
+    lakeLevel: null, lakeLevelNormal: 660, lakeLevelValidTime: null,
+    weatherDesc: null, updatedAt: null,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        // NOAA weather for Lake of the Ozarks area (Osage Beach, MO)
-        const wRes = await fetch(
-          "https://api.open-meteo.com/v1/forecast?latitude=38.103&longitude=-92.627&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FChicago"
-        );
-        const wJson = await wRes.json();
-
-        // USGS lake level — Bagnell Dam gauge (site 06926510)
-        const gRes = await fetch(
-          "https://waterservices.usgs.gov/nwis/iv/?sites=06926510&parameterCd=00065&format=json&period=PT1H"
-        );
-        const gJson = await gRes.json();
-        const timeSeries = gJson?.value?.timeSeries?.[0];
-        const rawLevel = parseFloat(timeSeries?.values?.[0]?.value?.[0]?.value ?? "NaN");
-
-        const windDegMap = (deg: number): string => {
-          const dirs = ["N","NE","E","SE","S","SW","W","NW"];
-          return dirs[Math.round(deg / 45) % 8];
-        };
-
+        const res = await fetch("/api/conditions");
+        if (!res.ok) throw new Error(`conditions ${res.status}`);
+        const j = await res.json();
         if (!alive) return;
         setData({
-          waterTempF: null, // USGS water temp gauge separate — placeholder
-          airTempF: Math.round(wJson.current.temperature_2m),
-          windSpeedMph: Math.round(wJson.current.wind_speed_10m),
-          windDir: windDegMap(wJson.current.wind_direction_10m),
-          lakeLevel: isNaN(rawLevel) ? null : Math.round(rawLevel * 10) / 10,
-          lakeLevelNormal: 660.0, // Normal pool elevation ft NGVD
-          weatherDesc: wJson.current.weather_code != null
-            ? weatherCodeToDesc(wJson.current.weather_code)
-            : null,
-          updatedAt: new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+          waterTempF:         j.waterTempF ?? null,
+          airTempF:           j.airTempF ?? null,
+          humidityPct:        j.humidityPct ?? null,
+          windSpeedMph:       j.windSpeedMph ?? null,
+          windGustMph:        j.windGustMph ?? null,
+          windDir:            j.windDir ?? null,
+          lakeLevel:          j.lakeLevelFt ?? null,
+          lakeLevelNormal:    j.lakeLevelNormalFt ?? 660,
+          lakeLevelValidTime: j.lakeLevelValidTime ?? null,
+          weatherDesc:        j.weatherDesc ?? null,
+          updatedAt:          j.updatedAt ?? null,
         });
       } catch {
-        // Silently fail — UI shows dashes
+        // Whole request failed — leave everything null so the UI shows "—".
+        if (alive) setError(true);
       } finally {
         if (alive) setLoading(false);
       }
@@ -1208,30 +1202,28 @@ function useConditions() {
     return () => { alive = false; };
   }, []);
 
-  return { data, loading };
+  return { data, loading, error };
 }
 
-function weatherCodeToDesc(code: number): string {
-  if (code === 0) return "Clear Sky";
-  if (code <= 3) return "Partly Cloudy";
-  if (code <= 9) return "Foggy";
-  if (code <= 19) return "Drizzle";
-  if (code <= 29) return "Rain";
-  if (code <= 39) return "Snow";
-  if (code <= 49) return "Fog";
-  if (code <= 59) return "Drizzle";
-  if (code <= 69) return "Rain";
-  if (code <= 79) return "Snow";
-  if (code <= 84) return "Rain Showers";
-  if (code <= 94) return "Thunderstorms";
-  return "Severe Storms";
+// ISO timestamp → "just now" / "5 min ago" / "2 hrs ago".
+function timeAgo(iso: string | null): string | null {
+  if (!iso) return null;
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return null;
+  const mins = Math.max(0, Math.round((Date.now() - then) / 60000));
+  if (mins < 1) return "just now";
+  if (mins < 60) return mins === 1 ? "1 min ago" : `${mins} min ago`;
+  const hrs = Math.round(mins / 60);
+  return hrs === 1 ? "1 hr ago" : `${hrs} hrs ago`;
 }
 
 function ConditionsTab() {
-  const { data, loading } = useConditions();
+  const { data, loading, error } = useConditions();
 
   const fmt = (v: number | null, unit: string) =>
     v == null ? "—" : `${v}${unit}`;
+
+  const updated = timeAgo(data.updatedAt);
 
   const levelDiff = data.lakeLevel != null && data.lakeLevelNormal != null
     ? (data.lakeLevel - data.lakeLevelNormal).toFixed(1)
@@ -1244,10 +1236,16 @@ function ConditionsTab() {
         <h3 className="font-display text-sm font-semibold text-white uppercase tracking-widest">
           Lake Conditions
         </h3>
-        {data.updatedAt && (
-          <span className="text-xs text-spyder-gray">Updated {data.updatedAt}</span>
+        {updated && (
+          <span className="text-xs text-spyder-gray">Updated {updated}</span>
         )}
       </div>
+
+      {error && !loading && (
+        <p className="text-xs text-spyder-red/80 leading-relaxed">
+          Live conditions are temporarily unavailable — showing placeholders.
+        </p>
+      )}
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
@@ -1265,9 +1263,17 @@ function ConditionsTab() {
               <CondCard
                 label="Wind"
                 value={data.windSpeedMph != null ? `${data.windSpeedMph} mph` : "—"}
-                note={data.windDir ?? undefined}
+                note={
+                  [data.windDir, data.windGustMph != null ? `gusts ${data.windGustMph}` : null]
+                    .filter(Boolean)
+                    .join(" · ") || undefined
+                }
               />
-              <CondCard label="Conditions" value={data.weatherDesc ?? "—"} />
+              <CondCard
+                label="Conditions"
+                value={data.weatherDesc ?? "—"}
+                note={data.humidityPct != null ? `${data.humidityPct}% humidity` : undefined}
+              />
             </div>
           </div>
 
@@ -1288,7 +1294,10 @@ function ConditionsTab() {
               />
             </div>
             <p className="text-xs text-spyder-gray mt-3 leading-relaxed">
-              Normal pool elevation: 660 ft (NGVD). Data via USGS gauge at Bagnell Dam.
+              Normal pool: {data.lakeLevelNormal ?? 660} ft. Data via NOAA / USGS gauge at Bagnell Dam
+              {data.lakeLevelValidTime && timeAgo(data.lakeLevelValidTime)
+                ? ` · reading ${timeAgo(data.lakeLevelValidTime)}`
+                : ""}.
             </p>
           </div>
           <div className="bg-spyder-navy-card rounded-xl overflow-hidden border border-white/10">

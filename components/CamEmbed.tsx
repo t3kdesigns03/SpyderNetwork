@@ -43,12 +43,9 @@ interface CamEmbedProps {
  * Autoplay:
  *   The iframe is rendered immediately with autoplay=true + muted=true, which
  *   is the strongest signal we can give Twitch's embedded player to start on
- *   its own. NOTE: Twitch/IVS ultimately enforces its own autoplay policy
- *   inside the iframe and can still show its native play button in some
- *   contexts (notably some mobile browsers, or when the tab isn't foreground).
- *   We can't override that from outside the iframe — the only way to guarantee
- *   hls-demo-style autoplay is to play a real HLS (.m3u8) source in a native
- *   <video> via HlsPlayer, which requires our own stream URLs.
+ *   its own. NOTE: this component is the FALLBACK behind CamPlayer/HlsPlayer —
+ *   the reliable no-play-button autoplay comes from the native HLS path; here
+ *   we just give Twitch's iframe its best shot.
  *
  * Audio:
  *   Browsers forbid gesture-free autoplay WITH sound, so the stream starts
