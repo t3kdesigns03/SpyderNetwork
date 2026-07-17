@@ -8,7 +8,7 @@ import {
 import { clsx } from "clsx";
 import { ALL_CAMS, CAMS_BY_BUSINESS, CAM_BUSINESSES, HERO_CAM } from "@/lib/cams";
 import { withUTM, trackPartnerSite, trackTwitchClick, trackCastClick, toUTMContent } from "@/lib/analytics";
-import { CamEmbed } from "./CamEmbed";
+import { CamPlayer } from "./CamPlayer";
 import { SponsorBadge } from "./SponsorBadge";
 import type { Cam } from "@/types";
 import { useIsLandscapeMobile } from "@/hooks/useOrientation";
@@ -305,7 +305,7 @@ export function CamStation() {
                 : "aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0"
             )}>
               {selected ? (
-                <CamEmbed cam={selected} key={selected.id} autoplay />
+                <CamPlayer cam={selected} key={selected.id} autoplay />
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center px-6">
                   <div className="w-16 h-16 rounded-2xl bg-spyder-red/10 border border-spyder-red/20 flex items-center justify-center">

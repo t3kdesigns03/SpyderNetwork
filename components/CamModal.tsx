@@ -4,7 +4,7 @@ import { useEffect, useCallback } from "react";
 import { X, ExternalLink, Cast, Star, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import { clsx } from "clsx";
 import type { Cam } from "@/types";
-import { CamEmbed } from "./CamEmbed";
+import { CamPlayer } from "./CamPlayer";
 import { CAMS } from "@/lib/cams";
 
 interface CamModalProps {
@@ -93,7 +93,7 @@ export function CamModal({ cam, isFavorite, onToggleFavorite, onClose }: CamModa
 
         {/* Stream */}
         <div className="w-full aspect-video-cam bg-black shrink-0">
-          <CamEmbed cam={cam} />
+          <CamPlayer cam={cam} />
         </div>
 
         {/* Actions */}
