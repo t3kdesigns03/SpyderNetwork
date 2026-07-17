@@ -221,6 +221,18 @@ export function CamStation() {
     >
       {/* ── Tab bar — hidden in landscape mobile ─────────── */}
       <div className={clsx("flex shrink-0", isLandscape && "!hidden")} style={{ background: "#050810", borderBottom: "2px solid rgba(0,212,255,0.35)", boxShadow: "0 0 20px rgba(0,212,255,0.2), 0 4px 20px rgba(0,0,0,0.6)" }}>
+        {/* Silver "chrome" gradient shared by the Partners tab icon + label. */}
+        <svg aria-hidden="true" width="0" height="0" style={{ position: "absolute" }}>
+          <defs>
+            <linearGradient id="partners-chrome" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor="#ffffff" />
+              <stop offset="45%"  stopColor="#e8edf3" />
+              <stop offset="52%"  stopColor="#8b95a3" />
+              <stop offset="60%"  stopColor="#d3dae3" />
+              <stop offset="100%" stopColor="#7c8794" />
+            </linearGradient>
+          </defs>
+        </svg>
         {(
           [
             { key: "cams", label: "CAMS", Icon: Video },
@@ -237,15 +249,37 @@ export function CamStation() {
           const metallicLabel: CSSProperties | undefined =
             key === "partners"
               ? {
+                  // Bigger + bolder than sibling tabs so the chrome actually
+                  // reads at tab size (a 12px gradient looks like flat grey).
+                  fontSize: "0.95rem",
+                  fontWeight: 800,
+                  letterSpacing: "0.12em",
+                  // Sharp "chrome horizon" gradient (light → steel flip at 50%)
+                  // is what makes small text look metallic.
                   backgroundImage:
-                    "linear-gradient(180deg,#ffffff 0%,#dbe1ea 28%,#8b98a8 52%,#ffffff 72%,#6c7787 100%)",
+                    "linear-gradient(180deg,#ffffff 0%,#f2f5f9 42%,#8b95a3 50%,#c9d2dd 58%,#6c7787 100%)",
                   WebkitBackgroundClip: "text",
                   backgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   color: "transparent",
+                  // Dark glyph shadow = bevel depth; red glow ties it to brand.
+                  textShadow: "0 1px 1px rgba(0,0,0,0.65)",
                   filter: isActive
-                    ? "drop-shadow(0 0 8px rgba(204,0,0,0.7))"
-                    : "drop-shadow(0 1px 1px rgba(0,0,0,0.5)) drop-shadow(0 0 5px rgba(204,0,0,0.4))",
+                    ? "drop-shadow(0 0 9px rgba(204,0,0,0.85))"
+                    : "drop-shadow(0 0 5px rgba(204,0,0,0.45))",
+                }
+              : undefined;
+
+          // Portrait-mobile treatment: below `sm` the Partners tab collapses to
+          // a chrome ICON only (the wordmark is too big for a ~95px tab). The
+          // icon takes the same silver gradient stroke + red glow as the label.
+          const chromeIcon: CSSProperties | undefined =
+            key === "partners"
+              ? {
+                  stroke: "url(#partners-chrome)",
+                  filter: isActive
+                    ? "drop-shadow(0 0 7px rgba(204,0,0,0.85))"
+                    : "drop-shadow(0 0 4px rgba(204,0,0,0.5))",
                 }
               : undefined;
           return (
@@ -260,9 +294,19 @@ export function CamStation() {
               // metallic label; the cyan underline + icon still signal "active".
               style={isActive && key !== "partners" ? { textShadow: "0 0 10px #00d4ff, 0 0 24px rgba(0,212,255,0.5)", filter: "drop-shadow(0 2px 6px rgba(0,212,255,0.4))" } : {}}
             >
-              <Icon className="w-3.5 h-3.5" />
-              <span className="hidden xs:inline" style={metallicLabel}>{label}</span>
-              <span className="xs:hidden" style={metallicLabel}>{label.slice(0, 4)}</span>
+              <Icon
+                className={clsx("shrink-0", key === "partners" ? "w-5 h-5 sm:w-3.5 sm:h-3.5" : "w-3.5 h-3.5")}
+                style={chromeIcon}
+              />
+              {key === "partners" ? (
+                /* Portrait mobile → chrome icon only; chrome wordmark from sm up. */
+                <span className="hidden sm:inline" style={metallicLabel}>{label}</span>
+              ) : (
+                <>
+                  <span className="hidden xs:inline">{label}</span>
+                  <span className="xs:hidden">{label.slice(0, 4)}</span>
+                </>
+              )}
             </button>
           );
         })}
