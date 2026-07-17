@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlertCircle, VolumeX } from "lucide-react";
 import type { Cam } from "@/types";
 
@@ -40,20 +40,23 @@ interface CamEmbedProps {
 /**
  * CamEmbed — live stream player.
  *
- * Autoplay behaviour (updated 2026-07-16):
- *   The iframe is rendered with autoplay=true + muted=true, which every modern
- *   browser (desktop Chrome/Firefox/Safari and mobile iOS/Android) permits for
- *   MUTED media without a user gesture. Because of that, the stream begins
- *   playing the instant the camera view loads — on both desktop and mobile.
+ * Autoplay (updated 2026-07-16):
+ *   Twitch/IVS refuses to muted-autoplay unless its iframe passes a visibility
+ *   check *at the moment the player boots* ("minimum requirements for autoplay
+ *   were not met: style visibility"). If we set the iframe src on the very
+ *   first paint — before Next.js has laid the frame out and it's on-screen —
+ *   the player initialises while "not visible" and permanently disables
+ *   autoplay for that instance.
  *
- *   The previous tap-to-play / big play-button overlay (and the invisible
- *   first-tap catcher) have been removed so nothing blocks that automatic start.
- *   The muted-autoplay query params are exactly what makes this reliable across
- *   autoplay policies.
+ *   Fix: we DON'T mount the iframe until an IntersectionObserver confirms the
+ *   frame is actually visible in the viewport, then wait one animation frame so
+ *   layout/visibility is settled. The player therefore boots on-screen and
+ *   autostarts (muted) on both desktop and mobile — no play button, no tap.
  *
- *   Audio: browsers forbid gesture-free autoplay WITH sound, so the stream
- *   starts muted. A small "Tap for sound" button reloads the iframe unmuted on
- *   the user's tap (a valid gesture); after that the viewer uses Twitch's own
+ * Audio:
+ *   Browsers forbid gesture-free autoplay WITH sound, so the stream starts
+ *   muted. A small "Tap for sound" button reloads the iframe unmuted on the
+ *   user's tap (a valid gesture); after that the viewer uses Twitch's own
  *   native controls to re-mute / adjust volume.
  */
 export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
@@ -62,11 +65,51 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
   // this to false via "Tap for sound", which reloads the Twitch iframe with
   // audio on. Resets per-cam because CamStation remounts CamEmbed on select.
   const [muted, setMuted] = useState(true);
+  // Gates the iframe: false until the frame is verified visible on-screen.
+  const [ready, setReady] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const isTwitch = cam.streamProvider === "twitch" && !!cam.twitchChannel;
 
-  // autoplay + muted satisfy browser autoplay policy so playback starts on the
-  // first paint. embedUrl is rebuilt whenever `muted` changes to toggle audio.
+  // ── Visibility gate ─────────────────────────────────────────────────────────
+  // Only create the iframe once the container is genuinely visible in the
+  // viewport, so Twitch's autoplay "style visibility" requirement is satisfied
+  // when the player initialises.
+  useEffect(() => {
+    setReady(false);
+    const el = containerRef.current;
+    if (!el) return;
+
+    // No IntersectionObserver (very old browsers / SSR edge) → just proceed.
+    if (typeof IntersectionObserver === "undefined") {
+      const id = requestAnimationFrame(() => setReady(true));
+      return () => cancelAnimationFrame(id);
+    }
+
+    let raf = 0;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio > 0) {
+            // Defer one frame so layout is settled and visibility computes true.
+            raf = requestAnimationFrame(() => setReady(true));
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: 0.1 }
+    );
+    io.observe(el);
+
+    return () => {
+      io.disconnect();
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [cam.id]);
+
+  // autoplay + muted satisfy browser autoplay policy so playback starts as soon
+  // as the (now-visible) player boots. embedUrl is rebuilt when `muted` toggles.
   const embedUrl = isTwitch
     ? buildTwitchUrl(cam.twitchChannel!, autoplay, muted)
     : (cam.iframeUrl ?? "");
@@ -83,28 +126,38 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
   const camLabel = cam.name ? `${cam.business} – ${cam.name}` : cam.business;
 
   return (
-    <div className="relative w-full h-full min-h-[200px] bg-black">
+    <div ref={containerRef} className="relative w-full h-full min-h-[200px] bg-black">
 
       {/*
         ── iframe — the ONLY playback surface ────────────────────────────────
-        autoplay=true + muted=true means the browser starts the stream
-        immediately, with no user gesture required, on desktop AND mobile.
-        Multiple parent= params remove the need for any async hostname lookup,
-        so the frame renders — and plays — on the very first paint. Native
-        Twitch controls (unmute, fullscreen, quality) are fully interactive
-        because there is no overlay sitting on top of them anymore.
+        Mounted only once `ready` is true (frame confirmed visible), so
+        autoplay=true + muted=true reliably start the stream with no gesture on
+        desktop AND mobile. Multiple parent= params avoid any async hostname
+        lookup. Native Twitch controls (unmute, fullscreen, quality) are fully
+        interactive because nothing overlays the player.
       */}
-      <iframe
-        key={`${cam.id}-${muted ? "muted" : "unmuted"}`}
-        src={embedUrl}
-        className="twitch-embed-frame"
-        allowFullScreen
-        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-        referrerPolicy="no-referrer-when-downgrade"
-        title={`${camLabel} live cam`}
-        onLoad={() => onLoad?.()}
-        onError={() => setError(true)}
-      />
+      {ready && (
+        <iframe
+          key={`${cam.id}-${muted ? "muted" : "unmuted"}`}
+          src={embedUrl}
+          className="twitch-embed-frame"
+          allowFullScreen
+          allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+          referrerPolicy="no-referrer-when-downgrade"
+          title={`${camLabel} live cam`}
+          onLoad={() => onLoad?.()}
+          onError={() => setError(true)}
+        />
+      )}
+
+      {/* Brief loading state while we wait for the visibility gate / first frame.
+          Keeps the black frame from looking broken; disappears once the iframe
+          mounts and paints. */}
+      {!ready && !error && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-spyder-red" />
+        </div>
+      )}
 
       {/* Error state */}
       {error && (
@@ -124,7 +177,7 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
         the top-right branding and Twitch's bottom-right control bar. ≥44px tap
         target, safe-area aware for phones.
       */}
-      {isTwitch && muted && !error && (
+      {isTwitch && ready && muted && !error && (
         <button
           type="button"
           onClick={() => setMuted(false)}
