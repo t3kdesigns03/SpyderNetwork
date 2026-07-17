@@ -34,10 +34,6 @@ import type { Cam } from "@/types";
 // fish-and-company-dock-1                    → spydernetwork23
 // fish-and-company-dock-2                    → spydernetwork26
 //
-// ── ALLEY CATS ──────────────────────────────────────────────────────────────
-// alley-cats-north                           → spydernetwork43
-// alley-cats-south                           → spydernetwork42
-//
 // ── ALHONNA RESORT & MARINA ─────────────────────────────────────────────────
 // alhonna-indoor-pool                        → spydernetwork65
 // alhonna-outdoor-pool                       → spydernetwork61
@@ -395,37 +391,6 @@ export const CAMS: Cam[] = [
     lng: -92.6673,
   },
 
-  // ── ALLEY CATS ────────────────────────────────────────────────────────────
-  {
-    id: "ac-north",
-    name: "North",
-    business: "Alley Cats",
-    slug: "alley-cats-north",
-    category: "bar-grill",
-    streamProvider: "twitch",
-    twitchChannel: "spydernetwork43",
-    isLive: true,
-    description: "Bagnell Strip street view north — crowds, traffic, nightlife",
-    websiteUrl: "https://www.alleycatsonthestrip.com",
-    spyderPageUrl: "https://spydernetwork.com/alley-cats-north/",
-    lat: 38.1943,
-    lng: -92.6122,
-  },
-  {
-    id: "ac-south",
-    name: "South",
-    business: "Alley Cats",
-    slug: "alley-cats-south",
-    category: "bar-grill",
-    streamProvider: "twitch",
-    twitchChannel: "spydernetwork42",
-    isLive: true,
-    description: "Bagnell Strip street view south — voted best pizza at the lake",
-    websiteUrl: "https://www.alleycatsonthestrip.com",
-    spyderPageUrl: "https://spydernetwork.com/alley-cats-south/",
-    lat: 38.1940,
-    lng: -92.6124,
-  },
 
   // ── ALHONNA RESORT & MARINA ───────────────────────────────────────────────
   {

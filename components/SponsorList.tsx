@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ExternalLink, Tv2, ArrowRight } from "lucide-react";
 import { withUTM, trackPartnerSite, toUTMContent } from "@/lib/analytics";
 
@@ -15,7 +16,6 @@ const PARTNERS: Partner[] = [
   { name: "Dog Days",                  url: "https://dogdays.ws/",                   sponsorTier: "featured" },
   { name: "Lazy Gators",              url: "https://lazygators.com/",                sponsorTier: "featured" },
   { name: "Alhonna Resort & Marina",  url: "https://thealhonnaresort.com/" },
-  { name: "Alley Cats",              url: "https://www.alleycatsonthestrip.com/" },
   { name: "Angels Mexican Restaurant",url: "https://www.facebook.com/profile.php?id=61577060969567" },
   { name: "Annamarie Hopkins Real Estate", url: "https://asmartermove.com/" },
   { name: "Bridgeview Marina",        url: "https://www.facebook.com/pages/Bridgeview%20Marina/157000694367289/" },
@@ -95,20 +95,82 @@ function PartnerCard({ partner, size = "sm" }: { partner: Partner; size?: "sm" |
 
 export function SponsorList() {
   return (
-    <section className="py-14 px-4 sm:px-6">
+    <section
+      id="partners"
+      className="relative py-16 sm:py-20 px-4 sm:px-6"
+      style={{
+        // Subtle glow-topped divider so the elevated section reads as a
+        // deliberate, premium band rather than more scroll content.
+        borderTop: "1px solid rgba(0,212,255,0.12)",
+        background:
+          "radial-gradient(120% 80% at 50% 0%, rgba(0,212,255,0.05) 0%, rgba(204,0,0,0.04) 40%, transparent 70%)",
+      }}
+    >
       <div className="max-w-6xl mx-auto">
 
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.15em] mb-2" style={{ color: "rgba(204,0,0,0.8)" }}>
-              Supporting Local LOTO Businesses
-            </p>
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-white">Our Partners</h2>
+        {/* ── Branded "Partners" heading ──────────────────────────────────────
+            Reuses the actual top-left SpyderNetwork logo graphic + the same
+            electric "logo-lightning" sweep, paired with a chrome/metallic
+            PARTNERS wordmark and red neon glow, so it matches the master brand. */}
+        <div className="mb-12 flex flex-col items-center text-center">
+          <p
+            className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.24em] mb-5"
+            style={{ color: "rgba(204,0,0,0.85)", textShadow: "0 0 12px rgba(204,0,0,0.35)" }}
+          >
+            Supporting Local LOTO Businesses
+          </p>
+
+          <div className="logo-lightning rounded-lg">
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-5">
+              <Image
+                src="/images/SpyderNetworkLogo.png"
+                alt="SpyderNetwork"
+                width={631}
+                height={200}
+                priority
+                className="h-11 sm:h-16 w-auto object-contain drop-shadow-[0_0_20px_rgba(204,0,0,0.35)]"
+              />
+              {/* Chrome divider — desktop only */}
+              <span
+                aria-hidden="true"
+                className="hidden sm:block h-12 w-px"
+                style={{ background: "linear-gradient(180deg, transparent, rgba(255,255,255,0.28), transparent)" }}
+              />
+              <span
+                className="font-display font-extrabold uppercase leading-none"
+                style={{
+                  fontSize: "clamp(2rem, 6vw, 3.5rem)",
+                  letterSpacing: "0.05em",
+                  // Metallic chrome gradient fill (mirrors the logo's "NETWORK")…
+                  background:
+                    "linear-gradient(180deg, #ffffff 0%, #dbe1ea 28%, #8b98a8 52%, #ffffff 72%, #6c7787 100%)",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  color: "transparent",
+                  // …with the brand's red neon glow.
+                  filter:
+                    "drop-shadow(0 1px 1px rgba(0,0,0,0.6)) drop-shadow(0 0 18px rgba(204,0,0,0.5))",
+                }}
+              >
+                Partners
+              </span>
+            </div>
           </div>
+
+          {/* Red neon divider */}
+          <div
+            className="mt-7 h-[3px] w-40 rounded-full"
+            style={{
+              background: "linear-gradient(90deg, transparent, #cc0000, transparent)",
+              boxShadow: "0 0 14px rgba(204,0,0,0.75)",
+            }}
+          />
+
           <Link
             href="/become-a-broadcaster"
-            className="inline-flex items-center gap-2 text-sm font-semibold transition-colors whitespace-nowrap min-h-[44px] text-spyder-cyan hover:text-white"
+            className="mt-7 inline-flex items-center gap-2 text-sm font-semibold transition-all whitespace-nowrap min-h-[44px] px-5 rounded-full text-spyder-cyan hover:text-white"
+            style={{ border: "1px solid rgba(0,212,255,0.3)", background: "rgba(0,212,255,0.06)" }}
           >
             <Tv2 className="w-4 h-4" /> Become a Partner <ArrowRight className="w-4 h-4" />
           </Link>

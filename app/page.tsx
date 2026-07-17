@@ -9,12 +9,14 @@ export default function HomePage() {
       {/* ── Primary experience: full-viewport live cam station ── */}
       <CamStation />
 
-      {/* ── Below-the-fold: monetization & partner sections ──────
+      {/* ── Below-the-fold: partner & monetization sections ──────
           Users who scroll past the cam station are high-intent
-          (dwell time is high). Keep the tone brand-aligned, not ad-like.
+          (dwell time is high). Partners is elevated directly beneath the
+          cam station so it reads as a prominent, intentional band before
+          the broadcaster CTA. Keep the tone brand-aligned, not ad-like.
       ─────────────────────────────────────────────────────────── */}
-      <BroadcasterCTA />
       <SponsorList />
+      <BroadcasterCTA />
       <Footer />
     </>
   );
