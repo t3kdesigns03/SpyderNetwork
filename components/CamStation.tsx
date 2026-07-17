@@ -3,12 +3,13 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   Star, Search, Play, Pause, SkipBack, SkipForward, RotateCcw, Maximize2,
-  Map, Video, Thermometer, X, Cast, ExternalLink, ChevronDown, Zap, Loader2, Tv2,
+  Map, Video, Thermometer, X, Cast, ExternalLink, ChevronDown, Zap, Loader2, Tv2, Handshake,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { ALL_CAMS, CAMS_BY_BUSINESS, CAM_BUSINESSES, HERO_CAM } from "@/lib/cams";
 import { withUTM, trackPartnerSite, trackTwitchClick, trackCastClick, toUTMContent } from "@/lib/analytics";
 import { CamPlayer } from "./CamPlayer";
+import { SponsorList } from "./SponsorList";
 import { SponsorBadge } from "./SponsorBadge";
 import type { Cam } from "@/types";
 import { useIsLandscapeMobile } from "@/hooks/useOrientation";
@@ -22,7 +23,7 @@ const INTERVALS = [
   { label: "5m", value: 300 },
 ];
 
-type Tab = "cams" | "map" | "conditions";
+type Tab = "cams" | "map" | "conditions" | "partners";
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export function CamStation() {
@@ -225,6 +226,7 @@ export function CamStation() {
             { key: "cams", label: "CAMS", Icon: Video },
             { key: "map", label: "MAP", Icon: Map },
             { key: "conditions", label: "CONDITIONS", Icon: Thermometer },
+            { key: "partners", label: "PARTNERS", Icon: Handshake },
           ] as const
         ).map(({ key, label, Icon }) => (
           <button
@@ -781,6 +783,16 @@ export function CamStation() {
 
       {/* ── CONDITIONS tab ───────────────────────────────── */}
       {!isLandscape && tab === "conditions" && <ConditionsTab />}
+
+      {/* ── PARTNERS tab ─────────────────────────────────────
+          Same branded SponsorList section, surfaced as a first-class tab so
+          it's always one tap away (id differs from the below-fold instance to
+          keep DOM ids unique). */}
+      {!isLandscape && tab === "partners" && (
+        <div className="flex-1 overflow-y-auto overscroll-contain">
+          <SponsorList id="partners-tab" />
+        </div>
+      )}
     </div>
   );
 }

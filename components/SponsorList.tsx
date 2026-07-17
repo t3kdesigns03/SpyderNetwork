@@ -93,10 +93,10 @@ function PartnerCard({ partner, size = "sm" }: { partner: Partner; size?: "sm" |
   );
 }
 
-export function SponsorList() {
+export function SponsorList({ id = "partners" }: { id?: string } = {}) {
   return (
     <section
-      id="partners"
+      id={id}
       className="relative py-16 sm:py-20 px-4 sm:px-6"
       style={{
         // Subtle glow-topped divider so the elevated section reads as a
