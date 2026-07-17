@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Wifi, Tv2 } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, Tv2 } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "About Us",
@@ -22,16 +23,25 @@ export default function AboutPage() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-14 h-14 bg-spyder-red rounded-2xl flex items-center justify-center shadow-red-glow">
-            <Wifi className="w-7 h-7 text-white" />
+        <div className="mb-8">
+          {/* Branded SpyderNetwork logo with the same electric lightning sweep
+              + red glow as the site header (replaces the old Wifi icon). */}
+          <div className="mb-5">
+            <div className="logo-lightning rounded-lg">
+              <Image
+                src="/images/SpyderNetworkLogo.png"
+                alt="SpyderNetwork"
+                width={631}
+                height={200}
+                priority
+                className="h-12 sm:h-14 w-auto object-contain drop-shadow-[0_0_20px_rgba(204,0,0,0.35)]"
+              />
+            </div>
           </div>
-          <div>
-            <h1 className="font-display text-3xl sm:text-4xl font-bold text-white">
-              About SpyderNetwork
-            </h1>
-            <p className="text-spyder-gray text-sm mt-1">Lake of the Ozarks Live Cams</p>
-          </div>
+          <h1 className="font-display text-3xl sm:text-4xl font-bold text-white">
+            About SpyderNetwork
+          </h1>
+          <p className="text-spyder-gray text-sm mt-1">Lake of the Ozarks Live Cams</p>
         </div>
 
         <div className="prose prose-invert prose-sm max-w-none space-y-4 text-spyder-gray leading-relaxed">

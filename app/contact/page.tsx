@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Mail, Phone, MapPin } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, Mail, MapPin } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Contact Us",
@@ -21,6 +22,19 @@ export default function ContactPage() {
           </Link>
         </div>
 
+        {/* Branded SpyderNetwork logo with lightning sweep + red glow. */}
+        <div className="mb-5">
+          <div className="logo-lightning rounded-lg">
+            <Image
+              src="/images/SpyderNetworkLogo.png"
+              alt="SpyderNetwork"
+              width={631}
+              height={200}
+              priority
+              className="h-12 sm:h-14 w-auto object-contain drop-shadow-[0_0_20px_rgba(204,0,0,0.35)]"
+            />
+          </div>
+        </div>
         <h1 className="font-display text-3xl sm:text-4xl font-bold text-white mb-2">
           Contact Us
         </h1>
