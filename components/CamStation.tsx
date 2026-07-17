@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, type CSSProperties } from "react";
 import {
   Star, Search, Play, Pause, SkipBack, SkipForward, RotateCcw, Maximize2,
   Map, Video, Thermometer, X, Cast, ExternalLink, ChevronDown, Zap, Loader2, Tv2, Handshake,
@@ -228,21 +228,44 @@ export function CamStation() {
             { key: "conditions", label: "CONDITIONS", Icon: Thermometer },
             { key: "partners", label: "PARTNERS", Icon: Handshake },
           ] as const
-        ).map(({ key, label, Icon }) => (
-          <button
-            key={key}
-            onClick={() => setTab(key)}
-            className={clsx(
-              "flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold tracking-widest border-b-[3px] transition-all min-h-[48px] touch-manipulation",
-              tab === key ? "border-spyder-cyan text-spyder-cyan" : "text-spyder-gray border-transparent"
-            )}
-            style={tab === key ? { textShadow: "0 0 10px #00d4ff, 0 0 24px rgba(0,212,255,0.5)", filter: "drop-shadow(0 2px 6px rgba(0,212,255,0.4))" } : {}}
-          >
-            <Icon className="w-3.5 h-3.5" />
-            <span className="hidden xs:inline">{label}</span>
-            <span className="xs:hidden">{label.slice(0, 4)}</span>
-          </button>
-        ))}
+        ).map(({ key, label, Icon }) => {
+          const isActive = tab === key;
+          // The PARTNERS tab label gets the premium chrome/metallic treatment
+          // (matching the SpyderNetwork "PARTNERS" branding) instead of the flat
+          // tab color. Applied to the label text only, so the icon keeps its
+          // active/inactive state color. Red glow intensifies when active.
+          const metallicLabel: CSSProperties | undefined =
+            key === "partners"
+              ? {
+                  backgroundImage:
+                    "linear-gradient(180deg,#ffffff 0%,#dbe1ea 28%,#8b98a8 52%,#ffffff 72%,#6c7787 100%)",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  color: "transparent",
+                  filter: isActive
+                    ? "drop-shadow(0 0 8px rgba(204,0,0,0.7))"
+                    : "drop-shadow(0 1px 1px rgba(0,0,0,0.5)) drop-shadow(0 0 5px rgba(204,0,0,0.4))",
+                }
+              : undefined;
+          return (
+            <button
+              key={key}
+              onClick={() => setTab(key)}
+              className={clsx(
+                "flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold tracking-widest border-b-[3px] transition-all min-h-[48px] touch-manipulation",
+                isActive ? "border-spyder-cyan text-spyder-cyan" : "text-spyder-gray border-transparent"
+              )}
+              // Skip the cyan text-glow on PARTNERS so it doesn't fight the
+              // metallic label; the cyan underline + icon still signal "active".
+              style={isActive && key !== "partners" ? { textShadow: "0 0 10px #00d4ff, 0 0 24px rgba(0,212,255,0.5)", filter: "drop-shadow(0 2px 6px rgba(0,212,255,0.4))" } : {}}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              <span className="hidden xs:inline" style={metallicLabel}>{label}</span>
+              <span className="xs:hidden" style={metallicLabel}>{label.slice(0, 4)}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* ── CAMS tab — also shown (fullscreen video) when landscape mobile ── */}
