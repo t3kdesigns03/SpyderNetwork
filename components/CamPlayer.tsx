@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Cam } from "@/types";
 import { CamEmbed } from "./CamEmbed";
 import { HlsPlayer } from "./HlsPlayer";
+import { SpyderLoader } from "./SpyderLoader";
 
 /**
  * CamPlayer — smart player wrapper.
@@ -134,11 +135,11 @@ export function CamPlayer({ cam, onLoad, autoplay = true }: CamPlayerProps) {
     );
   }
 
-  // ── Resolving — brief loader (bounded by RESOLVE_TIMEOUT_MS → iframe) ────────
+  // ── Resolving — branded loader (bounded by RESOLVE_TIMEOUT_MS → iframe) ──────
   return (
     <div className="relative h-full w-full min-h-[200px] bg-black">
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-spyder-red" />
+        <SpyderLoader size={84} label="Loading live feed…" />
       </div>
     </div>
   );

@@ -44,8 +44,9 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AlertCircle, Loader2, Play } from "lucide-react";
+import { AlertCircle, Play } from "lucide-react";
 import { clsx } from "clsx";
+import { SpyderLoader } from "./SpyderLoader";
 
 // Where the persistent top-right branding links to.
 const SITE_URL = "https://spydernetwork.t3kdesigns.app";
@@ -304,12 +305,11 @@ export function HlsPlayer({
         </div>
       )}
 
-      {/* Subtle loader until the first frame is ready (mostly visible on the
+      {/* Branded loader until the first frame is ready (mostly visible on the
           clean mobile state; desktop shows the overlay instead). */}
       {showLoader && (
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
-          <Loader2 className="h-7 w-7 animate-spin text-white/70" aria-hidden="true" />
-          <span className="sr-only">Loading video…</span>
+          <SpyderLoader size={76} />
         </div>
       )}
 
@@ -337,24 +337,10 @@ export function HlsPlayer({
             overlayFading ? "pointer-events-none opacity-0" : "opacity-100 hlsp-rise"
           )}
         >
-          {/* Spider-web backdrop */}
-          <div className="pointer-events-none absolute inset-0 opacity-[0.06]" aria-hidden="true">
-            <svg width="100%" height="100%" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice">
-              <g stroke="#cc0000" strokeWidth="0.5" fill="none">
-                {[20, 40, 60, 80, 100].map((r) => <circle key={r} cx="100" cy="100" r={r} />)}
-                {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => {
-                  const rad = (deg * Math.PI) / 180;
-                  return (
-                    <line key={deg} x1="100" y1="100"
-                      x2={100 + 110 * Math.cos(rad)} y2={100 + 110 * Math.sin(rad)} />
-                  );
-                })}
-              </g>
-            </svg>
-          </div>
-
-          {/* Enhanced spider eye with the neon glow pulse */}
-          <SpyderEye className="hlsp-glow relative h-11 w-11 sm:h-14 sm:w-14" />
+          {/* Branded spider/web loader — replaces the old pulsing red-dot eye.
+              Its own web + crawling spider carry the motion, so no separate
+              web backdrop is needed. */}
+          <SpyderLoader size={66} className="relative" />
 
           {/* Hero play button — large, premium, mobile-first (64–80px) */}
           <button
@@ -380,10 +366,7 @@ export function HlsPlayer({
             {isTouch ? (
               <span className="tracking-wide text-white/90">Tap to Play</span>
             ) : (
-              <>
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-spyder-red animate-ping" />
-                Connecting to live feed…
-              </>
+              <span className="tracking-wide">Connecting to live feed…</span>
             )}
           </div>
         </div>

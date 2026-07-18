@@ -93,7 +93,6 @@ import type { Cam } from "@/types";
 // cactus-blossom-boutique                    → spydernetwork64
 // the-hatch                                  → spydernetwork14
 // topsider-condos                            → spydernetwork37
-// rip-tavern                                 → spydernetwork40
 // spydernetwork-ptz                          → spydernetwork70
 // roaming-cam                                → spydernetwork          (base channel)
 //
@@ -1113,22 +1112,6 @@ export const CAMS: Cam[] = [
     lng: -92.6360,
   },
 
-  // ── RIP TAVERN ────────────────────────────────────────────────────────────
-  {
-    id: "rip-tavern",
-    name: "Strip View",
-    business: "RIP Tavern",
-    slug: "rip-tavern",
-    category: "bar-grill",
-    streamProvider: "twitch",
-    twitchChannel: "spydernetwork40",
-    isLive: true,
-    description: "Bagnell Dam Strip street view from RIP Tavern — Lake Ozark",
-    websiteUrl: "https://www.facebook.com/profile.php?id=61557375811392",
-    spyderPageUrl: "https://spydernetwork.com/rip-tavern/",
-    lat: 38.1950,
-    lng: -92.6120,
-  },
 
   // ── SPYDERNETWORK SPECIAL / ROAMING ───────────────────────────────────────
   {
