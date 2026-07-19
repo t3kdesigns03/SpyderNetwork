@@ -11,6 +11,7 @@ import type { Cam } from "@/types";
 const TWITCH_PARENTS = [
   "spydernetwork.com",
   "www.spydernetwork.com",
+  "beta.spydernetwork.com",
   "spydernetwork.t3kdesigns.app",
 ];
 
