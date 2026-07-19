@@ -218,11 +218,27 @@ export function HlsPlayer({
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           if (!cancelled) { setReady(true); onReady?.(); }
         });
+        // Bounded self-heal. A single segment 403 (e.g. an ad-conditioned
+        // segment on a monetized channel) shouldn't nuke the stream — hls.js
+        // can often recover by reloading. But if recovery keeps failing we must
+        // surface onError so CamPlayer can try a fresh token (a new token may
+        // dodge a transient 403) and, ultimately, fall back — instead of
+        // looping startLoad() forever behind a frozen frame.
+        let networkRetries = 0;
+        let mediaRetries = 0;
+        const MAX_NETWORK_RETRIES = 3;
+        const MAX_MEDIA_RETRIES = 2;
         hls.on(Hls.Events.ERROR, (_evt, data) => {
-          if (!data?.fatal) return; // non-fatal: hls.js self-heals
-          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls?.startLoad();
-          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls?.recoverMediaError();
-          else { setError(true); onError?.(data); hls?.destroy(); }
+          if (!data?.fatal) return; // non-fatal: hls.js self-heals silently
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+            if (networkRetries++ < MAX_NETWORK_RETRIES) { hls?.startLoad(); return; }
+            setError(true); onError?.(data); hls?.destroy();
+          } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+            if (mediaRetries++ < MAX_MEDIA_RETRIES) { hls?.recoverMediaError(); return; }
+            setError(true); onError?.(data); hls?.destroy();
+          } else {
+            setError(true); onError?.(data); hls?.destroy();
+          }
         });
         hls.loadSource(src);
         hls.attachMedia(video);

@@ -39,8 +39,12 @@ export function CamPlayer({ cam, onLoad, autoplay = true }: CamPlayerProps) {
   const [mode, setMode]       = useState<Mode>(isTwitch ? "resolving" : "iframe");
   const [hlsUrl, setHlsUrl]   = useState<string | null>(null);
   const [hlsReady, setHlsReady] = useState(false);
-  // Only auto-retry the token once before falling back to the iframe.
-  const retriedRef = useRef(false);
+  // Auto-retry the token a couple of times before falling back to the iframe.
+  // A fresh token can dodge a transient/ad-conditioned segment 403 (the reason
+  // one otherwise-identical channel can get stuck on the play-button iframe),
+  // keeping the cam on the muted-autoplay HLS player.
+  const retriesRef = useRef(0);
+  const MAX_TOKEN_RETRIES = 2;
 
   // If the stream hasn't actually started playing this long after we switch to
   // HLS, assume it's not going to (bad URL, CORS, hls.js stuck retrying) and
@@ -72,7 +76,7 @@ export function CamPlayer({ cam, onLoad, autoplay = true }: CamPlayerProps) {
 
   // Resolve on cam change (Twitch only), bounded by a hard timeout.
   useEffect(() => {
-    retriedRef.current = false;
+    retriesRef.current = 0;
     if (!isTwitch) {
       setMode("iframe");
       return;
@@ -103,11 +107,11 @@ export function CamPlayer({ cam, onLoad, autoplay = true }: CamPlayerProps) {
   // HlsPlayer hit a fatal error (expired token, CDN/CORS, decode…). Try ONE
   // fresh token; if that also fails, fall back to the iframe.
   const handleHlsError = useCallback(() => {
-    if (retriedRef.current) {
+    if (retriesRef.current >= MAX_TOKEN_RETRIES) {
       setMode("iframe");
       return;
     }
-    retriedRef.current = true;
+    retriesRef.current += 1;
     setMode("resolving");
     setHlsUrl(null);
     const ctrl = new AbortController();
