@@ -98,9 +98,13 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
         allowFullScreen
         allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
         referrerPolicy="no-referrer-when-downgrade"
-        // In-viewport players (hero) still load immediately; off-screen embeds
-        // (e.g. related-cam cards below the fold) defer — protects Core Web Vitals.
-        loading="lazy"
+        // Autoplaying players MUST load eagerly: a lazy iframe can still be in a
+        // deferred / not-yet-painted state when Twitch runs its autoplay
+        // eligibility check, which then fails "style visibility" and disables
+        // autoplay (the Angels symptom). Only embeds explicitly created with
+        // autoplay={false} — e.g. off-screen / below-fold cards — stay lazy to
+        // protect Core Web Vitals; they aren't trying to autostart anyway.
+        loading={autoplay ? "eager" : "lazy"}
         title={`${camLabel} live cam`}
         onLoad={() => onLoad?.()}
         onError={() => setError(true)}
