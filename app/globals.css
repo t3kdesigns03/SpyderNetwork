@@ -605,9 +605,18 @@ html.landscape-video-mode header {
 }
 .animate-play-ring { animation: play-ring-pulse 2.2s ease-out infinite; }
 
+/* Live camera toggle (ON): gently pulsing red glow around the knob so an
+   in-cycle camera reads as "recording/live". */
+@keyframes cam-live {
+  0%, 100% { box-shadow: 0 0 5px rgba(204,0,0,0.75); }
+  50%      { box-shadow: 0 0 11px rgba(204,0,0,1), 0 0 20px rgba(204,0,0,0.55); }
+}
+.animate-cam-live { animation: cam-live 1.8s ease-in-out infinite; }
+
 /* Respect users who ask for less motion — hold the final frame, no looping. */
 @media (prefers-reduced-motion: reduce) {
   .spyder-glow-pulse,
   .animate-overlay-rise,
-  .animate-play-ring { animation: none !important; }
+  .animate-play-ring,
+  .animate-cam-live { animation: none !important; }
 }

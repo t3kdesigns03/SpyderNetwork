@@ -3,11 +3,11 @@
 import { useState, useEffect, useRef, useCallback, useMemo, type CSSProperties } from "react";
 import {
   Star, Search, Play, Pause, SkipBack, SkipForward, RotateCcw, Maximize2,
-  Map, Video, Thermometer, X, Cast, ExternalLink, ChevronDown, Zap, Loader2, Tv2, Handshake,
+  Map, Video, Thermometer, X, Cast, ExternalLink, ChevronDown, Zap, Loader2, Handshake,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { ALL_CAMS, CAMS_BY_BUSINESS, CAM_BUSINESSES, HERO_CAM } from "@/lib/cams";
-import { withUTM, trackPartnerSite, trackTwitchClick, trackCastClick, toUTMContent } from "@/lib/analytics";
+import { withUTM, trackPartnerSite, trackCastClick, toUTMContent } from "@/lib/analytics";
 import { CamPlayer } from "./CamPlayer";
 import { SponsorList } from "./SponsorList";
 import { SponsorBadge } from "./SponsorBadge";
@@ -24,6 +24,9 @@ const INTERVALS = [
 ];
 
 type Tab = "cams" | "map" | "conditions" | "partners";
+
+// localStorage key for the user's cycle selection (which cams are toggled ON).
+const CYCLE_STORAGE_KEY = "spyder:cycleEnabled";
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export function CamStation() {
@@ -111,6 +114,23 @@ export function CamStation() {
   const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Hydrate the cycle selection from localStorage once on mount. Kept out of the
+  // useState initializer to avoid an SSR/client hydration mismatch — the server
+  // renders the default (all cams ON) and the client corrects it after mount.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(CYCLE_STORAGE_KEY);
+      if (!raw) return;
+      const ids = JSON.parse(raw) as string[];
+      if (!Array.isArray(ids)) return;
+      // Keep only ids that still exist in the current cam list.
+      const valid = ids.filter((id) => ALL_CAMS.some((c) => c.id === id));
+      setEnabled(new Set(valid));
+    } catch {
+      /* corrupt/unavailable storage — fall back to the all-ON default */
+    }
+  }, []);
+
   const toggleGroup = (biz: string) =>
     setExpandedGroups((prev) => {
       const n = new Set(prev);
@@ -178,6 +198,8 @@ export function CamStation() {
     setEnabled((prev) => {
       const n = new Set(prev);
       n.has(id) ? n.delete(id) : n.add(id);
+      // Persist so the user's cycle selection survives a refresh.
+      try { localStorage.setItem(CYCLE_STORAGE_KEY, JSON.stringify([...n])); } catch {}
       return n;
     });
 
@@ -540,29 +562,6 @@ export function CamStation() {
                   </button>
                 ))}
               </div>
-
-              {/* Spacer + external link */}
-              <div className="ml-auto">
-                {selected?.websiteUrl && (
-                  <a
-                    href={withUTM(selected.websiteUrl, {
-                      content: toUTMContent(selected.business),
-                      term: "player-bar",
-                    })}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => trackPartnerSite(
-                      selected.business,
-                      selected.websiteUrl!,
-                      "player-bar"
-                    )}
-                    className="flex items-center gap-1.5 text-xs text-spyder-gray hover:text-white transition-colors min-h-[36px] px-2"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Visit Site</span>
-                  </a>
-                )}
-              </div>
             </div>
           </div>
 
@@ -760,22 +759,8 @@ export function CamStation() {
                         {/* Sponsor badge */}
                         {hasPaidTier && <SponsorBadge tier={bizTier!} size="sm" />}
 
-                        {/* Website link icon — shown for every business that has one */}
-                        {bizUrl && (
-                          <a
-                            href={withUTM(bizUrl, {
-                              content: toUTMContent(biz),
-                              term: "cam-sidebar",
-                            })}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title={`Visit ${biz}`}
-                            onClick={() => trackPartnerSite(biz, bizUrl, "cam-sidebar")}
-                            className="shrink-0 flex items-center justify-center w-7 h-7 rounded text-spyder-gray/40 hover:text-white transition-colors touch-manipulation"
-                          >
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        )}
+                        {/* Website link lives in the single pill under the expanded
+                            business name (below) — no duplicate icon here. */}
 
                         <span className="text-xs text-spyder-gray/70 shrink-0 tabular-nums">{cams.length}</span>
                         {activeCam && (
@@ -854,7 +839,8 @@ export function CamStation() {
 }
 
 // ─── SpyderSwitch ─────────────────────────────────────────────────────────────
-// A branded toggle that uses a mini spider icon as its knob.
+// Cycle-membership toggle. The knob is a camera icon: ON → a "live" red camera
+// with a pulsing glow + recording dot; OFF → a dimmed/gray camera.
 // Track glows red with web-thread decoration when active.
 function SpyderSwitch({
   checked,
@@ -891,35 +877,28 @@ function SpyderSwitch({
         </span>
       )}
 
-      {/* Spider knob */}
+      {/* Camera knob — live when ON, dimmed when OFF */}
       <span
         aria-hidden
         className={clsx(
           "absolute top-0.5 left-0.5 w-5 h-5 rounded-full flex items-center justify-center",
           "shadow-md transition-all duration-300",
           checked
-            ? "translate-x-5 bg-spyder-red shadow-[0_0_6px_rgba(204,0,0,0.8)]"
+            ? "translate-x-5 bg-spyder-red animate-cam-live"
             : "translate-x-0 bg-[#1e2433]"
         )}
       >
-        {/* Mini spider SVG — legs + body + lens */}
-        <svg viewBox="0 0 20 20" width="13" height="13" fill="none">
-          {/* Legs */}
-          <path d="M7.5 7.5 Q5 5 3 3"   stroke={checked ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.18)"} strokeWidth="1.1" strokeLinecap="round" />
-          <path d="M7 10   Q4 9.5 2 10"  stroke={checked ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.18)"} strokeWidth="1.1" strokeLinecap="round" />
-          <path d="M7.5 12.5 Q5 15 3 17" stroke={checked ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.18)"} strokeWidth="1.1" strokeLinecap="round" />
-          <path d="M12.5 7.5 Q15 5 17 3"   stroke={checked ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.18)"} strokeWidth="1.1" strokeLinecap="round" />
-          <path d="M13 10   Q16 9.5 18 10"  stroke={checked ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.18)"} strokeWidth="1.1" strokeLinecap="round" />
-          <path d="M12.5 12.5 Q15 15 17 17" stroke={checked ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.18)"} strokeWidth="1.1" strokeLinecap="round" />
-          {/* Body shell */}
-          <circle cx="10" cy="10" r="4.5" fill={checked ? "white" : "#3a4055"} />
-          {/* Lens chamber */}
-          <circle cx="10" cy="10" r="2.6" fill={checked ? "#cc0000" : "#1a1f2e"} />
-          {/* Pupil */}
-          <circle cx="10" cy="10" r="1.2" fill={checked ? "white" : "#2a2f40"} />
-          {/* Catchlight */}
-          <circle cx="8.9" cy="8.9" r="0.6" fill={checked ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.1)"} />
-        </svg>
+        <Video
+          className={clsx(
+            "w-3 h-3 transition-colors duration-300",
+            checked ? "text-white" : "text-white/25"
+          )}
+          strokeWidth={2.25}
+        />
+        {/* Live recording dot — only while included in the cycle */}
+        {checked && (
+          <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_5px_rgba(255,255,255,0.95)] animate-pulse" />
+        )}
       </span>
     </button>
   );

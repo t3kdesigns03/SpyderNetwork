@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Star, ExternalLink, MapPin, Play, Cast } from "lucide-react";
+import { Star, MapPin, Play, Cast } from "lucide-react";
 import { clsx } from "clsx";
 import type { Cam } from "@/types";
 import { CamEmbed } from "./CamEmbed";
@@ -130,18 +130,6 @@ export function CamCard({
         {/* Expanded links */}
         {expanded && (
           <div className="flex gap-2 mt-3">
-            {cam.websiteUrl && (
-              <a
-                href={cam.websiteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="btn-secondary text-xs py-2 px-3 min-h-[36px]"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                Visit Site
-              </a>
-            )}
             <a
               href={`https://player.twitch.tv/?channel=${cam.twitchChannel}&parent=spydernetwork.com`}
               target="_blank"
