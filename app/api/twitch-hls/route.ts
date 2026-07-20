@@ -35,6 +35,18 @@ export const revalidate = 0;
 // Public Twitch web client-id (the same one twitch.tv's own web player sends).
 const CLIENT_ID = "kimne78kx3ncx6brgo4mv6wki5h1ko";
 
+// A stable-ish device id makes the token request look like a real embedded
+// player session rather than a bare anonymous call. Twitch conditions ads (and
+// the ad-signed segment 403 that kicks HLS back to the iframe) partly on this;
+// sending one — plus requesting as the "embed" playerType below — is the same
+// trick that lets an embedded player pull clean segments. Random per request is
+// fine: it just needs to be a 32-char lowercase hex string.
+function randomDeviceId(): string {
+  let s = "";
+  for (let i = 0; i < 32; i++) s += Math.floor(Math.random() * 16).toString(16);
+  return s;
+}
+
 // Full GraphQL query (not a persisted-query hash, which goes stale) requesting a
 // live stream playback access token.
 const GQL_QUERY = `query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!) {
@@ -55,11 +67,19 @@ export async function GET(request: Request) {
 
   try {
     // ── 1) PlaybackAccessToken ────────────────────────────────────────────────
+    // playerType "embed" + a Device-ID header make this look like an embedded
+    // player rather than a bare anonymous site call. Twitch conditions the
+    // ad-signed segment 403 (which forces the iframe fallback) partly on these,
+    // so requesting this way is what lets an otherwise-flagged channel pull
+    // clean HLS segments.
+    const deviceId = randomDeviceId();
     const tokenRes = await fetch("https://gql.twitch.tv/gql", {
       method: "POST",
       headers: {
         "Client-ID": CLIENT_ID,
         "Content-Type": "application/json",
+        "Device-ID": deviceId,
+        "X-Device-Id": deviceId,
       },
       body: JSON.stringify({
         operationName: "PlaybackAccessToken_Template",
@@ -69,7 +89,7 @@ export async function GET(request: Request) {
           login: channel,
           isVod: false,
           vodID: "",
-          playerType: "site",
+          playerType: "embed",
         },
       }),
       cache: "no-store",
