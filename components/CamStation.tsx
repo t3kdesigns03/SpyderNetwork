@@ -684,6 +684,25 @@ export function CamStation() {
                   <span className="ml-auto text-xs opacity-70">({favorites.size})</span>
                 )}
               </button>
+
+              {/* Cycle-toggle legend — a tiny, always-visible hint that explains
+                  the per-cam camera toggle. The toggle's own tooltip is desktop-
+                  only (no hover on touch), so this covers mobile too, and doubles
+                  as a visual key on desktop. */}
+              <div className="flex items-center gap-2 px-0.5 text-[10px] leading-tight text-spyder-gray/70">
+                <span
+                  aria-hidden
+                  className="relative shrink-0 w-8 h-[18px] rounded-full bg-spyder-red/20 border border-spyder-red/50"
+                >
+                  <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-spyder-red flex items-center justify-center shadow-[0_0_5px_rgba(204,0,0,0.7)]">
+                    <Video className="w-2 h-2 text-white" strokeWidth={2.5} />
+                  </span>
+                </span>
+                <span>
+                  Toggle a camera <span className="font-semibold text-white/85">live</span> to add it to{" "}
+                  <span className="font-semibold text-white/85">Cycle&nbsp;Selected</span>
+                </span>
+              </div>
             </div>
 
             {/* Mobile: expands naturally; desktop: scrolls inside sidebar */}
@@ -795,21 +814,10 @@ export function CamStation() {
                         {/* Sponsor badge */}
                         {hasPaidTier && <SponsorBadge tier={bizTier!} size="sm" />}
 
-                        {/* Website link lives in the single pill under the expanded
-                            business name (below) — no duplicate icon here. */}
-
-                        <span className="text-xs text-spyder-gray/70 shrink-0 tabular-nums">{cams.length}</span>
-                        {activeCam && (
-                          <span className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ background: "#00d4ff", boxShadow: "0 0 8px #00d4ff, 0 0 16px rgba(0,212,255,0.7)" }} />
-                        )}
-                      </div>
-
-                      {/* Visit Website action strip — appears for EVERY business
-                          (with a site) when the group is expanded. Paid tiers keep
-                          their purple/cyan accent; untiered businesses get a neutral
-                          treatment so the button never implies a sponsor tier. */}
-                      {isOpen && bizUrl && (
-                        <div className="flex gap-2 px-3 pb-2 pt-0.5 flex-wrap">
+                        {/* Visit Website — right side of the header row, for any
+                            business with a site. Paid tiers keep their accent; the
+                            rest get a neutral treatment. */}
+                        {bizUrl && (
                           <a
                             href={withUTM(bizUrl, {
                               content: toUTMContent(biz),
@@ -817,8 +825,8 @@ export function CamStation() {
                             })}
                             target="_blank"
                             rel="noopener noreferrer"
-                            onClick={() => trackPartnerSite(biz, bizUrl, "cam-sidebar")}
-                            className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all touch-manipulation hover:brightness-125"
+                            onClick={(e) => { e.stopPropagation(); trackPartnerSite(biz, bizUrl, "cam-sidebar"); }}
+                            className="shrink-0 inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all touch-manipulation hover:brightness-125"
                             style={bizTier === "premium"
                               ? { background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)", color: "#a855f7" }
                               : bizTier === "featured"
@@ -829,8 +837,13 @@ export function CamStation() {
                             <ExternalLink className="w-2.5 h-2.5" />
                             Visit Website
                           </a>
-                        </div>
-                      )}
+                        )}
+
+                        <span className="text-xs text-spyder-gray/70 shrink-0 tabular-nums">{cams.length}</span>
+                        {activeCam && (
+                          <span className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ background: "#00d4ff", boxShadow: "0 0 8px #00d4ff, 0 0 16px rgba(0,212,255,0.7)" }} />
+                        )}
+                      </div>
 
                       {/* Sub-cams */}
                       {isOpen && cams.map((cam) => (
@@ -893,6 +906,7 @@ function SpyderSwitch({
       role="switch"
       aria-checked={checked}
       aria-label={label}
+      title={label}
       onClick={onToggle}
       className={clsx(
         "relative shrink-0 w-11 h-6 rounded-full border transition-all duration-300 touch-manipulation",
@@ -979,7 +993,7 @@ function CamRow({
       <SpyderSwitch
         checked={isEnabled}
         onToggle={onToggleEnabled}
-        label={isEnabled ? "Remove from cycle" : "Add to cycle"}
+        label={isEnabled ? "In Cycle" : "Add to Cycle"}
       />
 
       {/* Favorite */}
