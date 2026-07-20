@@ -720,7 +720,6 @@ export function CamStation() {
                   // Pull business-level metadata from first cam (shared across the group)
                   const bizUrl     = cams[0]?.websiteUrl;
                   const bizTier    = cams[0]?.sponsorTier;
-                  const bizTwitch  = cams.find((c) => c.twitchChannel)?.twitchChannel;
                   const hasPaidTier = bizTier && bizTier !== "basic";
 
                   // Left border shifts: active > premium > featured > none
@@ -784,41 +783,31 @@ export function CamStation() {
                         )}
                       </div>
 
-                      {/* Paid-tier action strip — appears when group is expanded */}
-                      {isOpen && hasPaidTier && (bizUrl || bizTwitch) && (
+                      {/* Visit Website action strip — appears for EVERY business
+                          (with a site) when the group is expanded. Paid tiers keep
+                          their purple/cyan accent; untiered businesses get a neutral
+                          treatment so the button never implies a sponsor tier. */}
+                      {isOpen && bizUrl && (
                         <div className="flex gap-2 px-3 pb-2 pt-0.5 flex-wrap">
-                          {bizUrl && (
-                            <a
-                              href={withUTM(bizUrl, {
-                                content: toUTMContent(biz),
-                                term: "cam-sidebar",
-                              })}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={() => trackPartnerSite(biz, bizUrl, "cam-sidebar")}
-                              className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all touch-manipulation hover:brightness-125"
-                              style={bizTier === "premium"
-                                ? { background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)", color: "#a855f7" }
-                                : { background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.25)", color: "#00d4ff" }
-                              }
-                            >
-                              <ExternalLink className="w-2.5 h-2.5" />
-                              Visit Website
-                            </a>
-                          )}
-                          {bizTwitch && (
-                            <a
-                              href={`https://twitch.tv/${bizTwitch}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={() => trackTwitchClick(bizTwitch, "twitch-strip")}
-                              className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all touch-manipulation hover:brightness-125"
-                              style={{ background: "rgba(145,70,255,0.1)", border: "1px solid rgba(145,70,255,0.25)", color: "#9147ff" }}
-                            >
-                              <Tv2 className="w-2.5 h-2.5" />
-                              Watch on Twitch
-                            </a>
-                          )}
+                          <a
+                            href={withUTM(bizUrl, {
+                              content: toUTMContent(biz),
+                              term: "cam-sidebar",
+                            })}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => trackPartnerSite(biz, bizUrl, "cam-sidebar")}
+                            className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all touch-manipulation hover:brightness-125"
+                            style={bizTier === "premium"
+                              ? { background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)", color: "#a855f7" }
+                              : bizTier === "featured"
+                              ? { background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.25)", color: "#00d4ff" }
+                              : { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.75)" }
+                            }
+                          >
+                            <ExternalLink className="w-2.5 h-2.5" />
+                            Visit Website
+                          </a>
                         </div>
                       )}
 
