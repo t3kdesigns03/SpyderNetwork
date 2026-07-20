@@ -138,7 +138,15 @@ export function CamStation() {
     };
     load();
     const id = setInterval(load, STATUS_POLL_MS);
-    return () => { active = false; clearInterval(id); };
+    // Mobile browsers throttle background timers — refetch when the user
+    // returns to the tab so status feels live on return.
+    const onVisible = () => { if (document.visibilityState === "visible") load(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      active = false;
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
 
   // Hydrate the cycle selection from localStorage once on mount. Kept out of the
@@ -1011,10 +1019,9 @@ function CamRow({
             unknown / checking → neutral gray dot            */}
       <span
         className={clsx(
-          "shrink-0 rounded-full",
-          status === "offline" ? "w-2 h-2 cam-status-offline" : "w-1.5 h-1.5",
-          status === "online" && "animate-pulse",
-          status === undefined && "animate-pulse"
+          "shrink-0 w-2 h-2 rounded-full",
+          status === "offline" && "cam-status-offline",
+          (status === "online" || status === undefined) && "animate-pulse"
         )}
         style={
           status === "online"
@@ -1023,7 +1030,7 @@ function CamRow({
             ? { background: "#ef4444" }
             : { background: "rgba(148,163,184,0.55)" }
         }
-        role="status"
+        role="img"
         aria-label={
           status === "online" ? "Online"
           : status === "offline" ? "Offline"
