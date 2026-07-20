@@ -28,6 +28,12 @@ type Tab = "cams" | "map" | "conditions" | "partners";
 // localStorage key for the user's cycle selection (which cams are toggled ON).
 const CYCLE_STORAGE_KEY = "spyder:cycleEnabled";
 
+// Live health status for a cam. `undefined` = not checked yet (loading).
+type CamStatus = "online" | "offline" | "unknown";
+// How often the client re-polls /api/cam-status (ms). The route is CDN-cached
+// for ~60s, so this stays gentle on the upstream streams.
+const STATUS_POLL_MS = 75_000;
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export function CamStation() {
   // Pre-select hero cam so iframe loads with the page navigation gesture — enables mobile autoplay
@@ -113,6 +119,27 @@ export function CamStation() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // ── Live online/offline status per cam ──────────────────────────────────────
+  // Empty until the first /api/cam-status response lands; rows show a neutral
+  // "checking" dot until then. Polled on a gentle interval (route is CDN-cached).
+  const [camStatus, setCamStatus] = useState<Record<string, CamStatus>>({});
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const res = await fetch("/api/cam-status", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = (await res.json()) as { statuses?: Record<string, CamStatus> };
+        if (active && data.statuses) setCamStatus(data.statuses);
+      } catch {
+        /* transient network error — keep last known statuses */
+      }
+    };
+    load();
+    const id = setInterval(load, STATUS_POLL_MS);
+    return () => { active = false; clearInterval(id); };
+  }, []);
 
   // Hydrate the cycle selection from localStorage once on mount. Kept out of the
   // useState initializer to avoid an SSR/client hydration mismatch — the server
@@ -702,6 +729,7 @@ export function CamStation() {
                       isSelected={selected?.id === cam.id}
                       isEnabled={enabled.has(cam.id)}
                       isFavorite={favorites.has(cam.id)}
+                      status={camStatus[cam.id]}
                       onSelect={() => { setSelected(cam); setIsCycling(false); }}
                       onToggleEnabled={() => toggleEnabled(cam.id)}
                       onToggleFav={() => toggleFav(cam.id)}
@@ -805,6 +833,7 @@ export function CamStation() {
                           isSelected={selected?.id === cam.id}
                           isEnabled={enabled.has(cam.id)}
                           isFavorite={favorites.has(cam.id)}
+                          status={camStatus[cam.id]}
                           onSelect={() => { setSelected(cam); setIsCycling(false); }}
                           onToggleEnabled={() => toggleEnabled(cam.id)}
                           onToggleFav={() => toggleFav(cam.id)}
@@ -912,6 +941,7 @@ function CamRow({
   isSelected,
   isEnabled,
   isFavorite,
+  status,
   onSelect,
   onToggleEnabled,
   onToggleFav,
@@ -921,6 +951,7 @@ function CamRow({
   isSelected: boolean;
   isEnabled: boolean;
   isFavorite: boolean;
+  status?: CamStatus;
   onSelect: () => void;
   onToggleEnabled: () => void;
   onToggleFav: () => void;
@@ -973,10 +1004,37 @@ function CamRow({
         )}
       </button>
 
-      {/* Live indicator */}
-      {cam.isLive && (
-        <span className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse" style={isSelected ? { background: "var(--neon-cyan)", boxShadow: "0 0 6px rgba(0,212,255,0.8)" } : { background: "#cc0000", boxShadow: "0 0 4px rgba(204,0,0,0.6)" }} />
-      )}
+      {/* ── Live status indicator ──────────────────────────────────────────────
+          Real online/offline health from /api/cam-status:
+            online  → green, gentle healthy pulse
+            offline → red with an expanding alert ring
+            unknown / checking → neutral gray dot            */}
+      <span
+        className={clsx(
+          "shrink-0 rounded-full",
+          status === "offline" ? "w-2 h-2 cam-status-offline" : "w-1.5 h-1.5",
+          status === "online" && "animate-pulse",
+          status === undefined && "animate-pulse"
+        )}
+        style={
+          status === "online"
+            ? { background: "#22c55e", boxShadow: "0 0 6px rgba(34,197,94,0.9)" }
+            : status === "offline"
+            ? { background: "#ef4444" }
+            : { background: "rgba(148,163,184,0.55)" }
+        }
+        role="status"
+        aria-label={
+          status === "online" ? "Online"
+          : status === "offline" ? "Offline"
+          : "Checking status"
+        }
+        title={
+          status === "online" ? "Online"
+          : status === "offline" ? "Offline"
+          : "Checking…"
+        }
+      />
     </div>
   );
 }
