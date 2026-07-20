@@ -1,14 +1,17 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ArrowLeft, ArrowRight, Tv2, Wifi, Zap, Star,
   CheckCircle, MapPin, Radio, BarChart3, Shield, Users,
 } from "lucide-react";
+import { JsonLd } from "@/components/JsonLd";
+import { SITE, absoluteUrl, pageMetadata, faqSchema, breadcrumbSchema } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Become a Broadcaster",
-  description: "Put your Lake of the Ozarks business in front of thousands of visitors. Join SpyderNetwork.",
-};
+  description:
+    "Put your Lake of the Ozarks business in front of thousands of daily visitors. List your live cam on SpyderNetwork — on the cam list, the lake map, and in the cam cycle.",
+  path: "/become-a-broadcaster",
+});
 
 const TIERS = [
   {
@@ -182,6 +185,13 @@ export default function BecomeABroadcasterPage() {
 
       {/* ── FAQ ── */}
       <section className="py-14 px-4 sm:px-6 max-w-3xl mx-auto">
+        <JsonLd data={[
+          faqSchema(FAQ),
+          breadcrumbSchema([
+            { name: "Home", url: SITE.url },
+            { name: "Become a Broadcaster", url: absoluteUrl("/become-a-broadcaster") },
+          ]),
+        ]} />
         <h2 className="font-display text-2xl sm:text-3xl font-bold text-white text-center mb-8">Common Questions</h2>
         <div className="space-y-3">
           {FAQ.map(({ q, a }) => (

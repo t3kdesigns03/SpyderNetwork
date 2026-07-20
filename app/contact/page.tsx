@@ -1,12 +1,14 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Mail, MapPin } from "lucide-react";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Contact Us",
-  description: "Get in touch with SpyderNetwork — Lake of the Ozarks live cam network.",
-};
+  description:
+    "Get in touch with SpyderNetwork — the Lake of the Ozarks live cam network. Questions, cam issues, or partnership and broadcaster inquiries.",
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (

@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
+import { JsonLd } from "@/components/JsonLd";
+import { SITE, organizationSchema, websiteSchema } from "@/lib/seo";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "";
 
@@ -13,11 +15,9 @@ const GA_INIT_SCRIPT = GA_ID
     "gtag('config','" + GA_ID + "',{send_page_view:true,anonymize_ip:true});"
   : "";
 
-// Base URL used to resolve all relative metadata URLs (og:image, icons, etc.)
-// into absolute URLs for social crawlers. Point this at the domain that
-// actually serves this app. When the site moves to spydernetwork.com, update
-// this value (and the openGraph.url below) accordingly.
-const SITE_URL = "https://spydernetwork.t3kdesigns.app";
+// Canonical production domain — single source of truth lives in lib/seo.ts so
+// metadata, canonicals, sitemap, robots, OG URLs, and schema never drift.
+const SITE_URL = SITE.url;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -100,6 +100,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="scroll-smooth">
       <body className="min-h-screen bg-spyder-navy text-white overflow-x-hidden">
+
+        {/* Site-wide structured data: Organization + WebSite */}
+        <JsonLd data={[organizationSchema(), websiteSchema()]} />
 
         {GA_ID && (
           <>

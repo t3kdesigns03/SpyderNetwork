@@ -3,8 +3,13 @@ import type { Metadata } from "next";
 import { getCamBySlug, CAMS } from "@/lib/cams";
 import { CamCard } from "@/components/CamCard";
 import { CamEmbed } from "@/components/CamEmbed";
+import { JsonLd } from "@/components/JsonLd";
+import {
+  SITE, absoluteUrl, camUrl, camCategoryLabel, camMetaDescription,
+  camVideoSchema, camPlaceSchema, breadcrumbSchema,
+} from "@/lib/seo";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, Cast, MapPin, Star } from "lucide-react";
+import { ArrowLeft, ExternalLink, Cast, MapPin, Star, Radar, Map as MapIcon } from "lucide-react";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -17,10 +22,30 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const cam = getCamBySlug(slug);
-  if (!cam) return { title: "Cam Not Found" };
+  if (!cam) return { title: "Cam Not Found", robots: { index: false, follow: false } };
+
+  const title = `${cam.business} – ${cam.name} Live Cam | ${SITE.area.name}`;
+  const description = camMetaDescription(cam);
+  const path = `/cams/${cam.slug}`;
+  const image = cam.thumbnailUrl ?? "/og-image.png";
+
   return {
-    title: `${cam.business} – ${cam.name} Live Cam`,
-    description: `Watch ${cam.business} live on SpyderNetwork. Real-time webcam from Lake of the Ozarks.`,
+    title: { absolute: title },
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: "video.other",
+      url: absoluteUrl(path),
+      title,
+      description,
+      images: [{ url: image, width: 1200, height: 630, alt: `${cam.business} live cam — ${cam.name}` }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
   };
 }
 
@@ -32,10 +57,34 @@ export default async function CamPage({ params }: Props) {
   // Related cams from same business
   const related = CAMS.filter((c) => c.business === cam.business && c.id !== cam.id).slice(0, 4);
 
+  // ── Structured data: live VideoObject + venue Place + breadcrumb trail ──
+  const schema = [
+    camVideoSchema(cam),
+    camPlaceSchema(cam),
+    breadcrumbSchema([
+      { name: "Home", url: SITE.url },
+      { name: "Live Cams", url: absoluteUrl("/#cams") },
+      { name: `${cam.business} – ${cam.name}`, url: camUrl(cam) },
+    ]),
+  ].filter(Boolean) as object[];
+
+  const kind = camCategoryLabel(cam);
+
   return (
     <div className="min-h-screen pt-14 sm:pt-16">
-      {/* Back nav */}
+      <JsonLd data={schema} />
+
+      {/* Breadcrumb + back nav */}
       <div className="px-4 sm:px-6 max-w-7xl mx-auto pt-4">
+        <nav aria-label="Breadcrumb" className="text-xs text-spyder-gray mb-2">
+          <ol className="flex flex-wrap items-center gap-1.5">
+            <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
+            <li aria-hidden className="text-spyder-gray/50">/</li>
+            <li><Link href="/#cams" className="hover:text-white transition-colors">Live Cams</Link></li>
+            <li aria-hidden className="text-spyder-gray/50">/</li>
+            <li className="text-white/80">{cam.business} — {cam.name}</li>
+          </ol>
+        </nav>
         <Link
           href="/#cams"
           className="inline-flex items-center gap-2 text-sm text-spyder-gray hover:text-white transition-colors min-h-[44px]"
@@ -74,9 +123,11 @@ export default async function CamPage({ params }: Props) {
                       )}
                     </div>
                     <h1 className="font-display text-xl sm:text-2xl font-bold text-white">
-                      {cam.business}
+                      {cam.business} <span className="text-spyder-red">Live Cam</span>
                     </h1>
-                    <p className="text-spyder-gray text-sm mt-1">{cam.name}</p>
+                    <p className="text-spyder-gray text-sm mt-1">
+                      {cam.name} · {SITE.area.name}, {SITE.area.regionName}
+                    </p>
                     {cam.description && (
                       <p className="text-spyder-gray/80 text-sm mt-2">{cam.description}</p>
                     )}
@@ -109,16 +160,41 @@ export default async function CamPage({ params }: Props) {
                     <a
                       href={cam.spyderPageUrl}
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="noopener noreferrer nofollow"
                       className="btn-secondary text-sm py-2.5 px-5"
                     >
                       <ExternalLink className="w-4 h-4" />
-                      Twitch Chat
+                      More details
                     </a>
                   )}
                 </div>
               </div>
             </div>
+
+            {/* Answer-first summary — extractable by Google + AI, entity-rich */}
+            <section className="mt-4 rounded-2xl border border-white/10 bg-spyder-navy-card p-5">
+              <h2 className="font-display text-lg font-bold text-white mb-2">
+                What this cam shows
+              </h2>
+              <p className="text-spyder-gray/90 text-sm leading-relaxed">
+                The <strong className="text-white">{cam.business} live cam</strong> streams the {kind} at {cam.business} in
+                real time from {SITE.area.name}, {SITE.area.regionName}
+                {cam.mile ? ` near mile marker ${cam.mile}` : ""}.{" "}
+                {cam.description ? `${cam.description} ` : ""}
+                It&apos;s one of 60+ free, no-signup live webcams on SpyderNetwork covering
+                bars &amp; grills, marinas, pools, docks, and lakefront venues around the lake.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-4">
+                <Link href="/" className="btn-secondary text-xs py-2 px-4">
+                  <MapIcon className="w-3.5 h-3.5" />
+                  All live cams &amp; map
+                </Link>
+                <Link href="/radar" className="btn-secondary text-xs py-2 px-4">
+                  <Radar className="w-3.5 h-3.5" />
+                  Lake radar &amp; conditions
+                </Link>
+              </div>
+            </section>
           </div>
 
           {/* Sidebar */}

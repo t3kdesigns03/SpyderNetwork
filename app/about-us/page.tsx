@@ -1,13 +1,14 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Tv2 } from "lucide-react";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "About Us",
+export const metadata = pageMetadata({
+  title: "About SpyderNetwork",
   description:
-    "SpyderNetwork is the largest network of live webcams at Lake of the Ozarks, Missouri.",
-};
+    "SpyderNetwork is the largest network of live webcams at Lake of the Ozarks, Missouri — 60+ free real-time streams from the lake's bars, marinas, pools, and docks.",
+  path: "/about-us",
+});
 
 export default function AboutPage() {
   return (

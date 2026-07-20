@@ -1,11 +1,13 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Film, ExternalLink } from "lucide-react";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Saved Videos",
-  description: "Watch saved SpyderNetwork videos from Lake of the Ozarks.",
-};
+  description:
+    "Watch saved highlight videos from SpyderNetwork's Lake of the Ozarks live cams — sunsets, storms, and the best moments on the lake.",
+  path: "/video-collection",
+});
 
 // Placeholder video collection — link to original
 const SAVED_VIDEOS = [

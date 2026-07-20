@@ -1,11 +1,13 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, CloudRain } from "lucide-react";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Lake Radar",
-  description: "Live weather radar for Lake of the Ozarks, Missouri.",
-};
+export const metadata = pageMetadata({
+  title: "Lake Radar & Conditions",
+  description:
+    "Live weather radar and wind conditions for Lake of the Ozarks, Missouri. Check the forecast and lake conditions before you head out on the water.",
+  path: "/radar",
+});
 
 export default function RadarPage() {
   return (

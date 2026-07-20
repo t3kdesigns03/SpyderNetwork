@@ -98,6 +98,9 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
         allowFullScreen
         allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
         referrerPolicy="no-referrer-when-downgrade"
+        // In-viewport players (hero) still load immediately; off-screen embeds
+        // (e.g. related-cam cards below the fold) defer — protects Core Web Vitals.
+        loading="lazy"
         title={`${camLabel} live cam`}
         onLoad={() => onLoad?.()}
         onError={() => setError(true)}
