@@ -8,12 +8,13 @@ import type { Cam } from "@/types";
  * structured data. Route files import from here so metadata, canonicals,
  * sitemap, robots, OG URLs, and schema never drift apart.
  *
- * Canonical production domain: spydernetwork.com (apex). All other hosts
- * (www, beta, t3kdesigns) should 301-redirect here so this stays authoritative.
+ * Canonical domain: beta.spydernetwork.com. All other hosts should 301-redirect
+ * here so this stays authoritative. Change SITE.url below to move every SEO URL
+ * (canonicals, OG/Twitter, sitemap, robots, schema @ids) to a new domain.
  */
 
 export const SITE = {
-  url: "https://spydernetwork.com",
+  url: "https://beta.spydernetwork.com",
   name: "SpyderNetwork",
   legalName: "SpyderNetwork",
   description:
