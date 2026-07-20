@@ -1,0 +1,11 @@
+  zx    Switch the site from the beta domain back to the production domain for all SEO URLs.
+
+In `lib/seo.ts` (and any related helpers), change the canonical / base domain from `https://beta.spydernetwork.com` to `https://spydernetwork.com`.
+
+This should affect:
+- Canonical tags
+- Open Graph and Twitter image/URL fields
+- Any absolute URLs used in metadata
+- The sitemap (if it uses the same base URL)
+
+Do not change any other logic. Keep everything else exactly the same. After making the change, show me the updated relevant parts of `lib/seo.ts`.
