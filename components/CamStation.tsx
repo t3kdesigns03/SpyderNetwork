@@ -32,9 +32,9 @@ const CYCLE_STORAGE_KEY = "spyder:cycleEnabled";
 export function CamStation() {
   // Pre-select hero cam so iframe loads with the page navigation gesture — enables mobile autoplay
   const [selected, setSelected] = useState<Cam | null>(HERO_CAM);
-  const [enabled, setEnabled] = useState<Set<string>>(
-    () => new Set(ALL_CAMS.map((c) => c.id))
-  );
+  // Every camera starts OFF (excluded from the cycle). The user opts cams in
+  // via each row's toggle; the choice is persisted to localStorage.
+  const [enabled, setEnabled] = useState<Set<string>>(() => new Set<string>());
   // Track which business groups are expanded (all collapsed by default)
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
     () => new Set<string>()
