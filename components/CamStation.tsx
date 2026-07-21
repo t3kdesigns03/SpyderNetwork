@@ -10,7 +10,6 @@ import { ALL_CAMS, CAMS_BY_BUSINESS, CAM_BUSINESSES, HERO_CAM } from "@/lib/cams
 import { withUTM, trackPartnerSite, trackCastClick, toUTMContent } from "@/lib/analytics";
 import { CamPlayer } from "./CamPlayer";
 import { SponsorList } from "./SponsorList";
-import { SponsorBadge } from "./SponsorBadge";
 import type { Cam } from "@/types";
 import { useIsLandscapeMobile } from "@/hooks/useOrientation";
 
@@ -831,11 +830,10 @@ export function CamStation() {
                   // Pull business-level metadata from first cam (shared across the group)
                   const bizUrl     = cams[0]?.websiteUrl;
                   const bizTier    = cams[0]?.sponsorTier;
-                  const hasPaidTier = bizTier && bizTier !== "basic";
 
                   // Left border shifts: active > premium > featured > none
                   const headerStyle = activeCam
-                    ? { borderLeft: "3px solid #ff1a1a", boxShadow: "none", background: "rgba(255,26,26,0.12)" }
+                    ? { borderLeft: "3px solid #ff1a1a", boxShadow: "none", background: "rgba(255,255,255,0.08)" }
                     : bizTier === "premium"
                     ? { borderLeft: "3px solid rgba(204,0,0,0.55)" }
                     : bizTier === "featured"
@@ -867,9 +865,6 @@ export function CamStation() {
                             {biz}
                           </span>
                         </button>
-
-                        {/* Sponsor badge */}
-                        {hasPaidTier && <SponsorBadge tier={bizTier!} size="sm" />}
 
                         {/* Visit Website — right side of the header row, for any
                             business with a site. Paid tiers keep their accent; the
@@ -1075,7 +1070,7 @@ function CamRow({
         "border-l-[3px]",
         isSelected ? "cam-row-selected" : "border-l-transparent"
       )}
-      style={isSelected ? { background: "rgba(255,26,26,0.12)", borderLeftColor: "#ff1a1a", boxShadow: "none" } : {}}
+      style={isSelected ? { background: "rgba(255,255,255,0.08)", borderLeftColor: "#ff1a1a", boxShadow: "none" } : {}}
     >
       {/* Spyder switch */}
       <SpyderSwitch
@@ -1103,13 +1098,13 @@ function CamRow({
       <button onClick={onSelect} className="flex-1 text-left min-w-0">
         {showBusiness ? (
           <>
-            <p className="cam-name text-sm font-semibold leading-snug truncate transition-colors" style={isSelected ? { color: "#ff4d4d", textShadow: "0 0 4px rgba(0,0,0,0.6)" } : { color: "rgba(255,255,255,0.9)" }}>
+            <p className="cam-name text-sm font-semibold leading-snug truncate transition-colors" style={isSelected ? { color: "#ffffff", textShadow: "0 0 4px rgba(0,0,0,0.5)" } : { color: "rgba(255,255,255,0.9)" }}>
               {cam.business}
             </p>
             <p className="text-xs text-spyder-gray/80 truncate">{cam.name}</p>
           </>
         ) : (
-          <p className="cam-name text-sm leading-snug truncate transition-colors" style={isSelected ? { color: "#ff4d4d", textShadow: "0 0 4px rgba(0,0,0,0.6)", fontWeight: 600 } : { color: "#9ca3af" }}>
+          <p className="cam-name text-sm leading-snug truncate transition-colors" style={isSelected ? { color: "#ffffff", textShadow: "0 0 4px rgba(0,0,0,0.5)", fontWeight: 600 } : { color: "#9ca3af" }}>
             {cam.name}
           </p>
         )}

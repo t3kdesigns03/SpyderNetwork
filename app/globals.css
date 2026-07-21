@@ -486,13 +486,13 @@
    CAM ROW — selected is a red web strip, hover has a soft red flash
    ═══════════════════════════════════════════════════════════════════════════ */
 .cam-row-selected {
-  background: rgba(255, 26, 26, 0.12) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
   border-left: 3px solid #ff1a1a !important;
   box-shadow: none !important;
 }
 .cam-row-selected .cam-name {
-  color: #ff4d4d !important;
-  text-shadow: 0 0 4px rgba(0,0,0,0.6) !important;
+  color: #ffffff !important;
+  text-shadow: 0 0 4px rgba(0,0,0,0.5) !important;
 }
 
 /* Hover: quick red flash */
