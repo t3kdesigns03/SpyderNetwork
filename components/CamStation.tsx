@@ -12,6 +12,8 @@ import { CamPlayer } from "./CamPlayer";
 import { SponsorList } from "./SponsorList";
 import type { Cam } from "@/types";
 import { useIsLandscapeMobile } from "@/hooks/useOrientation";
+import { useViewerHeartbeat } from "@/hooks/useViewerHeartbeat";
+import { useCurrentHero } from "@/hooks/useCurrentHero";
 
 // ─── Interval options ─────────────────────────────────────────────────────────
 const INTERVALS = [
@@ -265,6 +267,24 @@ export function CamStation() {
     [selected]
   );
 
+  // ── Silent viewer-competition wiring ────────────────────────────────────────
+  // The featured/hero slot organically follows whichever camera currently has
+  // the most active viewers. This is invisible: no counts, badges, or ranking —
+  // the stream just updates in the background. A manual selection (any specific
+  // cam) always wins and is never overridden; only the hero slot follows.
+  const heroId = useCurrentHero();
+  const heroCam = useMemo(
+    () => ALL_CAMS.find((c) => c.id === heroId) ?? HERO_CAM,
+    [heroId]
+  );
+  const isOnHero = selected?.id === HERO_CAM.id;
+  const playingCam = isOnHero ? heroCam : selected;
+
+  // Report whatever is actually on screen so viewers feed the competition for
+  // the cam they're really watching. Fires immediately on switch, then every 20s
+  // while visible; pauses when hidden or when nothing is playing.
+  useViewerHeartbeat(playingCam?.id);
+
   const displayList = useMemo(() => {
     let list = ALL_CAMS;
     if (favOnly) list = list.filter((c) => favorites.has(c.id));
@@ -450,8 +470,8 @@ export function CamStation() {
                 ? "flex-1 min-h-0"
                 : "aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0"
             )}>
-              {selected ? (
-                <CamPlayer cam={selected} key={`${selected.id}:${refreshKey}`} autoplay />
+              {playingCam ? (
+                <CamPlayer cam={playingCam} key={`${playingCam.id}:${refreshKey}`} autoplay />
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center px-6">
                   <div className="w-16 h-16 rounded-2xl bg-spyder-red/10 border border-spyder-red/20 flex items-center justify-center">

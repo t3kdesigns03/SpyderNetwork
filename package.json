@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@upstash/redis": "^1.38.0",
     "clsx": "^2.1.1",
     "hls.js": "^1.6.16",
     "leaflet": "^1.9.4",
