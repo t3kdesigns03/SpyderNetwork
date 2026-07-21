@@ -170,6 +170,14 @@
   .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
   .pt-safe { padding-top:    env(safe-area-inset-top, 0px); }
 
+  /* High-visibility neon red for the cam list — bright core + soft red halo so
+     small red labels stay legible against the dark sidebar on mobile. */
+  .text-neon-red { color: #ff2a2a; text-shadow: 0 0 6px rgba(255,42,42,0.65), 0 0 14px rgba(204,0,0,0.5); }
+
+  /* Neon cyan — matches the site's other electric-cyan accents. Used for the
+     SPYDER FEEDS live/spots counter. */
+  .text-neon-cyan { color: #00d4ff; text-shadow: 0 0 6px rgba(0,212,255,0.7), 0 0 16px rgba(0,212,255,0.4); }
+
   /* Neon text glow helpers */
   .text-glow-cyan   { text-shadow: 0 0 10px rgba(0,212,255,0.8),   0 0 24px rgba(0,212,255,0.4); }
   .text-glow-red    { text-shadow: 0 0 10px rgba(204,0,0,0.8),     0 0 24px rgba(204,0,0,0.4); }
@@ -483,8 +491,8 @@
   box-shadow: inset 4px 0 16px rgba(204,0,0,0.22) !important;
 }
 .cam-row-selected .cam-name {
-  color: #ff4d4d !important;
-  text-shadow: 0 0 8px rgba(204,0,0,0.6);
+  color: #ff2a2a !important;
+  text-shadow: 0 0 6px rgba(255,42,42,0.7), 0 0 16px rgba(204,0,0,0.55) !important;
 }
 
 /* Hover: quick red flash */

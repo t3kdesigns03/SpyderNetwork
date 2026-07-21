@@ -53,6 +53,10 @@ export function CamStation() {
   const [search, setSearch] = useState("");
   const [favOnly, setFavOnly] = useState(false);
   const [tab, setTab] = useState<Tab>("cams");
+  // Bumped when the user re-clicks the already-active cam. Folded into the
+  // CamPlayer `key` so React remounts ONLY that player (reloading its iframe/
+  // HLS) without touching selection, scroll, or cycle state.
+  const [refreshKey, setRefreshKey] = useState(0);
   // Landscape mobile: video goes fullscreen, all other UI collapses
   const isLandscape = useIsLandscapeMobile();
 
@@ -245,6 +249,23 @@ export function CamStation() {
       return n;
     });
 
+  // Single entry point for tapping a cam (featured hero row + every cam row).
+  // If it's ALREADY the active cam we don't re-select — that would re-run the
+  // selection effects (scroll-to-top / scroll-into-view) and reset the view.
+  // Instead we only bump refreshKey, remounting that one player to reload its
+  // feed. Selection highlight, cycle state, and scroll position stay put.
+  const selectCam = useCallback(
+    (cam: Cam) => {
+      if (selected?.id === cam.id) {
+        setRefreshKey((k) => k + 1);
+        return;
+      }
+      setSelected(cam);
+      setIsCycling(false);
+    },
+    [selected]
+  );
+
   const displayList = useMemo(() => {
     let list = ALL_CAMS;
     if (favOnly) list = list.filter((c) => favorites.has(c.id));
@@ -431,7 +452,7 @@ export function CamStation() {
                 : "aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0"
             )}>
               {selected ? (
-                <CamPlayer cam={selected} key={selected.id} autoplay />
+                <CamPlayer cam={selected} key={`${selected.id}:${refreshKey}`} autoplay />
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center px-6">
                   <div className="w-16 h-16 rounded-2xl bg-spyder-red/10 border border-spyder-red/20 flex items-center justify-center">
@@ -642,7 +663,7 @@ export function CamStation() {
                 >
                   Spyder Feeds
                 </span>
-                <span className="ml-auto text-[10px] font-mono uppercase tracking-widest text-spyder-red/80 tabular-nums">
+                <span className="ml-auto text-[10px] font-mono uppercase tracking-widest text-neon-cyan tabular-nums">
                   {ALL_CAMS.length} live · {CAM_BUSINESSES.length} spots
                 </span>
               </div>
@@ -751,13 +772,13 @@ export function CamStation() {
                   <span className="text-xs text-white font-medium truncate">
                     {selected.business}{selected.name ? ` · ${selected.name}` : ""}
                   </span>
-                  <span className="ml-auto text-xs text-spyder-red font-bold shrink-0">LIVE</span>
+                  <span className="ml-auto text-xs text-neon-red font-bold shrink-0">LIVE</span>
                 </div>
               )}
 
               {/* ── Hero / Featured cam ── */}
               <button
-                onClick={() => { setSelected(HERO_CAM); setIsCycling(false); }}
+                onClick={() => selectCam(HERO_CAM)}
                 className={clsx(
                   "w-full flex items-center gap-3 px-3 py-3 border-b-2 transition-all duration-150",
                   selected?.id === HERO_CAM.id
@@ -767,7 +788,7 @@ export function CamStation() {
               >
                 <Zap className="w-4 h-4 text-spyder-red shrink-0" />
                 <div className="flex-1 text-left min-w-0">
-                  <p className="text-xs font-bold text-spyder-red tracking-widest uppercase">Featured</p>
+                  <p className="text-xs font-bold text-neon-red tracking-widest uppercase">Featured</p>
                   <p className="text-xs text-spyder-gray truncate">SpyderNetwork Main Feed</p>
                 </div>
                 {selected?.id === HERO_CAM.id && (
@@ -793,7 +814,7 @@ export function CamStation() {
                       isEnabled={enabled.has(cam.id)}
                       isFavorite={favorites.has(cam.id)}
                       status={camStatus[cam.id]}
-                      onSelect={() => { setSelected(cam); setIsCycling(false); }}
+                      onSelect={() => selectCam(cam)}
                       onToggleEnabled={() => toggleEnabled(cam.id)}
                       onToggleFav={() => toggleFav(cam.id)}
                     />
@@ -841,7 +862,7 @@ export function CamStation() {
                           />
                           <span
                             className="biz-name flex-1 text-left text-xs font-bold tracking-wide truncate"
-                            style={activeCam ? { color: "#ff4d4d", textShadow: "0 0 8px #cc0000, 0 0 20px rgba(204,0,0,0.5)" } : { color: "white" }}
+                            style={activeCam ? { color: "#ff2a2a", textShadow: "0 0 6px rgba(255,42,42,0.75), 0 0 18px rgba(204,0,0,0.55)" } : { color: "white" }}
                           >
                             {biz}
                           </span>
@@ -875,7 +896,7 @@ export function CamStation() {
                           </a>
                         )}
 
-                        <span className="text-xs text-spyder-gray/70 shrink-0 tabular-nums">{cams.length}</span>
+                        <span className="text-xs text-neon-red shrink-0 tabular-nums">{cams.length}</span>
                         {activeCam && (
                           <span className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ background: "#ff2a2a", boxShadow: "0 0 8px #cc0000, 0 0 16px rgba(204,0,0,0.7)" }} />
                         )}
@@ -891,7 +912,7 @@ export function CamStation() {
                           isEnabled={enabled.has(cam.id)}
                           isFavorite={favorites.has(cam.id)}
                           status={camStatus[cam.id]}
-                          onSelect={() => { setSelected(cam); setIsCycling(false); }}
+                          onSelect={() => selectCam(cam)}
                           onToggleEnabled={() => toggleEnabled(cam.id)}
                           onToggleFav={() => toggleFav(cam.id)}
                         />
@@ -1082,13 +1103,13 @@ function CamRow({
       <button onClick={onSelect} className="flex-1 text-left min-w-0">
         {showBusiness ? (
           <>
-            <p className="cam-name text-sm font-semibold leading-snug truncate transition-colors" style={isSelected ? { color: "#ff4d4d", textShadow: "0 0 8px rgba(204,0,0,0.7)" } : { color: "rgba(255,255,255,0.9)" }}>
+            <p className="cam-name text-sm font-semibold leading-snug truncate transition-colors" style={isSelected ? { color: "#ff2a2a", textShadow: "0 0 6px rgba(255,42,42,0.7), 0 0 16px rgba(204,0,0,0.55)" } : { color: "rgba(255,255,255,0.9)" }}>
               {cam.business}
             </p>
             <p className="text-xs text-spyder-gray/80 truncate">{cam.name}</p>
           </>
         ) : (
-          <p className="cam-name text-sm leading-snug truncate transition-colors" style={isSelected ? { color: "#ff4d4d", textShadow: "0 0 8px rgba(204,0,0,0.7)", fontWeight: 600 } : { color: "#9ca3af" }}>
+          <p className="cam-name text-sm leading-snug truncate transition-colors" style={isSelected ? { color: "#ff2a2a", textShadow: "0 0 6px rgba(255,42,42,0.7), 0 0 16px rgba(204,0,0,0.55)", fontWeight: 600 } : { color: "#9ca3af" }}>
             {cam.name}
           </p>
         )}
