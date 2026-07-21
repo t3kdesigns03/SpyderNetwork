@@ -13,7 +13,10 @@ import type { Cam } from "@/types";
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 const ADMIN_URL = "https://beta.spydernetwork.com/admin/viewers";
 
-const FROM = process.env.ALERT_EMAIL_FROM ?? "SpyderNetwork Alerts <onboarding@resend.dev>";
+// Sends from the verified beta.spydernetwork.com domain (verified in the Resend
+// account whose RESEND_API_KEY is configured in Netlify). Override via env.
+const FROM = process.env.ALERT_EMAIL_FROM ?? "SpyderNetwork Alerts <alerts@beta.spydernetwork.com>";
+// With a verified domain, alerts can go to any inbox. Override with ALERT_EMAIL_TO.
 const TO = process.env.ALERT_EMAIL_TO ?? "b.reilly03@gmail.com";
 
 /** ms → "1 hour 12 minutes" / "45 minutes" / "1 day 3 hours". */
@@ -136,17 +139,28 @@ function renderOfflineEmail(cam: Cam, downtimeMs: number, sinceMs: number): stri
 </html>`;
 }
 
+export interface SendResult {
+  ok: boolean;
+  status?: number;
+  detail?: string;
+  from: string;
+  to: string;
+}
+
 /**
- * Sends the offline alert email. Returns true only if Resend accepted it, so the
- * caller only records the alert (and enforces the 24h cooldown) on real success.
+ * Sends the offline alert email. Returns { ok } plus diagnostics (HTTP status +
+ * Resend's response body on failure, and the from/to used) so callers can report
+ * exactly why a send failed. Only records the alert / 24h cooldown when ok.
  */
 export async function sendOfflineAlertEmail(
   cam: Cam,
   downtimeMs: number,
   sinceMs: number
-): Promise<boolean> {
+): Promise<SendResult> {
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return false;
+  if (!apiKey) {
+    return { ok: false, detail: "RESEND_API_KEY is not set in this environment", from: FROM, to: TO };
+  }
 
   const camName = friendlyName(cam);
   try {
@@ -163,8 +177,20 @@ export async function sendOfflineAlertEmail(
         html: renderOfflineEmail(cam, downtimeMs, sinceMs),
       }),
     });
-    return res.ok;
-  } catch {
-    return false;
+
+    if (res.ok) return { ok: true, status: res.status, from: FROM, to: TO };
+
+    // Surface Resend's actual error (e.g. unverified domain, recipient
+    // restricted to the account owner, bad key) instead of a generic message.
+    let detail = `Resend responded ${res.status}`;
+    try {
+      const body = await res.text();
+      if (body) detail += `: ${body.slice(0, 400)}`;
+    } catch {
+      /* ignore body read errors */
+    }
+    return { ok: false, status: res.status, detail, from: FROM, to: TO };
+  } catch (err) {
+    return { ok: false, detail: `request error: ${String(err)}`, from: FROM, to: TO };
   }
 }

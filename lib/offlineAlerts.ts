@@ -79,7 +79,7 @@ export async function runOfflineCheck(baseUrl: string): Promise<OfflineCheckResu
     // 5. Send, and only record the alert on real success (so a failed send
     //    retries next run instead of silently starting the cooldown).
     const sent = await sendOfflineAlertEmail(cam, downtime, since);
-    if (sent) {
+    if (sent.ok) {
       await redis.set(alertKey, now, { ex: STATE_TTL_SECONDS });
       result.alertsSent.push(cam.id);
     }
@@ -100,6 +100,9 @@ export interface TestAlertResult {
   downtimeMs?: number;
   humanDuration?: string;
   simulatedDuration?: boolean; // true if we faked the duration (no real offline:since)
+  resendStatus?: number; // HTTP status from Resend, when a send was attempted
+  sentFrom?: string;
+  sentTo?: string;
   error?: string;
 }
 
@@ -141,13 +144,16 @@ export async function runTestAlert(
   const sent = await sendOfflineAlertEmail(cam, downtimeMs, sinceMs);
 
   return {
-    ok: sent,
+    ok: sent.ok,
     camId: cam.id,
     camName,
     source,
     downtimeMs,
     humanDuration: formatDuration(downtimeMs),
     simulatedDuration,
-    ...(sent ? {} : { error: "email send failed (check RESEND_API_KEY)" }),
+    resendStatus: sent.status,
+    sentFrom: sent.from,
+    sentTo: sent.to,
+    ...(sent.ok ? {} : { error: sent.detail ?? "email send failed" }),
   };
 }
