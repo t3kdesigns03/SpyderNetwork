@@ -13,9 +13,10 @@ import type { Cam } from "@/types";
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 const ADMIN_URL = "https://beta.spydernetwork.com/admin/viewers";
 
-// Sends from the verified beta.spydernetwork.com domain (verified in the Resend
-// account whose RESEND_API_KEY is configured in Netlify). Override via env.
-const FROM = process.env.ALERT_EMAIL_FROM ?? "SpyderNetwork Alerts <alerts@beta.spydernetwork.com>";
+// Sends from the verified alerts.spydernetwork.com domain (verified in the Resend
+// account whose RESEND_API_KEY is configured in Netlify). The from-domain MUST
+// match the verified domain. Override the local part / display name via env.
+const FROM = process.env.ALERT_EMAIL_FROM ?? "SpyderNetwork Alerts <noreply@alerts.spydernetwork.com>";
 // With a verified domain, alerts can go to any inbox. Override with ALERT_EMAIL_TO.
 const TO = process.env.ALERT_EMAIL_TO ?? "b.reilly03@gmail.com";
 

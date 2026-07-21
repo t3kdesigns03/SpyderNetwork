@@ -9,3 +9,9 @@ This should affect:
 - The sitemap (if it uses the same base URL)
 
 Do not change any other logic. Keep everything else exactly the same. After making the change, show me the updated relevant parts of `lib/seo.ts`.
+
+
+
+spyder_offline_7f3k9x2m
+
+resend re_j4SszcsF_D8BscRYLECFKRnFw5e2Mff9U
