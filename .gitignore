@@ -32,3 +32,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# scratch notes / working files (may contain pasted secrets — keep out of git)
+reverse_cutover_seo_apexdomain.txt
+*.scratch.txt
+*.local.notes.txt
