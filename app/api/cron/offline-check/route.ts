@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { runOfflineCheck } from "@/lib/offlineAlerts";
+import { runOfflineCheck, runTestAlert } from "@/lib/offlineAlerts";
 
 /**
  * GET|POST /api/cron/offline-check
@@ -34,6 +34,22 @@ async function handle(req: Request) {
 
   const url = new URL(req.url);
   const baseUrl = `${url.protocol}//${url.host}`;
+
+  // ── Test mode ── force-send one branded alert, bypassing the timing rules.
+  //   ?test=1[&camId=SOME_CAM_ID]
+  // Never updates the alert:last cooldown, so it won't affect real alerting.
+  if (url.searchParams.get("test") === "1") {
+    try {
+      const camId = url.searchParams.get("camId");
+      const result = await runTestAlert(baseUrl, camId);
+      return NextResponse.json(
+        { mode: "test", testAlertSent: result.ok, ...result },
+        { status: result.ok ? 200 : result.error?.startsWith("unknown camId") || result.error?.includes("offline") ? 400 : 502 }
+      );
+    } catch {
+      return NextResponse.json({ mode: "test", ok: false, error: "test failed" }, { status: 500 });
+    }
+  }
 
   try {
     const result = await runOfflineCheck(baseUrl);

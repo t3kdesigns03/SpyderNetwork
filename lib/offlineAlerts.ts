@@ -1,6 +1,6 @@
 import { getRedis } from "@/lib/redis";
 import { ALL_CAMS } from "@/lib/cams";
-import { sendOfflineAlertEmail } from "@/lib/email";
+import { sendOfflineAlertEmail, formatDuration } from "@/lib/email";
 
 /**
  * Offline-alert engine.
@@ -86,4 +86,68 @@ export async function runOfflineCheck(baseUrl: string): Promise<OfflineCheckResu
   }
 
   return result;
+}
+
+// ─── Test mode ────────────────────────────────────────────────────────────────
+// Force-sends ONE branded alert without any of the 45-min / 24h gating, for
+// manual testing. It never writes offline:since or alert:last, so it can't
+// interfere with the real alert schedule.
+export interface TestAlertResult {
+  ok: boolean;
+  camId?: string;
+  camName?: string;
+  source?: "param" | "first-offline";
+  downtimeMs?: number;
+  humanDuration?: string;
+  simulatedDuration?: boolean; // true if we faked the duration (no real offline:since)
+  error?: string;
+}
+
+export async function runTestAlert(
+  baseUrl: string,
+  camIdParam?: string | null
+): Promise<TestAlertResult> {
+  const now = Date.now();
+
+  // Resolve the target camera.
+  let cam = camIdParam ? ALL_CAMS.find((c) => c.id === camIdParam) : undefined;
+  let source: "param" | "first-offline" = "param";
+
+  if (camIdParam && !cam) {
+    return { ok: false, error: `unknown camId: ${camIdParam}` };
+  }
+
+  if (!cam) {
+    // No camId given → pick the first camera currently reporting offline.
+    const res = await fetch(`${baseUrl}/api/cam-status`, { cache: "no-store" });
+    if (!res.ok) return { ok: false, error: `cam-status responded ${res.status}` };
+    const { statuses } = (await res.json()) as { statuses: Record<string, string> };
+    cam = ALL_CAMS.find((c) => statuses[c.id] === "offline");
+    source = "first-offline";
+    if (!cam) return { ok: false, error: "no cameras are currently offline" };
+  }
+
+  // Use the real recorded downtime if we have it; otherwise simulate 45 min so
+  // the email shows a sensible duration.
+  const redis = getRedis();
+  const sinceRaw = Number(await redis.get<number>(`offline:since:${cam.id}`)) || 0;
+  const simulatedDuration = sinceRaw === 0;
+  const sinceMs = sinceRaw || now - OFFLINE_THRESHOLD_MS;
+  const downtimeMs = now - sinceMs;
+
+  const camName = cam.name ? `${cam.business} – ${cam.name}` : cam.business;
+
+  // Force-send via the real branded template. Does NOT touch alert:last.
+  const sent = await sendOfflineAlertEmail(cam, downtimeMs, sinceMs);
+
+  return {
+    ok: sent,
+    camId: cam.id,
+    camName,
+    source,
+    downtimeMs,
+    humanDuration: formatDuration(downtimeMs),
+    simulatedDuration,
+    ...(sent ? {} : { error: "email send failed (check RESEND_API_KEY)" }),
+  };
 }
