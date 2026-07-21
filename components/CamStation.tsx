@@ -835,7 +835,7 @@ export function CamStation() {
 
                   // Left border shifts: active > premium > featured > none
                   const headerStyle = activeCam
-                    ? { borderLeft: "3px solid #cc0000", boxShadow: "inset 4px 0 16px rgba(204,0,0,0.18)", background: "linear-gradient(90deg,rgba(204,0,0,0.11) 0%,rgba(9,8,10,0.97) 100%)" }
+                    ? { borderLeft: "3px solid #ff1a1a", boxShadow: "none", background: "rgba(255,26,26,0.12)" }
                     : bizTier === "premium"
                     ? { borderLeft: "3px solid rgba(204,0,0,0.55)" }
                     : bizTier === "featured"
@@ -862,7 +862,7 @@ export function CamStation() {
                           />
                           <span
                             className="biz-name flex-1 text-left text-xs font-bold tracking-wide truncate"
-                            style={activeCam ? { color: "#ff2a2a", textShadow: "0 0 6px rgba(255,42,42,0.75), 0 0 18px rgba(204,0,0,0.55)" } : { color: "white" }}
+                            style={activeCam ? { color: "#ffffff", textShadow: "0 1px 3px rgba(0,0,0,0.55)" } : { color: "white" }}
                           >
                             {biz}
                           </span>
@@ -1075,7 +1075,7 @@ function CamRow({
         "border-l-[3px]",
         isSelected ? "cam-row-selected" : "border-l-transparent"
       )}
-      style={isSelected ? { background: "linear-gradient(90deg,rgba(204,0,0,0.16) 0%,rgba(204,0,0,0.03) 100%)", borderLeftColor: "#cc0000", boxShadow: "inset 4px 0 20px rgba(204,0,0,0.2)" } : {}}
+      style={isSelected ? { background: "rgba(255,26,26,0.12)", borderLeftColor: "#ff1a1a", boxShadow: "none" } : {}}
     >
       {/* Spyder switch */}
       <SpyderSwitch
@@ -1103,13 +1103,13 @@ function CamRow({
       <button onClick={onSelect} className="flex-1 text-left min-w-0">
         {showBusiness ? (
           <>
-            <p className="cam-name text-sm font-semibold leading-snug truncate transition-colors" style={isSelected ? { color: "#ff2a2a", textShadow: "0 0 6px rgba(255,42,42,0.7), 0 0 16px rgba(204,0,0,0.55)" } : { color: "rgba(255,255,255,0.9)" }}>
+            <p className="cam-name text-sm font-semibold leading-snug truncate transition-colors" style={isSelected ? { color: "#ff4d4d", textShadow: "0 0 4px rgba(0,0,0,0.6)" } : { color: "rgba(255,255,255,0.9)" }}>
               {cam.business}
             </p>
             <p className="text-xs text-spyder-gray/80 truncate">{cam.name}</p>
           </>
         ) : (
-          <p className="cam-name text-sm leading-snug truncate transition-colors" style={isSelected ? { color: "#ff2a2a", textShadow: "0 0 6px rgba(255,42,42,0.7), 0 0 16px rgba(204,0,0,0.55)", fontWeight: 600 } : { color: "#9ca3af" }}>
+          <p className="cam-name text-sm leading-snug truncate transition-colors" style={isSelected ? { color: "#ff4d4d", textShadow: "0 0 4px rgba(0,0,0,0.6)", fontWeight: 600 } : { color: "#9ca3af" }}>
             {cam.name}
           </p>
         )}
