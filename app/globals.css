@@ -491,8 +491,8 @@
   box-shadow: none !important;
 }
 .cam-row-selected .cam-name {
-  color: #ffffff !important;
-  text-shadow: 0 0 4px rgba(0,0,0,0.5) !important;
+  color: #00f0ff !important;
+  text-shadow: 0 0 6px rgba(0,240,255,0.6), 0 0 14px rgba(0,229,255,0.35) !important;
 }
 
 /* Hover: quick red flash */

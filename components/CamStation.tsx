@@ -860,7 +860,7 @@ export function CamStation() {
                           />
                           <span
                             className="biz-name flex-1 text-left text-xs font-bold tracking-wide truncate"
-                            style={activeCam ? { color: "#ffffff", textShadow: "0 1px 3px rgba(0,0,0,0.55)" } : { color: "white" }}
+                            style={activeCam ? { color: "#00f0ff", textShadow: "0 0 6px rgba(0,240,255,0.6), 0 0 14px rgba(0,229,255,0.35)" } : { color: "white" }}
                           >
                             {biz}
                           </span>
@@ -1098,13 +1098,13 @@ function CamRow({
       <button onClick={onSelect} className="flex-1 text-left min-w-0">
         {showBusiness ? (
           <>
-            <p className="cam-name text-sm font-semibold leading-snug truncate transition-colors" style={isSelected ? { color: "#ffffff", textShadow: "0 0 4px rgba(0,0,0,0.5)" } : { color: "rgba(255,255,255,0.9)" }}>
+            <p className="cam-name text-sm font-semibold leading-snug truncate transition-colors" style={isSelected ? { color: "#00f0ff", textShadow: "0 0 6px rgba(0,240,255,0.6), 0 0 14px rgba(0,229,255,0.35)" } : { color: "rgba(255,255,255,0.9)" }}>
               {cam.business}
             </p>
             <p className="text-xs text-spyder-gray/80 truncate">{cam.name}</p>
           </>
         ) : (
-          <p className="cam-name text-sm leading-snug truncate transition-colors" style={isSelected ? { color: "#ffffff", textShadow: "0 0 4px rgba(0,0,0,0.5)", fontWeight: 600 } : { color: "#9ca3af" }}>
+          <p className="cam-name text-sm leading-snug truncate transition-colors" style={isSelected ? { color: "#00f0ff", textShadow: "0 0 6px rgba(0,240,255,0.6), 0 0 14px rgba(0,229,255,0.35)", fontWeight: 600 } : { color: "#9ca3af" }}>
             {cam.name}
           </p>
         )}
