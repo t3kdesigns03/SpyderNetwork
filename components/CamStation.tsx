@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo, type CSSProperties } from "react";
 import {
-  Star, Search, Play, Pause, SkipBack, SkipForward, RotateCcw, Maximize2,
+  Search, Play, SkipBack, SkipForward, Maximize2,
   Map, Video, Thermometer, X, Cast, ExternalLink, ChevronDown, Zap, Loader2, Handshake,
 } from "lucide-react";
 import { clsx } from "clsx";
@@ -277,7 +277,7 @@ export function CamStation() {
       style={isLandscape ? { height: "100dvh", width: "100dvw" } : { height: "calc(100dvh - 56px)" }}
     >
       {/* ── Tab bar — hidden in landscape mobile ─────────── */}
-      <div className={clsx("flex shrink-0", isLandscape && "!hidden")} style={{ background: "#050810", borderBottom: "2px solid rgba(0,212,255,0.35)", boxShadow: "0 0 20px rgba(0,212,255,0.2), 0 4px 20px rgba(0,0,0,0.6)" }}>
+      <div className={clsx("flex shrink-0", isLandscape && "!hidden")} style={{ background: "#0a0506", borderBottom: "2px solid rgba(204,0,0,0.4)", boxShadow: "0 0 20px rgba(204,0,0,0.18), 0 4px 20px rgba(0,0,0,0.6)" }}>
         {/* Silver "chrome" gradient shared by the Partners tab icon + label. */}
         <svg aria-hidden="true" width="0" height="0" style={{ position: "absolute" }}>
           <defs>
@@ -345,11 +345,11 @@ export function CamStation() {
               onClick={() => setTab(key)}
               className={clsx(
                 "flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold tracking-widest border-b-[3px] transition-all min-h-[48px] touch-manipulation",
-                isActive ? "border-spyder-cyan text-spyder-cyan" : "text-spyder-gray border-transparent"
+                isActive ? "border-spyder-red text-spyder-red-bright" : "text-spyder-gray border-transparent"
               )}
-              // Skip the cyan text-glow on PARTNERS so it doesn't fight the
-              // metallic label; the cyan underline + icon still signal "active".
-              style={isActive && key !== "partners" ? { textShadow: "0 0 10px #00d4ff, 0 0 24px rgba(0,212,255,0.5)", filter: "drop-shadow(0 2px 6px rgba(0,212,255,0.4))" } : {}}
+              // Skip the red text-glow on PARTNERS so it doesn't fight the
+              // metallic label; the red underline + icon still signal "active".
+              style={isActive && key !== "partners" ? { textShadow: "0 0 10px #cc0000, 0 0 24px rgba(204,0,0,0.5)", filter: "drop-shadow(0 2px 6px rgba(204,0,0,0.4))" } : {}}
             >
               <Icon
                 className={clsx("shrink-0", key === "partners" ? "w-5 h-5 sm:w-3.5 sm:h-3.5" : "w-3.5 h-3.5")}
@@ -532,86 +532,122 @@ export function CamStation() {
               )}
             </div>
 
-            {/* Progress bar — hidden in landscape mobile */}
-            <div className={clsx("h-0.5 bg-white/10 shrink-0", isLandscape && "!hidden")}>
+            {/* Cycle progress seam — a glowing red edge that fills as the
+                interval elapses; hidden in landscape mobile. Replaces the thin
+                flat progress bar with a cinematic lit seam. */}
+            <div className={clsx("relative h-[3px] bg-black/70 shrink-0 overflow-hidden", isLandscape && "!hidden")}>
               <div
-                className="h-full bg-spyder-red transition-all duration-1000 ease-linear"
-                style={{ width: isCycling ? `${progressPct}%` : "0%" }}
+                className="absolute inset-y-0 left-0 transition-all duration-1000 ease-linear"
+                style={{
+                  width: isCycling ? `${progressPct}%` : "0%",
+                  background: "linear-gradient(90deg, rgba(139,0,0,0.5), #cc0000 55%, #ff3b1f)",
+                  boxShadow: isCycling ? "0 0 10px rgba(204,0,0,0.9)" : "none",
+                }}
               />
             </div>
 
-            {/* Controls bar — single row on all breakpoints; hidden in landscape mobile */}
-            <div className={clsx("neon-controls flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 shrink-0 min-h-[48px] overflow-x-auto scrollbar-hide", isLandscape && "!hidden")}>
-              {/* Prev / Next */}
+            {/* Control deck — angular, red-lit; hidden in landscape mobile */}
+            <div className={clsx("neon-controls flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 shrink-0 min-h-[52px] overflow-x-auto scrollbar-hide", isLandscape && "!hidden")}>
+              {/* Prev / Next — angular web-tab buttons */}
               <button
                 onClick={goPrev}
-                className="w-9 h-9 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                className="w-9 h-9 flex items-center justify-center rounded-md border border-white/15 bg-white/[0.04] text-white/80 hover:text-white hover:border-spyder-red/60 hover:bg-spyder-red/15 transition-colors"
                 aria-label="Previous cam"
               >
-                <SkipBack className="w-4 h-4 text-white" />
+                <SkipBack className="w-4 h-4" />
               </button>
               <button
                 onClick={goNext}
-                className="w-9 h-9 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                className="w-9 h-9 flex items-center justify-center rounded-md border border-white/15 bg-white/[0.04] text-white/80 hover:text-white hover:border-spyder-red/60 hover:bg-spyder-red/15 transition-colors"
                 aria-label="Next cam"
               >
-                <SkipForward className="w-4 h-4 text-white" />
+                <SkipForward className="w-4 h-4" />
               </button>
 
-              <div className="w-px h-5 bg-white/15" />
+              <div className="w-px h-5 bg-white/10" />
 
-              {/* Cycle toggle */}
+              {/* Cycle / LIVE indicator — the hero control. When cycling it
+                  becomes a lit red "CYCLING" badge with a live pulse rather
+                  than a plain toggle. */}
               <button
                 onClick={() => setIsCycling((v) => !v)}
+                aria-pressed={isCycling}
                 className={clsx(
-                  "flex items-center gap-2 px-3 h-9 rounded-lg text-xs font-semibold transition-all",
-                  isCycling
-                    ? "bg-spyder-red text-white shadow-live"
-                    : "bg-white/10 text-spyder-gray hover:text-white"
+                  "flex items-center gap-2 pl-2.5 pr-3 h-9 rounded-md text-xs font-bold uppercase tracking-wider transition-all shrink-0",
+                  !isCycling && "border border-white/15 bg-white/[0.04] text-spyder-gray hover:text-white hover:border-spyder-red/50"
                 )}
+                style={
+                  isCycling
+                    ? {
+                        background: "linear-gradient(135deg,#cc0000,#8b0000)",
+                        border: "1px solid rgba(255,42,42,0.7)",
+                        color: "#fff",
+                        boxShadow: "0 0 14px rgba(204,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.12)",
+                      }
+                    : undefined
+                }
               >
                 {isCycling ? (
-                  <Pause className="w-3.5 h-3.5 fill-white" />
+                  <>
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-white/70 animate-ping" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
+                    </span>
+                    Cycling
+                  </>
                 ) : (
-                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <>
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    Cycle
+                  </>
                 )}
-                {isCycling ? "Cycling" : "Off"}
               </button>
 
-              <div className="w-px h-5 bg-white/15" />
+              <div className="w-px h-5 bg-white/10" />
 
-              {/* Interval picker */}
-              <div className="flex gap-1 shrink-0">
-                {INTERVALS.map(({ label, value }) => (
-                  <button
-                    key={value}
-                    onClick={() => setIntervalSecs(value)}
-                    className={clsx(
-                      "px-1.5 sm:px-2 h-8 min-w-[28px] sm:min-w-[32px] rounded text-xs font-mono transition-all touch-manipulation",
-                      intervalSecs === value
-                        ? "bg-spyder-red text-white"
-                        : "bg-white/10 text-spyder-gray hover:text-white"
-                    )}
-                  >
-                    {label}
-                  </button>
-                ))}
+              {/* Interval picker — sharp segmented control */}
+              <div className="flex items-center gap-1 shrink-0">
+                <span className="hidden sm:inline text-[10px] uppercase tracking-widest text-white/30 mr-0.5">Every</span>
+                {INTERVALS.map(({ label, value }) => {
+                  const on = intervalSecs === value;
+                  return (
+                    <button
+                      key={value}
+                      onClick={() => setIntervalSecs(value)}
+                      className={clsx(
+                        "px-1.5 sm:px-2 h-8 min-w-[28px] sm:min-w-[32px] rounded-md text-xs font-mono border transition-all touch-manipulation",
+                        on
+                          ? "bg-spyder-red text-white border-spyder-red-bright/70 shadow-[0_0_10px_rgba(204,0,0,0.45)]"
+                          : "bg-white/[0.04] text-spyder-gray border-white/10 hover:text-white hover:border-white/25"
+                      )}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
 
           {/* RIGHT: Cam list — hidden in landscape mobile ── */}
-          <div className={clsx("neon-sidebar relative flex flex-col w-full lg:w-72 xl:w-80 lg:min-h-0", isLandscape && "!hidden")} style={{ borderTop: "2px solid rgba(168,85,247,0.4)", boxShadow: "0 -4px 20px rgba(168,85,247,0.15)" }}>
+          <div className={clsx("neon-sidebar relative flex flex-col w-full lg:w-72 xl:w-80 lg:min-h-0", isLandscape && "!hidden")} style={{ borderTop: "2px solid rgba(204,0,0,0.4)", boxShadow: "0 -4px 20px rgba(204,0,0,0.15)" }}>
 
             {/* List header */}
             <div className="neon-list-header px-3 pt-3 pb-2 shrink-0 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-display text-xs font-bold tracking-widest uppercase" style={{ color: "#a855f7", textShadow: "0 0 10px #a855f7, 0 0 24px rgba(168,85,247,0.6)", letterSpacing: "0.15em" }}>
-                  {ALL_CAMS.length} CAMS · {CAM_BUSINESSES.length} LOCATIONS
+              <div className="flex items-center gap-2">
+                <SpiderMark className="w-4 h-4 shrink-0" filled />
+                <span
+                  className="font-display text-sm font-bold uppercase text-white"
+                  style={{ letterSpacing: "0.18em", textShadow: "0 0 12px rgba(204,0,0,0.55)" }}
+                >
+                  Spyder Feeds
+                </span>
+                <span className="ml-auto text-[10px] font-mono uppercase tracking-widest text-spyder-red/80 tabular-nums">
+                  {ALL_CAMS.length} live · {CAM_BUSINESSES.length} spots
                 </span>
               </div>
 
-              {/* Cycle Selected / Cycle Favorites */}
+              {/* Cycle Selected / Cycle Favorites — angular web-cut buttons */}
               <div className="flex gap-2">
                 <button
                   onClick={() => {
@@ -619,10 +655,10 @@ export function CamStation() {
                     setIsCycling(true);
                   }}
                   className={clsx(
-                    "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all min-h-[36px] border",
+                    "spyder-cut flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-bold uppercase tracking-wider transition-all min-h-[38px] border",
                     cycleMode === "selected" && isCycling
                       ? "neon-cycle-active"
-                      : "bg-white/5 border-white/10 text-white hover:bg-white/10"
+                      : "bg-white/[0.04] border-white/12 text-white/85 hover:bg-spyder-red/12 hover:border-spyder-red/50"
                   )}
                 >
                   <Play className="w-3 h-3 fill-current" />
@@ -635,14 +671,14 @@ export function CamStation() {
                   }}
                   disabled={favorites.size === 0}
                   className={clsx(
-                    "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all min-h-[36px] border",
+                    "spyder-cut flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-bold uppercase tracking-wider transition-all min-h-[38px] border",
                     cycleMode === "favorites" && isCycling
-                      ? "bg-spyder-red border-spyder-red text-white"
-                      : "bg-white/5 border-white/10 text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                      ? "neon-cycle-active"
+                      : "bg-white/[0.04] border-white/12 text-white/85 hover:bg-spyder-red/12 hover:border-spyder-red/50 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white/[0.04] disabled:hover:border-white/12"
                   )}
                 >
-                  <Star className="w-3 h-3 fill-current" />
-                  Cycle Favorites
+                  <SpiderMark className="w-3.5 h-3.5" filled />
+                  Cycle Web
                 </button>
               </div>
 
@@ -668,20 +704,20 @@ export function CamStation() {
                 )}
               </div>
 
-              {/* Favorites Only toggle */}
+              {/* Web Only (favorites) filter */}
               <button
                 onClick={() => setFavOnly((v) => !v)}
                 className={clsx(
-                  "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all min-h-[32px] border",
+                  "w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-semibold transition-all min-h-[34px] border",
                   favOnly
-                    ? "bg-spyder-gold/15 border-spyder-gold/40 text-spyder-gold"
+                    ? "bg-spyder-red/15 border-spyder-red/50 text-spyder-red-bright shadow-[0_0_10px_rgba(204,0,0,0.25)]"
                     : "bg-white/5 border-white/10 text-spyder-gray hover:text-white hover:bg-white/10"
                 )}
               >
-                <Star className={clsx("w-3.5 h-3.5", favOnly && "fill-current")} />
-                Favorites Only
+                <SpiderMark className="w-3.5 h-3.5" filled={favOnly} />
+                On My Web
                 {favorites.size > 0 && (
-                  <span className="ml-auto text-xs opacity-70">({favorites.size})</span>
+                  <span className="ml-auto text-xs opacity-70 tabular-nums">({favorites.size})</span>
                 )}
               </button>
 
@@ -778,11 +814,11 @@ export function CamStation() {
 
                   // Left border shifts: active > premium > featured > none
                   const headerStyle = activeCam
-                    ? { borderLeft: "3px solid #00d4ff", boxShadow: "inset 4px 0 16px rgba(0,212,255,0.15)", background: "linear-gradient(90deg,rgba(0,212,255,0.09) 0%,rgba(9,13,28,0.97) 100%)" }
+                    ? { borderLeft: "3px solid #cc0000", boxShadow: "inset 4px 0 16px rgba(204,0,0,0.18)", background: "linear-gradient(90deg,rgba(204,0,0,0.11) 0%,rgba(9,8,10,0.97) 100%)" }
                     : bizTier === "premium"
-                    ? { borderLeft: "3px solid rgba(168,85,247,0.45)" }
+                    ? { borderLeft: "3px solid rgba(204,0,0,0.55)" }
                     : bizTier === "featured"
-                    ? { borderLeft: "3px solid rgba(0,212,255,0.3)" }
+                    ? { borderLeft: "3px solid rgba(245,166,35,0.4)" }
                     : { borderLeft: "3px solid transparent" };
 
                   return (
@@ -805,7 +841,7 @@ export function CamStation() {
                           />
                           <span
                             className="biz-name flex-1 text-left text-xs font-bold tracking-wide truncate"
-                            style={activeCam ? { color: "#00d4ff", textShadow: "0 0 8px #00d4ff, 0 0 20px rgba(0,212,255,0.5)" } : { color: "white" }}
+                            style={activeCam ? { color: "#ff4d4d", textShadow: "0 0 8px #cc0000, 0 0 20px rgba(204,0,0,0.5)" } : { color: "white" }}
                           >
                             {biz}
                           </span>
@@ -828,9 +864,9 @@ export function CamStation() {
                             onClick={(e) => { e.stopPropagation(); trackPartnerSite(biz, bizUrl, "cam-sidebar"); }}
                             className="shrink-0 inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all touch-manipulation hover:brightness-125"
                             style={bizTier === "premium"
-                              ? { background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)", color: "#a855f7" }
+                              ? { background: "rgba(204,0,0,0.12)", border: "1px solid rgba(204,0,0,0.4)", color: "#ff4d4d" }
                               : bizTier === "featured"
-                              ? { background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.25)", color: "#00d4ff" }
+                              ? { background: "rgba(245,166,35,0.1)", border: "1px solid rgba(245,166,35,0.3)", color: "#f5a623" }
                               : { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.75)" }
                             }
                           >
@@ -841,7 +877,7 @@ export function CamStation() {
 
                         <span className="text-xs text-spyder-gray/70 shrink-0 tabular-nums">{cams.length}</span>
                         {activeCam && (
-                          <span className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ background: "#00d4ff", boxShadow: "0 0 8px #00d4ff, 0 0 16px rgba(0,212,255,0.7)" }} />
+                          <span className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ background: "#ff2a2a", boxShadow: "0 0 8px #cc0000, 0 0 16px rgba(204,0,0,0.7)" }} />
                         )}
                       </div>
 
@@ -909,7 +945,7 @@ function SpyderSwitch({
       title={label}
       onClick={onToggle}
       className={clsx(
-        "relative shrink-0 w-11 h-6 rounded-full border transition-all duration-300 touch-manipulation",
+        "relative shrink-0 w-11 h-6 rounded-[7px] border transition-all duration-300 touch-manipulation",
         "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-spyder-red",
         checked
           ? "bg-spyder-red/20 border-spyder-red/60 shadow-[0_0_8px_rgba(204,0,0,0.35)]"
@@ -918,7 +954,7 @@ function SpyderSwitch({
     >
       {/* Web-thread lines on the track when active */}
       {checked && (
-        <span className="absolute inset-0 rounded-full overflow-hidden opacity-30 pointer-events-none" aria-hidden>
+        <span className="absolute inset-0 rounded-[6px] overflow-hidden opacity-30 pointer-events-none" aria-hidden>
           <svg width="100%" height="100%" viewBox="0 0 44 24" preserveAspectRatio="none">
             <line x1="0" y1="12" x2="44" y2="12" stroke="#cc0000" strokeWidth="0.8" strokeDasharray="3 4" />
             <line x1="11" y1="0" x2="11" y2="24" stroke="#cc0000" strokeWidth="0.5" strokeDasharray="2 3" />
@@ -932,11 +968,11 @@ function SpyderSwitch({
       <span
         aria-hidden
         className={clsx(
-          "absolute top-0.5 left-0.5 w-5 h-5 rounded-full flex items-center justify-center",
+          "absolute top-0.5 left-0.5 w-5 h-5 rounded-[5px] flex items-center justify-center",
           "shadow-md transition-all duration-300",
           checked
             ? "translate-x-5 bg-spyder-red animate-cam-live"
-            : "translate-x-0 bg-[#1e2433]"
+            : "translate-x-0 bg-[#241012]"
         )}
       >
         <Video
@@ -955,6 +991,37 @@ function SpyderSwitch({
   );
 }
 
+
+// ─── SpiderMark ───────────────────────────────────────────────────────────────
+// Brand glyph that replaces the generic favorite "star". Uses currentColor so
+// text-color utilities drive it. `filled` fills the body (favorited / active).
+function SpiderMark({
+  className,
+  filled = false,
+}: {
+  className?: string;
+  filled?: boolean;
+}) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.3}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      {/* legs — 4 per side, two-segment for a crisp arachnid silhouette */}
+      <path d="M10 11 L6 8 L3 7 M10 12.3 L5 11.4 L2 10.4 M10 13.6 L5 14.4 L2 15.6 M10.4 15 L6.5 17.5 L3.6 19.2" />
+      <path d="M14 11 L18 8 L21 7 M14 12.3 L19 11.4 L22 10.4 M14 13.6 L19 14.4 L22 15.6 M13.6 15 L17.5 17.5 L20.4 19.2" />
+      {/* abdomen + cephalothorax */}
+      <ellipse cx="12" cy="13.4" rx="2.7" ry="3.5" fill={filled ? "currentColor" : "none"} />
+      <circle cx="12" cy="8.6" r="1.8" fill={filled ? "currentColor" : "none"} />
+    </svg>
+  );
+}
 
 // ─── Cam row ─────────────────────────────────────────────────────────────────
 function CamRow({
@@ -987,7 +1054,7 @@ function CamRow({
         "border-l-[3px]",
         isSelected ? "cam-row-selected" : "border-l-transparent"
       )}
-      style={isSelected ? { background: "linear-gradient(90deg,rgba(0,212,255,0.14) 0%,rgba(0,212,255,0.03) 100%)", borderLeftColor: "#00d4ff", boxShadow: "inset 4px 0 20px rgba(0,212,255,0.18)" } : {}}
+      style={isSelected ? { background: "linear-gradient(90deg,rgba(204,0,0,0.16) 0%,rgba(204,0,0,0.03) 100%)", borderLeftColor: "#cc0000", boxShadow: "inset 4px 0 20px rgba(204,0,0,0.2)" } : {}}
     >
       {/* Spyder switch */}
       <SpyderSwitch
@@ -996,31 +1063,32 @@ function CamRow({
         label={isEnabled ? "In Cycle" : "Add to Cycle"}
       />
 
-      {/* Favorite */}
+      {/* Favorite — a spider mark: filled red when on the user's web, faint outline otherwise */}
       <button
         onClick={onToggleFav}
         className={clsx(
           "shrink-0 w-7 h-7 flex items-center justify-center rounded-md transition-colors touch-manipulation",
           isFavorite
-            ? "text-spyder-gold"
-            : "text-white/20 hover:text-spyder-gold/70"
+            ? "text-spyder-red-bright"
+            : "text-white/20 hover:text-spyder-red/70"
         )}
-        aria-label={isFavorite ? "Unfavorite" : "Favorite"}
+        aria-label={isFavorite ? "Remove from your web" : "Add to your web"}
+        title={isFavorite ? "On your web" : "Add to your web"}
       >
-        <Star className={clsx("w-3.5 h-3.5", isFavorite && "fill-current")} />
+        <SpiderMark className="w-4 h-4" filled={isFavorite} />
       </button>
 
-      {/* Name — clicking selects the cam */}
+      {/* Name — business primary, view secondary. Clicking selects the cam. */}
       <button onClick={onSelect} className="flex-1 text-left min-w-0">
         {showBusiness ? (
           <>
-            <p className="cam-name text-sm font-medium leading-snug truncate transition-colors" style={isSelected ? { color: "#00d4ff", textShadow: "0 0 8px #00d4ff" } : { color: "rgba(255,255,255,0.8)" }}>
+            <p className="cam-name text-sm font-semibold leading-snug truncate transition-colors" style={isSelected ? { color: "#ff4d4d", textShadow: "0 0 8px rgba(204,0,0,0.7)" } : { color: "rgba(255,255,255,0.9)" }}>
               {cam.business}
             </p>
-            <p className="text-xs text-spyder-gray truncate">{cam.name}</p>
+            <p className="text-xs text-spyder-gray/80 truncate">{cam.name}</p>
           </>
         ) : (
-          <p className="cam-name text-sm leading-snug truncate transition-colors" style={isSelected ? { color: "#00d4ff", textShadow: "0 0 8px #00d4ff", fontWeight: 600 } : { color: "#9ca3af" }}>
+          <p className="cam-name text-sm leading-snug truncate transition-colors" style={isSelected ? { color: "#ff4d4d", textShadow: "0 0 8px rgba(204,0,0,0.7)", fontWeight: 600 } : { color: "#9ca3af" }}>
             {cam.name}
           </p>
         )}
@@ -1156,8 +1224,8 @@ function MapTab({ onSelectCam }: { onSelectCam: (cam: Cam) => void }) {
               <p className="font-display font-bold text-white text-base tracking-wide">One step to activate</p>
               <p className="text-spyder-gray text-sm leading-relaxed">
                 On spydernetwork.com, right-click the Google map → <em>View Frame Source</em>.
-                Find the value after <code className="text-spyder-cyan text-xs bg-white/5 px-1 py-0.5 rounded">mid=</code> and
-                paste it into <code className="text-spyder-cyan text-xs bg-white/5 px-1 py-0.5 rounded">SPYDER_MAP_MID</code> in{" "}
+                Find the value after <code className="text-spyder-red-bright text-xs bg-white/5 px-1 py-0.5 rounded">mid=</code> and
+                paste it into <code className="text-spyder-red-bright text-xs bg-white/5 px-1 py-0.5 rounded">SPYDER_MAP_MID</code> in{" "}
                 <code className="text-white/60 text-xs">CamStation.tsx</code>.
               </p>
             </div>
@@ -1179,7 +1247,7 @@ function MapTab({ onSelectCam }: { onSelectCam: (cam: Cam) => void }) {
         <button
           onClick={() => onSelectCam(HERO_CAM)}
           className="shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all touch-manipulation hover:brightness-125 active:scale-95"
-          style={{ background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff" }}
+          style={{ background: "rgba(204,0,0,0.12)", border: "1px solid rgba(204,0,0,0.4)", color: "#ff4d4d" }}
         >
           <Video className="w-3 h-3" />
           Watch Live
@@ -1376,7 +1444,7 @@ function CondCard({ label, value, note, highlight }: CondCardProps) {
       <p className="text-[10px] text-spyder-gray uppercase tracking-wider mb-1">{label}</p>
       <p
         className="font-display text-lg font-bold leading-none"
-        style={highlight ? { color: "#00d4ff", textShadow: "0 0 8px rgba(0,212,255,0.6)" } : { color: "white" }}
+        style={highlight ? { color: "#ff4d4d", textShadow: "0 0 8px rgba(204,0,0,0.6)" } : { color: "white" }}
       >
         {value}
       </p>

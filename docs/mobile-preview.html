@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SpyderNetwork — Mobile Player Preview (static)</title>
+<style>
+  :root{
+    --red:#cc0000; --red-bright:#ff1a1a; --red-ember:#ff3b1f; --crimson:#8b0000;
+    --navy:#0a0e1a; --gray:#9ca3af;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;font-family:Inter,system-ui,Arial,sans-serif;}
+  body{margin:0;background:#050506;color:#fff;display:flex;flex-wrap:wrap;gap:28px;justify-content:center;padding:28px 14px;}
+  .cap{width:100%;text-align:center;color:#8a8f99;font-size:13px;letter-spacing:.02em}
+  .phone{width:390px;max-width:100%;border:10px solid #15161a;border-radius:38px;overflow:hidden;background:#080709;box-shadow:0 20px 60px rgba(0,0,0,.6);}
+  .disp{font-family:Oswald,Impact,sans-serif;}
+  .web-bg{position:relative;}
+  .web-bg::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.06;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cg stroke='%23cc0000' stroke-width='0.6' fill='none'%3E%3Ccircle cx='200' cy='200' r='40'/%3E%3Ccircle cx='200' cy='200' r='80'/%3E%3Ccircle cx='200' cy='200' r='120'/%3E%3Ccircle cx='200' cy='200' r='160'/%3E%3Cline x1='200' y1='5' x2='200' y2='395'/%3E%3Cline x1='5' y1='200' x2='395' y2='200'/%3E%3Cline x1='31' y1='31' x2='369' y2='369'/%3E%3Cline x1='369' y1='31' x2='31' y2='369'/%3E%3C/g%3E%3C/svg%3E");}
+  /* tab bar */
+  .tabs{display:flex;background:#0a0506;border-bottom:2px solid rgba(204,0,0,.4);box-shadow:0 0 20px rgba(204,0,0,.18);}
+  .tab{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:48px;font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--gray);border-bottom:3px solid transparent}
+  .tab.on{color:var(--red-bright);border-bottom-color:var(--red);text-shadow:0 0 10px #cc0000,0 0 24px rgba(204,0,0,.5)}
+  .tab svg{width:15px;height:15px}
+  /* player header */
+  .phead{display:flex;align-items:center;gap:8px;padding:8px 12px;background:linear-gradient(90deg,rgba(10,4,4,1),rgba(14,10,10,.97));border-bottom:1px solid rgba(204,0,0,.22);border-left:3px solid #cc0000}
+  .live{display:inline-flex;align-items:center;gap:6px;background:var(--red);color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 9px;border-radius:999px;box-shadow:0 0 6px rgba(204,0,0,.9),0 0 16px rgba(204,0,0,.5)}
+  .live i{width:6px;height:6px;background:#fff;border-radius:50%;display:inline-block;animation:dp 1.4s ease-in-out infinite}
+  @keyframes dp{0%,100%{opacity:1}50%{opacity:.4}}
+  .biz{font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:14px}
+  .sub{color:var(--gray);font-size:12px}
+  .cast{margin-left:auto;color:var(--gray);font-size:12px;display:flex;align-items:center;gap:6px}
+  /* video */
+  .video{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden;
+    box-shadow:0 0 0 1px rgba(204,0,0,.45),0 0 18px rgba(204,0,0,.30),0 0 46px rgba(204,0,0,.14);animation:br 4.5s ease-in-out infinite}
+  @keyframes br{0%,100%{box-shadow:0 0 0 1px rgba(204,0,0,.45),0 0 12px rgba(204,0,0,.18)}50%{box-shadow:0 0 0 1px rgba(204,0,0,.45),0 0 22px rgba(204,0,0,.34)}}
+  .video .thumb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#2a2d36;font-size:13px;
+    background:radial-gradient(ellipse at 50% 40%,#12151d,#000)}
+  .c{position:absolute;width:22px;height:22px}
+  .tl{top:6px;left:6px;border-top:2px solid #ff2a2a;border-left:2px solid #ff2a2a;box-shadow:-2px -2px 10px rgba(204,0,0,.7)}
+  .tr{top:6px;right:6px;border-top:2px solid #ff2a2a;border-right:2px solid #ff2a2a;box-shadow:2px -2px 10px rgba(204,0,0,.7)}
+  .bl{bottom:6px;left:6px;border-bottom:2px solid #cc0000;border-left:2px solid #cc0000;box-shadow:-2px 2px 10px rgba(204,0,0,.7)}
+  .brr{bottom:6px;right:6px;border-bottom:2px solid #cc0000;border-right:2px solid #cc0000;box-shadow:2px 2px 10px rgba(204,0,0,.7)}
+  /* progress seam */
+  .seam{height:3px;background:#000;overflow:hidden}
+  .seam>i{display:block;height:100%;width:62%;background:linear-gradient(90deg,rgba(139,0,0,.5),#cc0000 55%,#ff3b1f);box-shadow:0 0 10px rgba(204,0,0,.9)}
+  /* control deck */
+  .deck{display:flex;align-items:center;gap:8px;min-height:52px;padding:8px 10px;overflow-x:auto;background:linear-gradient(90deg,#0a0506,#0e0a0a);border-top:1px solid rgba(204,0,0,.18)}
+  .deck::-webkit-scrollbar{display:none}
+  .sq{width:36px;height:36px;min-width:36px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);border-radius:6px;color:#fff}
+  .sq svg{width:16px;height:16px}
+  .divv{width:1px;height:20px;background:rgba(255,255,255,.1)}
+  .cyc{display:flex;align-items:center;gap:8px;height:36px;padding:0 12px 0 10px;border-radius:6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#fff;
+    background:linear-gradient(135deg,#cc0000,#8b0000);border:1px solid rgba(255,42,42,.7);box-shadow:0 0 14px rgba(204,0,0,.5)}
+  .cyc .pd{position:relative;width:8px;height:8px}
+  .cyc .pd b{position:absolute;inset:0;border-radius:50%;background:#fff}
+  .cyc .pd s{position:absolute;inset:0;border-radius:50%;background:rgba(255,255,255,.7);animation:ping 1.4s cubic-bezier(0,0,.2,1) infinite}
+  @keyframes ping{0%{transform:scale(1);opacity:.7}75%,100%{transform:scale(2.2);opacity:0}}
+  .evy{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.3);white-space:nowrap}
+  .iv{height:32px;min-width:32px;padding:0 8px;border-radius:6px;font-family:monospace;font-size:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--gray)}
+  .iv.on{background:var(--red);color:#fff;border-color:rgba(255,26,26,.7);box-shadow:0 0 10px rgba(204,0,0,.45)}
+  /* list */
+  .list{background:linear-gradient(180deg,#0b0a0d,#080709);border-top:2px solid rgba(204,0,0,.4)}
+  .lhead{padding:12px;border-bottom:1px solid rgba(204,0,0,.22);background:linear-gradient(90deg,rgba(204,0,0,.08),rgba(9,8,10,.98))}
+  .ltitle{display:flex;align-items:center;gap:8px}
+  .ltitle .nm{font-family:Oswald,Impact,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.18em;font-size:14px;text-shadow:0 0 12px rgba(204,0,0,.55)}
+  .ltitle .cnt{margin-left:auto;font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:rgba(204,0,0,.85)}
+  .cycrow{display:flex;gap:8px;margin-top:10px}
+  .cbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;min-height:38px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-radius:2px 11px 2px 11px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:rgba(255,255,255,.85)}
+  .cbtn.on{background:linear-gradient(135deg,rgba(204,0,0,.85),rgba(139,0,0,.7));border-color:rgba(255,42,42,.7);color:#fff;box-shadow:0 0 14px rgba(204,0,0,.45)}
+  .cbtn svg{width:13px;height:13px}
+  .search{margin-top:10px;position:relative}
+  .search input{width:100%;height:36px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:0 12px 0 32px;color:#fff;font-size:14px}
+  .search input::placeholder{color:rgba(156,163,175,.5)}
+  .search svg{position:absolute;left:9px;top:9px;width:15px;height:15px;color:var(--gray)}
+  .webonly{margin-top:10px;display:flex;align-items:center;gap:8px;min-height:34px;padding:0 12px;border-radius:6px;font-size:12px;font-weight:600;
+    background:rgba(204,0,0,.15);border:1px solid rgba(204,0,0,.5);color:var(--red-bright);box-shadow:0 0 10px rgba(204,0,0,.25)}
+  .webonly .n{margin-left:auto;opacity:.7}
+  /* biz + rows */
+  .bizh{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 10px;background:linear-gradient(90deg,rgba(204,0,0,.11),rgba(9,8,10,.97));border-left:3px solid #cc0000;border-bottom:1px solid rgba(255,255,255,.05)}
+  .bizh .chev{color:var(--gray);width:14px;height:14px}
+  .bizh .bn{font-size:12px;font-weight:700;letter-spacing:.02em;color:#ff4d4d;text-shadow:0 0 8px rgba(204,0,0,.5);flex:1}
+  .bizh .visit{font-size:10px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(204,0,0,.12);border:1px solid rgba(204,0,0,.4);color:#ff4d4d}
+  .bizh .dot{width:8px;height:8px;border-radius:50%;background:#ff2a2a;box-shadow:0 0 8px #cc0000;animation:dp 1.6s infinite}
+  .row{display:flex;align-items:center;gap:8px;min-height:48px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.05);border-left:3px solid transparent}
+  .row.pl{padding-left:32px}
+  .row.sel{border-left-color:#cc0000;background:linear-gradient(90deg,rgba(204,0,0,.16),rgba(204,0,0,.03));box-shadow:inset 4px 0 20px rgba(204,0,0,.2)}
+  /* spyder switch */
+  .sw{position:relative;width:44px;height:24px;min-width:44px;border-radius:7px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08)}
+  .sw.on{background:rgba(204,0,0,.2);border-color:rgba(204,0,0,.6);box-shadow:0 0 8px rgba(204,0,0,.35)}
+  .sw .kn{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:5px;background:#241012;display:flex;align-items:center;justify-content:center}
+  .sw.on .kn{left:22px;background:var(--red);animation:cl 1.8s ease-in-out infinite}
+  @keyframes cl{0%,100%{box-shadow:0 0 5px rgba(204,0,0,.75)}50%{box-shadow:0 0 11px rgba(204,0,0,1),0 0 20px rgba(204,0,0,.55)}}
+  .sw .kn svg{width:11px;height:11px;color:rgba(255,255,255,.25)}
+  .sw.on .kn svg{color:#fff}
+  .fav{width:28px;height:28px;min-width:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;color:rgba(255,255,255,.2)}
+  .fav.on{color:var(--red-bright)}
+  .fav svg{width:16px;height:16px}
+  .rn{flex:1;min-width:0}
+  .rn .b{font-size:14px;font-weight:600;color:rgba(255,255,255,.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row.sel .rn .b{color:#ff4d4d;text-shadow:0 0 8px rgba(204,0,0,.7)}
+  .rn .v{font-size:12px;color:rgba(156,163,175,.8)}
+  .status{width:8px;height:8px;min-width:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,.9);animation:dp 2s infinite}
+</style>
+</head>
+<body>
+  <div class="cap">Static snapshot of the redesigned mobile player + list at 390px — actual tokens &amp; sizing. Not the live Next build.</div>
+
+  <div class="phone web-bg">
+    <div class="tabs">
+      <div class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/></svg>CAMS</div>
+      <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/></svg>MAP</div>
+      <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V5a2 2 0 10-4 0v9.76a4 4 0 104 0z"/></svg>COND</div>
+      <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4h2l2 3 3-1 1 3-3 2 3 2-1 3-3-1-2 3h-2l-2-3-3 1-1-3 3-2-3-2 1-3 3 1z"/></svg>PART</div>
+    </div>
+
+    <div class="phead">
+      <span class="live"><i></i>LIVE</span>
+      <span class="biz">JB Hooks</span>
+      <span class="sub">— Upstream</span>
+      <span class="cast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 16a6 6 0 016 6M2 12a10 10 0 0110 10M2 20h.01M2 8V6a2 2 0 012-2h16a2 2 0 012 2v12a2 2 0 01-2 2h-6"/></svg>Cast</span>
+    </div>
+
+    <div class="video">
+      <div class="thumb">live feed · muted autoplay</div>
+      <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c brr"></span>
+    </div>
+
+    <div class="seam"><i></i></div>
+
+    <div class="deck">
+      <div class="sq"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 5v14l-9-7zM8 5v14H5V5z"/></svg></div>
+      <div class="sq"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 5v14l9-7zM16 5v14h3V5z"/></svg></div>
+      <div class="divv"></div>
+      <div class="cyc"><span class="pd"><s></s><b></b></span>Cycling</div>
+      <div class="divv"></div>
+      <span class="evy">Every</span>
+      <div class="iv on">15s</div>
+      <div class="iv">30s</div>
+      <div class="iv">1m</div>
+      <div class="iv">2m</div>
+      <div class="iv">5m</div>
+    </div>
+
+    <div class="list">
+      <div class="lhead">
+        <div class="ltitle">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#cc0000" stroke="#cc0000" stroke-width="1.3" stroke-linecap="round"><path d="M10 11L6 8 3 7M10 12.3L5 11.4 2 10.4M10 13.6L5 14.4 2 15.6M10.4 15L6.5 17.5 3.6 19.2" fill="none"/><path d="M14 11l4-3 3-1M14 12.3l5-.9 3-1M14 13.6l5 .8 3 1.2M13.6 15l3.9 2.5 2.9 1.7" fill="none"/><ellipse cx="12" cy="13.4" rx="2.7" ry="3.5"/><circle cx="12" cy="8.6" r="1.8"/></svg>
+          <span class="nm">Spyder Feeds</span>
+          <span class="cnt">38 live · 14 spots</span>
+        </div>
+        <div class="cycrow">
+          <div class="cbtn on"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Cycle Selected</div>
+          <div class="cbtn"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.3"><ellipse cx="12" cy="13.4" rx="2.7" ry="3.5"/><circle cx="12" cy="8.6" r="1.8"/></svg>Cycle Web</div>
+        </div>
+        <div class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+          <input placeholder="Find a camera..." />
+        </div>
+        <div class="webonly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.3"><ellipse cx="12" cy="13.4" rx="2.7" ry="3.5"/><circle cx="12" cy="8.6" r="1.8"/></svg>
+          On My Web <span class="n">(3)</span>
+        </div>
+      </div>
+
+      <div class="bizh">
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        <span class="bn">JB Hooks</span>
+        <span class="visit">Visit Website</span>
+        <span class="dot"></span>
+      </div>
+
+      <div class="row sel pl">
+        <div class="sw on"><span class="kn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/></svg></span></div>
+        <div class="fav on"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M10 11L6 8 3 7M10 13.6L5 14.4 2 15.6" fill="none"/><path d="M14 11l4-3 3-1M14 13.6l5 .8 3 1.2" fill="none"/><ellipse cx="12" cy="13.4" rx="2.7" ry="3.5"/><circle cx="12" cy="8.6" r="1.8"/></svg></div>
+        <div class="rn"><div class="v" style="color:#ff4d4d;text-shadow:0 0 8px rgba(204,0,0,.7);font-weight:600">Upstream</div></div>
+        <span class="status"></span>
+      </div>
+
+      <div class="row pl">
+        <div class="sw"><span class="kn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/></svg></span></div>
+        <div class="fav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><ellipse cx="12" cy="13.4" rx="2.7" ry="3.5"/><circle cx="12" cy="8.6" r="1.8"/></svg></div>
+        <div class="rn"><div class="v">Downstream</div></div>
+        <span class="status"></span>
+      </div>
+
+      <div class="bizh" style="background:linear-gradient(90deg,rgba(8,12,24,.98),rgba(13,21,38,.95));border-left:3px solid transparent">
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:rotate(-90deg)"><path d="M6 9l6 6 6-6"/></svg>
+        <span class="bn" style="color:#fff;text-shadow:none">Franky &amp; Louie's</span>
+        <span class="visit" style="background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.3);color:#f5a623">Visit Website</span>
+        <span style="color:rgba(156,163,175,.7);font-size:12px">2</span>
+      </div>
+
+      <div class="row">
+        <div class="sw on"><span class="kn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/></svg></span></div>
+        <div class="fav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><ellipse cx="12" cy="13.4" rx="2.7" ry="3.5"/><circle cx="12" cy="8.6" r="1.8"/></svg></div>
+        <div class="rn"><div class="b">Franky &amp; Louie's</div><div class="v">Tiki Bar</div></div>
+        <span class="status"></span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

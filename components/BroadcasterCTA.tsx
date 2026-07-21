@@ -53,7 +53,7 @@ export function BroadcasterCTA() {
               href="/become-a-broadcaster"
               className="inline-flex items-center gap-2 bg-white text-spyder-red font-bold
                          px-8 py-4 rounded-xl text-base transition-all duration-200
-                         hover:bg-spyder-gold hover:text-white active:scale-95 min-h-[52px]"
+                         hover:bg-spyder-navy hover:text-white active:scale-95 min-h-[52px]"
             >
               Become a Broadcaster
               <ArrowRight className="w-5 h-5" />

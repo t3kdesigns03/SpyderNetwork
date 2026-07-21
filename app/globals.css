@@ -13,7 +13,11 @@
   --spyder-navy-card:   #0d1526;
   --spyder-red:         #cc0000;
   --spyder-red-bright:  #ff1a1a;
-  /* Neon accents — used for everything EXCEPT the logo */
+  --spyder-crimson:     #8b0000;   /* deep crimson secondary accent */
+  --spyder-ember:       #ff3b1f;   /* hot ember highlight */
+  --spyder-web:         rgba(255,255,255,0.10); /* faint web thread */
+  /* Legacy neon tokens retained so any off-view references still resolve,
+     but the player + list chrome no longer uses them. */
   --neon-cyan:          #00d4ff;
   --neon-cyan-dim:      rgba(0, 212, 255, 0.25);
   --neon-purple:        #a855f7;
@@ -39,13 +43,13 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--neon-cyan);
+    outline: 2px solid var(--spyder-red);
     outline-offset: 2px;
   }
 
   ::-webkit-scrollbar        { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track  { background: var(--spyder-navy-light); }
-  ::-webkit-scrollbar-thumb  { background: var(--neon-cyan-dim); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb  { background: rgba(204,0,0,0.5); border-radius: 9999px; }
 }
 
 /* ── Components ───────────────────────────────────────────────────────────── */
@@ -83,9 +87,9 @@
     border: 1px solid rgba(255,255,255,0.12);
   }
   .btn-secondary:hover {
-    background: rgba(0,212,255,0.08);
-    border-color: rgba(0,212,255,0.35);
-    box-shadow: 0 0 12px rgba(0,212,255,0.2);
+    background: rgba(204,0,0,0.10);
+    border-color: rgba(204,0,0,0.45);
+    box-shadow: 0 0 12px rgba(204,0,0,0.25);
   }
 
   /* ── Glass panel ── */
@@ -98,11 +102,11 @@
     box-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
   }
 
-  /* ── Cam list row — neon selection ── */
+  /* ── Cam list row — red selection ── */
   .cam-row-selected {
-    background: linear-gradient(90deg, rgba(0,212,255,0.07) 0%, rgba(0,212,255,0.02) 100%);
-    border-left: 2px solid var(--neon-cyan) !important;
-    box-shadow: inset 2px 0 8px rgba(0,212,255,0.15);
+    background: linear-gradient(90deg, rgba(204,0,0,0.10) 0%, rgba(204,0,0,0.02) 100%);
+    border-left: 2px solid var(--spyder-red) !important;
+    box-shadow: inset 2px 0 8px rgba(204,0,0,0.15);
   }
 
   /* ── Business group header ── */
@@ -112,11 +116,11 @@
     transition: background 0.15s;
   }
   .biz-header:hover {
-    background: linear-gradient(90deg, rgba(0,212,255,0.06), rgba(13,21,38,0.95));
+    background: linear-gradient(90deg, rgba(204,0,0,0.07), rgba(13,21,38,0.95));
   }
   .biz-header-active {
-    border-left: 2px solid var(--neon-cyan);
-    box-shadow: inset 2px 0 10px rgba(0,212,255,0.12);
+    border-left: 2px solid var(--spyder-red);
+    box-shadow: inset 2px 0 10px rgba(204,0,0,0.14);
   }
 
   /* ── Category pill ── */
@@ -136,9 +140,9 @@
   }
   .category-pill-inactive:hover {
     color: white;
-    background: rgba(0,212,255,0.06);
-    border-color: rgba(0,212,255,0.3);
-    box-shadow: 0 0 10px rgba(0,212,255,0.15);
+    background: rgba(204,0,0,0.08);
+    border-color: rgba(204,0,0,0.35);
+    box-shadow: 0 0 10px rgba(204,0,0,0.18);
   }
 
   /* ── Section heading ── */
@@ -158,6 +162,10 @@
   .scrollbar-hide::-webkit-scrollbar { display: none; }
 
   .aspect-video-cam { aspect-ratio: 16 / 9; }
+
+  /* Deliberate angular corner treatment — sharp TL/BR, cut TR/BL. Reads as
+     premium/aggressive rather than an iOS pill. Used on the cycle buttons. */
+  .spyder-cut { border-radius: 2px 11px 2px 11px; }
 
   .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
   .pt-safe { padding-top:    env(safe-area-inset-top, 0px); }
@@ -210,13 +218,13 @@
   opacity: 0.035;
   animation: web-breathe 8s ease-in-out infinite;
   will-change: opacity;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cg stroke='%2300d4ff' stroke-width='0.6' fill='none' opacity='0.9'%3E%3Ccircle cx='200' cy='200' r='40'/%3E%3Ccircle cx='200' cy='200' r='80'/%3E%3Ccircle cx='200' cy='200' r='120'/%3E%3Ccircle cx='200' cy='200' r='160'/%3E%3Ccircle cx='200' cy='200' r='195'/%3E%3Cline x1='200' y1='5'   x2='200' y2='395'/%3E%3Cline x1='5'   y1='200' x2='395' y2='200'/%3E%3Cline x1='31'  y1='31'  x2='369' y2='369'/%3E%3Cline x1='369' y1='31'  x2='31'  y2='369'/%3E%3Cline x1='200' y1='5'   x2='31'  y2='369'/%3E%3Cline x1='200' y1='5'   x2='369' y2='369'/%3E%3Cline x1='5'   y1='116' x2='395' y2='284'/%3E%3Cline x1='5'   y1='284' x2='395' y2='116'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cg stroke='%23cc0000' stroke-width='0.6' fill='none' opacity='0.9'%3E%3Ccircle cx='200' cy='200' r='40'/%3E%3Ccircle cx='200' cy='200' r='80'/%3E%3Ccircle cx='200' cy='200' r='120'/%3E%3Ccircle cx='200' cy='200' r='160'/%3E%3Ccircle cx='200' cy='200' r='195'/%3E%3Cline x1='200' y1='5'   x2='200' y2='395'/%3E%3Cline x1='5'   y1='200' x2='395' y2='200'/%3E%3Cline x1='31'  y1='31'  x2='369' y2='369'/%3E%3Cline x1='369' y1='31'  x2='31'  y2='369'/%3E%3Cline x1='200' y1='5'   x2='31'  y2='369'/%3E%3Cline x1='200' y1='5'   x2='369' y2='369'/%3E%3Cline x1='5'   y1='116' x2='395' y2='284'/%3E%3Cline x1='5'   y1='284' x2='395' y2='116'/%3E%3C/g%3E%3C/svg%3E");
   background-size: 400px 400px;
 }
 
 @keyframes web-breathe {
-  0%, 100% { opacity: 0.030; }
-  50%       { opacity: 0.055; }
+  0%, 100% { opacity: 0.040; }
+  50%       { opacity: 0.075; }
 }
 
 /* ── Leaflet ──────────────────────────────────────────────────────────────── */
@@ -233,7 +241,7 @@
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
   border: 2px solid white;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 12px rgba(0,212,255,0.4);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 12px rgba(204,0,0,0.5);
 }
 .spyder-map-marker-inner {
   transform: rotate(45deg);
@@ -317,40 +325,40 @@
    GLOWING NEON TAB — active state
    ═══════════════════════════════════════════════════════════════════════════ */
 .tab-active {
-  color: #00d4ff !important;
-  border-bottom-color: #00d4ff !important;
-  text-shadow: 0 0 8px rgba(0,212,255,0.9), 0 0 20px rgba(0,212,255,0.5);
-  box-shadow: 0 2px 12px rgba(0,212,255,0.35);
+  color: #ff2a2a !important;
+  border-bottom-color: #cc0000 !important;
+  text-shadow: 0 0 8px rgba(204,0,0,0.9), 0 0 20px rgba(204,0,0,0.5);
+  box-shadow: 0 2px 12px rgba(204,0,0,0.35);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   SELECTED CAM ROW — vivid cyan glow strip
+   SELECTED CAM ROW — red web strip
    ═══════════════════════════════════════════════════════════════════════════ */
 .cam-row-selected {
-  background: linear-gradient(90deg, rgba(0,212,255,0.12) 0%, rgba(0,212,255,0.03) 100%) !important;
-  border-left: 2px solid #00d4ff !important;
-  box-shadow: inset 3px 0 14px rgba(0,212,255,0.2) !important;
+  background: linear-gradient(90deg, rgba(204,0,0,0.16) 0%, rgba(204,0,0,0.04) 100%) !important;
+  border-left: 3px solid #cc0000 !important;
+  box-shadow: inset 4px 0 16px rgba(204,0,0,0.22) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    CYCLE ACTIVE BUTTON
    ═══════════════════════════════════════════════════════════════════════════ */
 .cycle-active {
-  background: rgba(0,212,255,0.14) !important;
-  border: 1px solid rgba(0,212,255,0.45) !important;
-  color: #00d4ff !important;
-  box-shadow: 0 0 12px rgba(0,212,255,0.35), inset 0 0 8px rgba(0,212,255,0.08) !important;
-  text-shadow: 0 0 6px rgba(0,212,255,0.8) !important;
+  background: rgba(204,0,0,0.16) !important;
+  border: 1px solid rgba(204,0,0,0.5) !important;
+  color: #ff4d4d !important;
+  box-shadow: 0 0 12px rgba(204,0,0,0.4), inset 0 0 8px rgba(204,0,0,0.1) !important;
+  text-shadow: 0 0 6px rgba(204,0,0,0.8) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    INTERVAL BUTTON ACTIVE
    ═══════════════════════════════════════════════════════════════════════════ */
 .interval-active {
-  background: rgba(0,212,255,0.12) !important;
-  border: 1px solid rgba(0,212,255,0.4) !important;
-  color: #00d4ff !important;
-  box-shadow: 0 0 8px rgba(0,212,255,0.3) !important;
+  background: rgba(204,0,0,0.14) !important;
+  border: 1px solid rgba(204,0,0,0.45) !important;
+  color: #ff4d4d !important;
+  box-shadow: 0 0 8px rgba(204,0,0,0.35) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -361,7 +369,7 @@
   border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 .biz-header:hover {
-  background: linear-gradient(90deg, rgba(0,212,255,0.07), rgba(13,21,38,0.97));
+  background: linear-gradient(90deg, rgba(204,0,0,0.08), rgba(13,21,38,0.97));
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -369,8 +377,8 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 .video-frame-glow {
   box-shadow:
-    0 0  0 1px rgba(0,212,255,0.15),
-    0 0 20px rgba(0,212,255,0.08),
+    0 0  0 1px rgba(204,0,0,0.18),
+    0 0 20px rgba(204,0,0,0.10),
     0 0 40px rgba(0,0,0,0.6);
 }
 
@@ -395,37 +403,35 @@
      to GPU compositor layers can prevent Chrome/Safari from granting
      the iframe autoplay permission. The opacity animation still works fine. */
 }
+/* ::before — a steady premium crimson hairline that frames the feed. */
 .neon-frame::before {
-  box-shadow: 0 0 0 1px rgba(204,0,0,0.55), 0 0 18px rgba(204,0,0,0.28), 0 0 40px rgba(204,0,0,0.1);
-  animation: frame-red 4s ease-in-out infinite;
+  box-shadow: 0 0 0 1px rgba(204,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.03);
+  opacity: 1;
   z-index: 0;
 }
+/* ::after — a soft red "live" glow that breathes outward (opacity only). */
 .neon-frame::after {
-  box-shadow: 0 0 0 1px rgba(0,212,255,0.55), 0 0 22px rgba(0,212,255,0.32), 0 0 50px rgba(0,212,255,0.12);
-  animation: frame-cyan 4s ease-in-out infinite;
+  box-shadow: 0 0 18px rgba(204,0,0,0.30), 0 0 46px rgba(204,0,0,0.14);
+  animation: frame-live-breathe 4.5s ease-in-out infinite;
   z-index: 0;
 }
-@keyframes frame-red {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
-}
-@keyframes frame-cyan {
-  0%, 100% { opacity: 0; }
-  50%       { opacity: 1; }
+@keyframes frame-live-breathe {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1;    }
 }
 
-/* Corner brackets — top-left, top-right, bottom-left, bottom-right */
+/* Corner brackets — web-anchor tabs; all red for the Spyder frame. */
 /* Corners live inside a z-25 pointer-events-none wrapper div */
 .corner {
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   pointer-events: none;
 }
-.corner-tl { top: 0;    left: 0;  border-top: 2px solid #00d4ff; border-left:  2px solid #00d4ff; box-shadow: -2px -2px 10px rgba(0,212,255,0.7), inset 1px 1px 4px rgba(0,212,255,0.2); }
-.corner-tr { top: 0;    right: 0; border-top: 2px solid #00d4ff; border-right: 2px solid #00d4ff; box-shadow:  2px -2px 10px rgba(0,212,255,0.7), inset -1px 1px 4px rgba(0,212,255,0.2); }
-.corner-bl { bottom: 0; left: 0;  border-bottom: 2px solid #cc0000; border-left:  2px solid #cc0000; box-shadow: -2px 2px 10px rgba(204,0,0,0.7), inset 1px -1px 4px rgba(204,0,0,0.2); }
-.corner-br { bottom: 0; right: 0; border-bottom: 2px solid #cc0000; border-right: 2px solid #cc0000; box-shadow:  2px 2px 10px rgba(204,0,0,0.7), inset -1px -1px 4px rgba(204,0,0,0.2); }
+.corner-tl { top: 0;    left: 0;  border-top: 2px solid #ff2a2a; border-left:  2px solid #ff2a2a; box-shadow: -2px -2px 10px rgba(204,0,0,0.7), inset 1px 1px 4px rgba(204,0,0,0.25); }
+.corner-tr { top: 0;    right: 0; border-top: 2px solid #ff2a2a; border-right: 2px solid #ff2a2a; box-shadow:  2px -2px 10px rgba(204,0,0,0.7), inset -1px 1px 4px rgba(204,0,0,0.25); }
+.corner-bl { bottom: 0; left: 0;  border-bottom: 2px solid #cc0000; border-left:  2px solid #cc0000; box-shadow: -2px 2px 10px rgba(204,0,0,0.7), inset 1px -1px 4px rgba(204,0,0,0.25); }
+.corner-br { bottom: 0; right: 0; border-bottom: 2px solid #cc0000; border-right: 2px solid #cc0000; box-shadow:  2px 2px 10px rgba(204,0,0,0.7), inset -1px -1px 4px rgba(204,0,0,0.25); }
 
 /* Scan line — inside same pointer-events-none wrapper */
 .scan-line {
@@ -433,8 +439,8 @@
   left: 0; right: 0;
   bottom: 0;           /* anchor at bottom; translateY moves it up */
   height: 2px;
-  background: linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.6) 20%, rgba(0,212,255,1) 50%, rgba(0,212,255,0.6) 80%, transparent 100%);
-  box-shadow: 0 0 10px rgba(0,212,255,0.9), 0 0 24px rgba(0,212,255,0.5);
+  background: linear-gradient(90deg, transparent 0%, rgba(204,0,0,0.6) 20%, rgba(255,42,42,1) 50%, rgba(204,0,0,0.6) 80%, transparent 100%);
+  box-shadow: 0 0 10px rgba(204,0,0,0.9), 0 0 24px rgba(204,0,0,0.5);
   pointer-events: none;
   will-change: transform, opacity;
   animation: scan-sweep 3s ease-in-out infinite;
@@ -450,12 +456,12 @@
    NEON SIDEBAR — purple left strip + glow
    ═══════════════════════════════════════════════════════════════════════════ */
 .neon-sidebar {
-  border-left: 1px solid rgba(168,85,247,0.25) !important;
-  box-shadow: -4px 0 24px rgba(168,85,247,0.08), inset 1px 0 0 rgba(168,85,247,0.06) !important;
-  background: linear-gradient(180deg, #090d1c 0%, #070b18 100%) !important;
+  border-left: 1px solid rgba(204,0,0,0.28) !important;
+  box-shadow: -4px 0 24px rgba(204,0,0,0.08), inset 1px 0 0 rgba(204,0,0,0.06) !important;
+  background: linear-gradient(180deg, #0b0a0d 0%, #080709 100%) !important;
 }
 
-/* Vertical purple glowline on the very left edge */
+/* Vertical red glowline on the very left edge — the "web spine" of the list */
 .neon-sidebar::before {
   content: "";
   position: absolute;
@@ -463,80 +469,80 @@
   left: 0;
   width: 1px;
   height: 90%;
-  background: linear-gradient(180deg, transparent, rgba(168,85,247,0.6) 30%, rgba(168,85,247,0.8) 50%, rgba(168,85,247,0.6) 70%, transparent);
-  box-shadow: 0 0 8px rgba(168,85,247,0.6);
+  background: linear-gradient(180deg, transparent, rgba(204,0,0,0.6) 30%, rgba(255,42,42,0.85) 50%, rgba(204,0,0,0.6) 70%, transparent);
+  box-shadow: 0 0 8px rgba(204,0,0,0.6);
   pointer-events: none;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   NEON CAM ROW — selected is vivid, hover has a flash
+   CAM ROW — selected is a red web strip, hover has a soft red flash
    ═══════════════════════════════════════════════════════════════════════════ */
 .cam-row-selected {
-  background: linear-gradient(90deg, rgba(0,212,255,0.15) 0%, rgba(0,212,255,0.04) 60%, transparent 100%) !important;
-  border-left: 2px solid #00d4ff !important;
-  box-shadow: inset 4px 0 16px rgba(0,212,255,0.2) !important;
+  background: linear-gradient(90deg, rgba(204,0,0,0.18) 0%, rgba(204,0,0,0.05) 60%, transparent 100%) !important;
+  border-left: 3px solid #cc0000 !important;
+  box-shadow: inset 4px 0 16px rgba(204,0,0,0.22) !important;
 }
 .cam-row-selected .cam-name {
-  color: #00d4ff !important;
-  text-shadow: 0 0 8px rgba(0,212,255,0.6);
+  color: #ff4d4d !important;
+  text-shadow: 0 0 8px rgba(204,0,0,0.6);
 }
 
-/* Hover: quick neon flash */
+/* Hover: quick red flash */
 .cam-row-hover:not(.cam-row-selected):hover {
-  background: linear-gradient(90deg, rgba(0,212,255,0.07) 0%, transparent 80%) !important;
-  border-left-color: rgba(0,212,255,0.35) !important;
+  background: linear-gradient(90deg, rgba(204,0,0,0.08) 0%, transparent 80%) !important;
+  border-left-color: rgba(204,0,0,0.4) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   NEON LIST HEADER
+   LIST HEADER
    ═══════════════════════════════════════════════════════════════════════════ */
 .neon-list-header {
-  background: linear-gradient(90deg, rgba(168,85,247,0.08) 0%, rgba(9,13,28,0.98) 100%);
-  border-bottom: 1px solid rgba(168,85,247,0.2) !important;
-  box-shadow: 0 2px 12px rgba(168,85,247,0.08);
+  background: linear-gradient(90deg, rgba(204,0,0,0.08) 0%, rgba(9,8,10,0.98) 100%);
+  border-bottom: 1px solid rgba(204,0,0,0.22) !important;
+  box-shadow: 0 2px 12px rgba(204,0,0,0.08);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   NEON CYCLE BUTTONS — "Cycle All" / "Cycle Favs"
+   CYCLE BUTTONS — active state (angular red)
    ═══════════════════════════════════════════════════════════════════════════ */
 .neon-cycle-active {
-  background: linear-gradient(135deg, rgba(204,0,0,0.25), rgba(168,85,247,0.15)) !important;
-  border-color: rgba(204,0,0,0.6) !important;
-  box-shadow: 0 0 12px rgba(204,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+  background: linear-gradient(135deg, rgba(204,0,0,0.85), rgba(139,0,0,0.7)) !important;
+  border-color: rgba(255,42,42,0.7) !important;
+  box-shadow: 0 0 14px rgba(204,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.10) !important;
   color: white !important;
-  text-shadow: 0 0 6px rgba(204,0,0,0.6);
+  text-shadow: 0 0 6px rgba(0,0,0,0.5);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   NEON BIZ HEADER — active location indicator
+   BIZ HEADER — active location indicator
    ═══════════════════════════════════════════════════════════════════════════ */
 .biz-header-has-active {
-  background: linear-gradient(90deg, rgba(0,212,255,0.09) 0%, rgba(9,13,28,0.97) 100%) !important;
-  border-left-color: #00d4ff !important;
-  box-shadow: inset 3px 0 12px rgba(0,212,255,0.18) !important;
+  background: linear-gradient(90deg, rgba(204,0,0,0.11) 0%, rgba(9,8,10,0.97) 100%) !important;
+  border-left-color: #cc0000 !important;
+  box-shadow: inset 3px 0 12px rgba(204,0,0,0.2) !important;
 }
 .biz-header-has-active .biz-name {
-  color: #00d4ff !important;
-  text-shadow: 0 0 8px rgba(0,212,255,0.5);
+  color: #ff4d4d !important;
+  text-shadow: 0 0 8px rgba(204,0,0,0.5);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   NEON PLAYER HEADER
+   PLAYER HEADER
    ═══════════════════════════════════════════════════════════════════════════ */
 .neon-player-header {
-  background: linear-gradient(90deg, rgba(4,7,16,1) 0%, rgba(10,14,26,0.97) 100%);
-  border-bottom: 1px solid rgba(0,212,255,0.2);
+  background: linear-gradient(90deg, rgba(10,4,4,1) 0%, rgba(14,10,10,0.97) 100%);
+  border-bottom: 1px solid rgba(204,0,0,0.22);
   border-left: 3px solid #cc0000;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.5), inset 0 -1px 0 rgba(0,212,255,0.08);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.5), inset 0 -1px 0 rgba(204,0,0,0.10);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   NEON CONTROLS BAR
+   CONTROLS BAR — cinematic red-lit deck
    ═══════════════════════════════════════════════════════════════════════════ */
 .neon-controls {
-  background: linear-gradient(90deg, #050810, #080d1c);
-  border-top: 1px solid rgba(0,212,255,0.15);
-  box-shadow: 0 -2px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(0,212,255,0.06);
+  background: linear-gradient(90deg, #0a0506, #0e0a0a);
+  border-top: 1px solid rgba(204,0,0,0.18);
+  box-shadow: 0 -2px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(204,0,0,0.08);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
