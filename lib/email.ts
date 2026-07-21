@@ -17,8 +17,12 @@ const ADMIN_URL = "https://beta.spydernetwork.com/admin/viewers";
 // account whose RESEND_API_KEY is configured in Netlify). The from-domain MUST
 // match the verified domain. Override the local part / display name via env.
 const FROM = process.env.ALERT_EMAIL_FROM ?? "SpyderNetwork Alerts <noreply@alerts.spydernetwork.com>";
-// With a verified domain, alerts can go to any inbox. Override with ALERT_EMAIL_TO.
-const TO = process.env.ALERT_EMAIL_TO ?? "b.reilly03@gmail.com";
+// Recipients. ALERT_EMAIL_TO may be a single address or a comma-separated list;
+// split into individual trimmed addresses so Resend gets a proper string[]
+// (Resend rejects a single comma-joined string).
+const TO_RAW = process.env.ALERT_EMAIL_TO ?? "b.reilly03@gmail.com";
+const TO_LIST = TO_RAW.split(",").map((addr) => addr.trim()).filter(Boolean);
+const TO_DISPLAY = TO_LIST.join(", ");
 
 /** ms → "1 hour 12 minutes" / "45 minutes" / "1 day 3 hours". */
 export function formatDuration(ms: number): string {
@@ -160,7 +164,7 @@ export async function sendOfflineAlertEmail(
 ): Promise<SendResult> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    return { ok: false, detail: "RESEND_API_KEY is not set in this environment", from: FROM, to: TO };
+    return { ok: false, detail: "RESEND_API_KEY is not set in this environment", from: FROM, to: TO_DISPLAY };
   }
 
   const camName = friendlyName(cam);
@@ -173,13 +177,13 @@ export async function sendOfflineAlertEmail(
       },
       body: JSON.stringify({
         from: FROM,
-        to: [TO],
+        to: TO_LIST,
         subject: `Camera Offline Alert – ${camName}`,
         html: renderOfflineEmail(cam, downtimeMs, sinceMs),
       }),
     });
 
-    if (res.ok) return { ok: true, status: res.status, from: FROM, to: TO };
+    if (res.ok) return { ok: true, status: res.status, from: FROM, to: TO_DISPLAY };
 
     // Surface Resend's actual error (e.g. unverified domain, recipient
     // restricted to the account owner, bad key) instead of a generic message.
@@ -190,8 +194,8 @@ export async function sendOfflineAlertEmail(
     } catch {
       /* ignore body read errors */
     }
-    return { ok: false, status: res.status, detail, from: FROM, to: TO };
+    return { ok: false, status: res.status, detail, from: FROM, to: TO_DISPLAY };
   } catch (err) {
-    return { ok: false, detail: `request error: ${String(err)}`, from: FROM, to: TO };
+    return { ok: false, detail: `request error: ${String(err)}`, from: FROM, to: TO_DISPLAY };
   }
 }
