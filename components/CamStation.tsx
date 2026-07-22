@@ -911,7 +911,7 @@ export function CamStation() {
                           </a>
                         )}
 
-                        <span className="text-xs text-neon-red shrink-0 tabular-nums">{cams.length}</span>
+                        <span className="text-xs text-slate-400 shrink-0 tabular-nums">{cams.length}</span>
                         {activeCam && (
                           <span className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ background: "#ff2a2a", boxShadow: "0 0 8px #cc0000, 0 0 16px rgba(204,0,0,0.7)" }} />
                         )}
