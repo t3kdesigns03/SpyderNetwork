@@ -30,6 +30,8 @@ All added for testing; each is unauthenticated beyond the cron secret.
       trusted, or gate it behind an env flag.
 - [ ] **`/api/debug/viewers`** (`app/api/debug/viewers/route.ts`) — delete, or
       require a secret/admin check. Exposes raw viewer tallies.
+- [ ] **`/api/debug/offline-state`** (`app/api/debug/offline-state/route.ts`) —
+      delete, or require a secret/admin check. Exposes offline-tracking state.
 - [ ] **`/admin/viewers`** (`app/admin/viewers/*`) — add auth, or remove. It's
       `noindex` but otherwise open, and it depends on `/api/debug/viewers`.
 

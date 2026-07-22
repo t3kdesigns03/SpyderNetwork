@@ -31,13 +31,28 @@ export function ViewersDashboard() {
   const [loading, setLoading] = useState(true);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
 
+  const [needsSecret, setNeedsSecret] = useState(false);
+
   const load = useCallback(async () => {
     try {
-      const res = await fetch("/api/debug/viewers", { cache: "no-store" });
+      // The debug endpoint is gated by CRON_SECRET. Pass it through from this
+      // page's own ?secret= param so the operator supplies it via the URL
+      // (kept out of the client bundle).
+      const secret = new URLSearchParams(window.location.search).get("secret") ?? "";
+      const url = secret
+        ? `/api/debug/viewers?secret=${encodeURIComponent(secret)}`
+        : "/api/debug/viewers";
+      const res = await fetch(url, { cache: "no-store" });
+      if (res.status === 401) {
+        setNeedsSecret(true);
+        setError(true);
+        return;
+      }
       if (!res.ok) throw new Error(`status ${res.status}`);
       const json = (await res.json()) as Data;
       setData(json);
       setError(false);
+      setNeedsSecret(false);
       setUpdatedAt(new Date());
     } catch {
       setError(true);
@@ -110,11 +125,16 @@ export function ViewersDashboard() {
         </div>
 
         {/* Error banner (non-blocking — last good data stays on screen) */}
-        {error && (
+        {needsSecret ? (
+          <p className="text-xs text-spyder-red/90 mb-4">
+            This page is protected. Open it as{" "}
+            <span className="font-mono">/admin/viewers?secret=YOUR_CRON_SECRET</span>.
+          </p>
+        ) : error ? (
           <p className="text-xs text-spyder-red/90 mb-4">
             Couldn&apos;t reach the viewer feed on the last refresh — showing the most recent data.
           </p>
-        )}
+        ) : null}
 
         {/* Table / empty state */}
         {loading && !data ? (

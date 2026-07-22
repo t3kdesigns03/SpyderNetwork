@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runOfflineCheck, runTestAlert } from "@/lib/offlineAlerts";
+import { isAuthorized } from "@/lib/authz";
 
 /**
  * GET|POST /api/cron/offline-check
@@ -19,16 +20,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
-function authorized(req: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return true;
-  const header = req.headers.get("x-cron-secret");
-  const q = new URL(req.url).searchParams.get("secret");
-  return header === secret || q === secret;
-}
-
 async function handle(req: Request) {
-  if (!authorized(req)) {
+  if (!isAuthorized(req)) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 

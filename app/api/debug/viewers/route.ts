@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getRedis } from "@/lib/redis";
 import { HERO_CAM } from "@/lib/cams";
+import { isAuthorized } from "@/lib/authz";
 
 /**
  * GET /api/debug/viewers   ⚠️ TEMPORARY — testing only, remove later.
@@ -19,7 +20,11 @@ export const dynamic = "force-dynamic";
 const HERO_CACHE_KEY = "hero:current";
 const SCAN_COUNT = 200;
 
-export async function GET() {
+export async function GET(req: Request) {
+  if (!isAuthorized(req)) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
   let redis: ReturnType<typeof getRedis>;
   try {
     redis = getRedis();

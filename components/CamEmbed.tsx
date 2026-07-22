@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlertCircle, VolumeX } from "lucide-react";
 import type { Cam } from "@/types";
 
@@ -61,6 +61,40 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
   // audio on. Resets per-cam because CamStation remounts CamEmbed on select.
   const [muted, setMuted] = useState(true);
 
+  // ── Autoplay-safe overlay gating ────────────────────────────────────────────
+  // Twitch gates gesture-free autoplay behind an IntersectionObserver-v2
+  // "isVisible" check that runs the moment its player boots. That check reports
+  // the iframe as NOT visible if anything overlaps it — even a decorative corner
+  // element — and Twitch then disables autoplay with:
+  //   "…minimum requirements for autoplay were not met: style visibility".
+  // Our corner scrim + branding + "Tap for sound" chrome sit ON TOP of the
+  // iframe (z-20/z-30), so at boot they partially obscure it and trip the check.
+  //
+  // The native-HLS path (HlsPlayer) plays a first-party <video> that Twitch
+  // never inspects, so it's immune — which is why ONLY the Twitch-iframe
+  // fallback fails, and in practice only Angels (spydernetwork72) reaches that
+  // fallback (its monetised channel returns an ad-signed segment 403 that knocks
+  // the HLS path out; every other cam stays on the immune HLS player).
+  //
+  // Fix: keep the iframe 100% unobscured until it has loaded and Twitch's
+  // boot-time visibility check has passed, THEN reveal the chrome. Autoplay is
+  // already granted by that point, so the later overlays can't revoke it.
+  const [chromeReady, setChromeReady] = useState(false);
+  const revealTimers = useRef<Array<ReturnType<typeof setTimeout>>>([]);
+
+  useEffect(() => {
+    // Reset when the cam changes, and guarantee the branding eventually appears
+    // even if `onLoad` never fires (network stall, blocked iframe, etc.).
+    setChromeReady(false);
+    const timers = revealTimers.current;
+    const safety = setTimeout(() => setChromeReady(true), 4000);
+    timers.push(safety);
+    return () => {
+      timers.forEach(clearTimeout);
+      timers.length = 0;
+    };
+  }, [cam.id]);
+
   const isTwitch = cam.streamProvider === "twitch" && !!cam.twitchChannel;
 
   // autoplay + muted are the strongest autoplay signal we can send Twitch.
@@ -106,7 +140,15 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
         // protect Core Web Vitals; they aren't trying to autostart anyway.
         loading={autoplay ? "eager" : "lazy"}
         title={`${camLabel} live cam`}
-        onLoad={() => onLoad?.()}
+        onLoad={() => {
+          onLoad?.();
+          // Twitch runs its autoplay eligibility check a beat AFTER the iframe
+          // document loads (once its player JS boots). Hold the overlay chrome
+          // back until that window has passed so the check sees a fully visible,
+          // unobscured, full-size player and grants gesture-free autoplay.
+          const t = setTimeout(() => setChromeReady(true), 1500);
+          revealTimers.current.push(t);
+        }}
         onError={() => setError(true)}
       />
 
@@ -128,12 +170,12 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
         the top-right branding and Twitch's bottom-right control bar. ≥44px tap
         target, safe-area aware for phones.
       */}
-      {isTwitch && muted && !error && (
+      {isTwitch && muted && !error && chromeReady && (
         <button
           type="button"
           onClick={() => setMuted(false)}
           aria-label={`Turn on sound for ${camLabel}`}
-          className="group/sound absolute bottom-3 left-3 z-30 flex items-center gap-2 rounded-full border border-white/20 bg-black/65 px-3.5 py-2.5 text-xs font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.55)] backdrop-blur-md transition-transform duration-150 hover:scale-105 active:scale-95"
+          className="chrome-fade-in group/sound absolute bottom-3 left-3 z-30 flex items-center gap-2 rounded-full border border-white/20 bg-black/65 px-3.5 py-2.5 text-xs font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.55)] backdrop-blur-md transition-transform duration-150 hover:scale-105 active:scale-95"
           style={{
             left:   "max(0.75rem, env(safe-area-inset-left))",
             bottom: "max(0.75rem, env(safe-area-inset-bottom))",
@@ -153,10 +195,12 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
         on phones so it never darkens too much of a small frame. Decorative and
         pointer-events-none, so it never blocks taps or player controls.
       */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute right-0 top-0 z-20 h-16 w-36 bg-gradient-to-bl from-black/45 via-black/10 to-transparent sm:h-20 sm:w-48"
-      />
+      {chromeReady && (
+        <div
+          aria-hidden="true"
+          className="chrome-fade-in pointer-events-none absolute right-0 top-0 z-20 h-16 w-36 bg-gradient-to-bl from-black/45 via-black/10 to-transparent sm:h-20 sm:w-48"
+        />
+      )}
 
       {/*
         ── Persistent top-right branding ─────────────────────────────────────
@@ -172,13 +216,14 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
         · Text drop-shadows + the corner scrim keep it legible over bright scenes.
         · Safe areas respected via max(…, env(safe-area-inset-*)).
       */}
+      {chromeReady && (
       <a
         href={SITE_URL}
         target="_blank"
         rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}
         aria-label="Powered by SpyderNetwork — opens spydernetwork.t3kdesigns.app in a new tab"
-        className="group absolute right-0 top-0 z-30 flex items-center p-2"
+        className="chrome-fade-in group absolute right-0 top-0 z-30 flex items-center p-2"
         style={{
           top:   "max(0.25rem, env(safe-area-inset-top))",
           right: "max(0.25rem, env(safe-area-inset-right))",
@@ -196,6 +241,7 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
           />
         </span>
       </a>
+      )}
     </div>
   );
 }
