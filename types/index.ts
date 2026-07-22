@@ -24,6 +24,17 @@ export interface Cam {
   twitchChannel?: string;
   iframeUrl?: string;
   streamProvider: StreamProvider;
+  /**
+   * Optional Twitch access-token `playerType` used when resolving this cam's
+   * native HLS stream (see /api/twitch-hls). Twitch conditions ad-signed
+   * segments — which return a 403 that kills the native player and forces the
+   * unreliable Twitch iframe — partly on the playerType. Most cams resolve fine
+   * with the default ("embed"); a channel that gets ad-403'd (e.g. Angels /
+   * spydernetwork72) can pin a cleaner type like "frontpage" here so it keeps
+   * playing on the reliable muted-autoplay <video> path instead of falling back
+   * to the iframe. Allow-listed server-side.
+   */
+  hlsPlayerType?: string;
   description?: string;
   mile?: string; // mile marker on lake
   lat?: number;

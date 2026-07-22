@@ -701,6 +701,14 @@ export const CAMS: Cam[] = [
     streamProvider: "twitch",
     twitchChannel: "spydernetwork72",
     isLive: true,
+    // Angels' stream returns an ad-signed segment 403 under the default "embed"
+    // playerType, which kills the native-HLS <video> and drops it onto Twitch's
+    // iframe — the one surface that can't reliably muted-autoplay (it reports
+    // "style visibility"). Pinning a cleaner playerType makes usher hand back
+    // ad-free segments, so Angels keeps playing on the reliable autoplay path
+    // like every other cam. See CamPlayer.tsx (escalates further on error) and
+    // /api/twitch-hls (allow-lists the value).
+    hlsPlayerType: "frontpage",
     description: "Lake view from Angels Mexican Restaurant — Lake of the Ozarks",
     websiteUrl: "https://www.facebook.com/profile.php?id=61577060969567",
     spyderPageUrl: "https://spydernetwork.com/angels-mexican-restaurant-lake-view-lake-ozarks/",

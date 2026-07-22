@@ -54,6 +54,15 @@ const GQL_QUERY = `query PlaybackAccessToken_Template($login: String!, $isLive: 
   videoPlaybackAccessToken(id: $vodID, params: {platform: "web", playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isVod) { value signature __typename }
 }`;
 
+// Access-token playerType values we permit the client to request. Twitch
+// conditions ad-signed segments (the 403 that knocks a channel off the native
+// HLS player onto the unreliable iframe) partly on this. "embed" is the default
+// used for every cam; "frontpage"/"site" are cleaner contexts a channel can
+// escalate to when it keeps getting ad-403'd (e.g. Angels). Allow-listed so a
+// crafted ?pt= can't inject arbitrary values into the GraphQL request.
+const ALLOWED_PLAYER_TYPES = new Set(["embed", "frontpage", "site", "autoplay"]);
+const DEFAULT_PLAYER_TYPE = "embed";
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   // Sanitise: Twitch logins are [a-z0-9_] only.
@@ -64,6 +73,11 @@ export async function GET(request: Request) {
   if (!channel) {
     return NextResponse.json({ error: "missing or invalid channel" }, { status: 400 });
   }
+
+  // Optional playerType override (see ALLOWED_PLAYER_TYPES). Falls back to the
+  // default for anything unrecognised, so existing callers are unaffected.
+  const ptParam = (searchParams.get("pt") ?? "").toLowerCase();
+  const playerType = ALLOWED_PLAYER_TYPES.has(ptParam) ? ptParam : DEFAULT_PLAYER_TYPE;
 
   try {
     // ── 1) PlaybackAccessToken ────────────────────────────────────────────────
@@ -89,7 +103,7 @@ export async function GET(request: Request) {
           login: channel,
           isVod: false,
           vodID: "",
-          playerType: "embed",
+          playerType,
         },
       }),
       cache: "no-store",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Cam } from "@/types";
 import { CamEmbed } from "./CamEmbed";
 import { HlsPlayer } from "./HlsPlayer";
@@ -39,12 +39,6 @@ export function CamPlayer({ cam, onLoad, autoplay = true }: CamPlayerProps) {
   const [mode, setMode]       = useState<Mode>(isTwitch ? "resolving" : "iframe");
   const [hlsUrl, setHlsUrl]   = useState<string | null>(null);
   const [hlsReady, setHlsReady] = useState(false);
-  // Auto-retry the token a couple of times before falling back to the iframe.
-  // A fresh token can dodge a transient/ad-conditioned segment 403 (the reason
-  // one otherwise-identical channel can get stuck on the play-button iframe),
-  // keeping the cam on the muted-autoplay HLS player.
-  const retriesRef = useRef(0);
-  const MAX_TOKEN_RETRIES = 2;
 
   // If the stream hasn't actually started playing this long after we switch to
   // HLS, assume it's not going to (bad URL, CORS, hls.js stuck retrying) and
@@ -52,45 +46,92 @@ export function CamPlayer({ cam, onLoad, autoplay = true }: CamPlayerProps) {
   // silently, so we can't rely on onError alone.
   const PLAYBACK_WATCHDOG_MS = 8000;
 
-  const resolve = useCallback(
-    async (signal: AbortSignal) => {
-      if (!isTwitch) return;
-      try {
-        const res = await fetch(
-          `/api/twitch-hls?channel=${encodeURIComponent(cam.twitchChannel!)}`,
-          { signal, cache: "no-store" }
-        );
-        if (!res.ok) throw new Error(`resolve ${res.status}`);
-        const data = (await res.json()) as { url?: string };
-        if (!data.url) throw new Error("no url");
-        setHlsReady(false);
-        setHlsUrl(data.url);
-        setMode("hls");
-      } catch {
-        // Any failure → iframe fallback (still autoplays muted where Twitch allows).
+  // ── PlayerType escalation ladder ────────────────────────────────────────────
+  // Twitch conditions ad-signed segments (whose 403 kills the native player and
+  // forces the iframe — the surface that can't reliably muted-autoplay) partly
+  // on the access-token `playerType`. So instead of retrying the SAME failing
+  // request, we walk a ladder of progressively cleaner playerTypes, keeping the
+  // cam on the reliable <video> path. The first entry is the cam's own hint (or
+  // `null` = the server default "embed", i.e. unchanged behaviour for every cam
+  // that already works); the rest are escalations tried only after a failure.
+  const attempts = useMemo<(string | null)[]>(() => {
+    const seq: (string | null)[] = [cam.hlsPlayerType ?? null];
+    for (const t of ["frontpage", "site"]) {
+      if (!seq.includes(t)) seq.push(t);
+    }
+    return seq;
+  }, [cam.hlsPlayerType]);
+
+  // Index into `attempts` for the request currently in flight / playing.
+  const attemptRef = useRef(0);
+  // The in-flight resolve, so cam changes / unmounts can abort cleanly.
+  const activeCtrl = useRef<AbortController | null>(null);
+  const activeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearActive = useCallback(() => {
+    activeCtrl.current?.abort();
+    activeCtrl.current = null;
+    if (activeTimer.current) {
+      clearTimeout(activeTimer.current);
+      activeTimer.current = null;
+    }
+  }, []);
+
+  // Resolve `attempts[index]`. On any failure, escalate to the next playerType;
+  // once the ladder is exhausted, fall back to the Twitch iframe.
+  const startAttempt = useCallback(
+    (index: number) => {
+      if (!isTwitch || index >= attempts.length) {
         setMode("iframe");
+        return;
       }
+      attemptRef.current = index;
+      clearActive();
+      setMode("resolving");
+      setHlsUrl(null);
+
+      const ctrl = new AbortController();
+      activeCtrl.current = ctrl;
+      activeTimer.current = setTimeout(() => ctrl.abort(), RESOLVE_TIMEOUT_MS);
+      const pt = attempts[index] ?? null;
+
+      (async () => {
+        try {
+          const qs = new URLSearchParams({ channel: cam.twitchChannel! });
+          if (pt) qs.set("pt", pt);
+          const res = await fetch(`/api/twitch-hls?${qs.toString()}`, {
+            signal: ctrl.signal,
+            cache: "no-store",
+          });
+          if (!res.ok) throw new Error(`resolve ${res.status}`);
+          const data = (await res.json()) as { url?: string };
+          if (!data.url) throw new Error("no url");
+          setHlsReady(false);
+          setHlsUrl(data.url);
+          setMode("hls");
+        } catch {
+          if (ctrl.signal.aborted) return; // superseded by a newer attempt
+          startAttempt(index + 1); // escalate playerType, or → iframe when exhausted
+        } finally {
+          if (activeTimer.current) {
+            clearTimeout(activeTimer.current);
+            activeTimer.current = null;
+          }
+        }
+      })();
     },
-    [cam.twitchChannel, isTwitch]
+    [attempts, cam.twitchChannel, isTwitch, clearActive]
   );
 
-  // Resolve on cam change (Twitch only), bounded by a hard timeout.
+  // Resolve on cam change (Twitch only). Starts at the top of the ladder.
   useEffect(() => {
-    retriesRef.current = 0;
     if (!isTwitch) {
       setMode("iframe");
       return;
     }
-    setMode("resolving");
-    setHlsUrl(null);
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), RESOLVE_TIMEOUT_MS);
-    void resolve(ctrl.signal).finally(() => clearTimeout(timer));
-    return () => {
-      ctrl.abort();
-      clearTimeout(timer);
-    };
-  }, [cam.id, isTwitch, resolve]);
+    startAttempt(0);
+    return () => clearActive();
+  }, [cam.id, isTwitch, startAttempt, clearActive]);
 
   // Watchdog: once in HLS mode, if playback hasn't started in time, fall back.
   useEffect(() => {
@@ -104,20 +145,12 @@ export function CamPlayer({ cam, onLoad, autoplay = true }: CamPlayerProps) {
     onLoad?.();
   }, [onLoad]);
 
-  // HlsPlayer hit a fatal error (expired token, CDN/CORS, decode…). Try ONE
-  // fresh token; if that also fails, fall back to the iframe.
+  // HlsPlayer hit a fatal error (ad-signed segment 403, expired token, CDN/CORS,
+  // decode…). Escalate to the next playerType on the ladder; when it's exhausted
+  // startAttempt falls back to the iframe on its own.
   const handleHlsError = useCallback(() => {
-    if (retriesRef.current >= MAX_TOKEN_RETRIES) {
-      setMode("iframe");
-      return;
-    }
-    retriesRef.current += 1;
-    setMode("resolving");
-    setHlsUrl(null);
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), RESOLVE_TIMEOUT_MS);
-    void resolve(ctrl.signal).finally(() => clearTimeout(timer));
-  }, [resolve]);
+    startAttempt(attemptRef.current + 1);
+  }, [startAttempt]);
 
   // ── Fallback: original Twitch iframe ────────────────────────────────────────
   if (mode === "iframe") {
