@@ -967,6 +967,24 @@ export const CAMS: Cam[] = [
     lat: 38.1951,
     lng: -92.6122,
   },
+  {
+    // spydernetwork68 — the original SpyderNetwork flagship / hero feed, now also
+    // grouped as Marty Byrde's third camera. The separate isFeatured "hero-featured"
+    // entry above still owns HERO_CAM, so hero/featured logic is unaffected.
+    id: "marty-byrdes-lake-view",
+    name: "Lake View",
+    business: "Marty Byrde's",
+    slug: "marty-byrdes-lake-view",
+    category: "lake-view",
+    streamProvider: "twitch",
+    twitchChannel: "spydernetwork68",
+    isLive: true,
+    description: "SpyderNetwork flagship lake view — Lake of the Ozarks from the Bagnell Dam Strip",
+    websiteUrl: "https://martybyrde.com",
+    spyderPageUrl: "https://spydernetwork.com",
+    lat: 38.1951,
+    lng: -92.6123,
+  },
 
   // ── MICHAEL'S STEAK CHALET ────────────────────────────────────────────────
   {
