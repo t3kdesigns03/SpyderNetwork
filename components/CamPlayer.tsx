@@ -25,6 +25,13 @@ interface CamPlayerProps {
   cam:       Cam;
   onLoad?:   () => void;
   autoplay?: boolean;
+  /** Allow the Twitch iframe fallback its own fullscreen. Default true; desktop
+   *  passes false so the iframe can't fullscreen (and freeze) — the parent owns
+   *  fullscreen instead. The native-video (HLS) path is unaffected. */
+  allowFullscreen?: boolean;
+  /** Reports whether the active player is the Twitch iframe fallback, so the
+   *  parent can show its own fullscreen control only where it's needed. */
+  onIframeFallback?: (isIframe: boolean) => void;
 }
 
 type Mode = "resolving" | "hls" | "iframe";
@@ -33,12 +40,16 @@ type Mode = "resolving" | "hls" | "iframe";
 // iframe so the viewer is never stuck staring at a spinner.
 const RESOLVE_TIMEOUT_MS = 5000;
 
-export function CamPlayer({ cam, onLoad, autoplay = true }: CamPlayerProps) {
+export function CamPlayer({ cam, onLoad, autoplay = true, allowFullscreen = true, onIframeFallback }: CamPlayerProps) {
   const isTwitch = cam.streamProvider === "twitch" && !!cam.twitchChannel;
 
   const [mode, setMode]       = useState<Mode>(isTwitch ? "resolving" : "iframe");
   const [hlsUrl, setHlsUrl]   = useState<string | null>(null);
   const [hlsReady, setHlsReady] = useState(false);
+
+  // Let the parent know when we're on the Twitch iframe fallback (vs the native
+  // <video>), so it can surface its own fullscreen control only for that path.
+  useEffect(() => { onIframeFallback?.(mode === "iframe"); }, [mode, onIframeFallback]);
 
   // If the stream hasn't actually started playing this long after we switch to
   // HLS, assume it's not going to (bad URL, CORS, hls.js stuck retrying) and
@@ -154,7 +165,7 @@ export function CamPlayer({ cam, onLoad, autoplay = true }: CamPlayerProps) {
 
   // ── Fallback: original Twitch iframe ────────────────────────────────────────
   if (mode === "iframe") {
-    return <CamEmbed cam={cam} onLoad={onLoad} autoplay={autoplay} />;
+    return <CamEmbed cam={cam} onLoad={onLoad} autoplay={autoplay} allowFullscreen={allowFullscreen} />;
   }
 
   // ── Native HLS playback (the reliable-autoplay path) ────────────────────────

@@ -36,6 +36,11 @@ interface CamEmbedProps {
   cam:      Cam;
   onLoad?:  () => void;
   autoplay?: boolean;
+  /** Permit the iframe to enter fullscreen itself. Default true (mobile relies
+   *  on it, esp. iOS). Desktop passes false so Twitch's double-click / fullscreen
+   *  button can't fullscreen — and freeze — the iframe; the parent owns
+   *  fullscreen by fullscreening the wrapper instead. */
+  allowFullscreen?: boolean;
 }
 
 /**
@@ -54,7 +59,7 @@ interface CamEmbedProps {
  *   user's tap (a valid gesture); after that the viewer uses Twitch's own
  *   native controls to re-mute / adjust volume.
  */
-export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
+export function CamEmbed({ cam, onLoad, autoplay = true, allowFullscreen = true }: CamEmbedProps) {
   const [error, setError] = useState(false);
   // Starts muted so the stream can autoplay with no gesture. The viewer flips
   // this to false via "Tap for sound", which reloads the Twitch iframe with
@@ -129,8 +134,10 @@ export function CamEmbed({ cam, onLoad, autoplay = true }: CamEmbedProps) {
         key={`${cam.id}-${muted ? "muted" : "unmuted"}`}
         src={embedUrl}
         className="twitch-embed-frame"
-        allowFullScreen
-        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+        allowFullScreen={allowFullscreen}
+        allow={allowFullscreen
+          ? "autoplay; fullscreen; picture-in-picture; encrypted-media"
+          : "autoplay; picture-in-picture; encrypted-media"}
         referrerPolicy="no-referrer-when-downgrade"
         // Autoplaying players MUST load eagerly: a lazy iframe can still be in a
         // deferred / not-yet-painted state when Twitch runs its autoplay

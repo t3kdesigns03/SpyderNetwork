@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo, type CSSProperties } from "react";
 import {
-  Search, Play, SkipBack, SkipForward, Maximize2,
+  Search, Play, SkipBack, SkipForward, Maximize2, Minimize2,
   Map, Video, Thermometer, X, Cast, ExternalLink, ChevronDown, Zap, Loader2, Handshake,
 } from "lucide-react";
 import { clsx } from "clsx";
@@ -60,6 +60,18 @@ export function CamStation() {
   const [refreshKey, setRefreshKey] = useState(0);
   // Landscape mobile: video goes fullscreen, all other UI collapses
   const isLandscape = useIsLandscapeMobile();
+  // Desktop = fine (mouse) pointer. Drives the "own the fullscreen" behavior so
+  // we never touch any mobile path.
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    setIsDesktop(window.matchMedia?.("(pointer: fine)").matches ?? false);
+  }, []);
+  // Whether OUR wrapper is currently the fullscreen element (desktop button icon).
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  // True while the active player is the Twitch iframe fallback (vs native video).
+  // Only iframe cams need our own fullscreen button, since we strip the iframe's
+  // built-in fullscreen on desktop to kill the freeze.
+  const [isIframeMode, setIsIframeMode] = useState(false);
 
   // 1. Toggle a class on <html> so CSS can hide the NavBar header as a
   //    belt-and-suspenders measure (our z-9999 overlay already covers it,
@@ -124,6 +136,9 @@ export function CamStation() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  // The video-area wrapper — THIS is what we put into fullscreen on desktop
+  // (never the iframe itself), so the stream can never freeze on exit.
+  const videoAreaRef = useRef<HTMLDivElement>(null);
 
   // ── Live online/offline status per cam ──────────────────────────────────────
   // Empty until the first /api/cam-status response lands; rows show a neutral
@@ -285,26 +300,32 @@ export function CamStation() {
   // while visible; pauses when hidden or when nothing is playing.
   useViewerHeartbeat(playingCam?.id);
 
-  // ── Desktop fullscreen-exit recovery (the bulletproof part) ─────────────────
-  // Leaving fullscreen — most often via a double-click toggle on the Twitch
-  // iframe — can leave the live feed frozen; a clean remount instantly reloads
-  // it. So on EVERY fullscreen exit on desktop, no matter how it was entered or
-  // exited (double-click, native player button, Esc), we bump the player key to
-  // force React to destroy + recreate the CamEmbed/CamPlayer. Mobile landscape
-  // fullscreen fires this same event, so we hard-gate on a fine (mouse) pointer
-  // AND not-landscape — every mobile fullscreen/flip path is left untouched.
+  // ── Desktop: OWN the fullscreen (mirror how mobile already works) ───────────
+  // Root cause of the freeze: Twitch's cross-origin iframe going fullscreen and
+  // back chokes the stream, and we can't reach inside it to stop that. The fix
+  // is to never let the IFRAME be the fullscreen surface. Instead we fullscreen
+  // the video-area WRAPPER (videoAreaRef) and strip the iframe's own fullscreen
+  // permission on desktop (see allowFullscreen below). The iframe simply grows
+  // to fill the wrapper — it is never fullscreened or destroyed — so there is no
+  // transition to freeze on. Exactly how mobile works: a stable surface fills
+  // the screen. We only track state here to drive our button's icon. This event
+  // also fires for mobile landscape fullscreen, but it only feeds a desktop-only
+  // button, so every mobile path stays untouched.
   useEffect(() => {
-    const onFullscreenChange = () => {
-      const exitedFullscreen = !document.fullscreenElement;
-      const isDesktop =
-        (window.matchMedia?.("(pointer: fine)").matches ?? false) && !isLandscape;
-      if (exitedFullscreen && isDesktop) {
-        setRefreshKey((k) => k + 1); // remount the current player → fresh feed
-      }
-    };
-    document.addEventListener("fullscreenchange", onFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
-  }, [isLandscape]);
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
+
+  const toggleDesktopFullscreen = useCallback(() => {
+    const el = videoAreaRef.current;
+    if (!el) return;
+    if (!document.fullscreenElement) {
+      el.requestFullscreen?.({ navigationUI: "hide" }).catch(() => {});
+    } else {
+      document.exitFullscreen?.().catch(() => {});
+    }
+  }, []);
 
   const displayList = useMemo(() => {
     let list = ALL_CAMS;
@@ -498,6 +519,7 @@ export function CamStation() {
 
             {/* Video area — 16:9 on mobile portrait, fills height on desktop, fullscreen in landscape mobile */}
             <div
+              ref={videoAreaRef}
               onDoubleClickCapture={(e) => {
                 // Best-effort: swallow desktop double-clicks on the video area so
                 // they can't toggle fullscreen. A cross-origin Twitch iframe's
@@ -519,7 +541,17 @@ export function CamStation() {
                 : "aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0"
             )}>
               {playingCam ? (
-                <CamPlayer cam={playingCam} key={`${playingCam.id}:${refreshKey}`} autoplay />
+                <CamPlayer
+                  cam={playingCam}
+                  key={`${playingCam.id}:${refreshKey}`}
+                  autoplay
+                  // Desktop: strip the iframe's built-in fullscreen so Twitch's
+                  // double-click / fullscreen button can't fullscreen (and freeze)
+                  // the iframe. We provide our own wrapper-fullscreen instead.
+                  // Mobile keeps the iframe's native fullscreen (iOS relies on it).
+                  allowFullscreen={!isDesktop}
+                  onIframeFallback={setIsIframeMode}
+                />
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center px-6">
                   <div className="w-16 h-16 rounded-2xl bg-spyder-red/10 border border-spyder-red/20 flex items-center justify-center">
@@ -533,6 +565,26 @@ export function CamStation() {
                     </p>
                   </div>
                 </div>
+              )}
+
+              {/* ── Desktop fullscreen button ───────────────────────────────
+                  Shown only on desktop for the Twitch-iframe fallback, whose own
+                  fullscreen we've disabled to kill the freeze. Fullscreens the
+                  WRAPPER (videoAreaRef) so the iframe just grows to fill it and
+                  is never fullscreened/destroyed. Top-left keeps it clear of the
+                  top-right branding and Twitch's bottom control bar. Hidden on
+                  mobile + in landscape (those keep their existing behavior). */}
+              {isDesktop && !isLandscape && isIframeMode && playingCam && (
+                <button
+                  onClick={toggleDesktopFullscreen}
+                  aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                  title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+                  className="absolute top-3 left-3 z-30 flex items-center justify-center w-9 h-9 rounded-lg border border-white/15 bg-black/55 text-white/80 backdrop-blur-md transition-colors hover:text-white hover:border-spyder-red/60 hover:bg-spyder-red/25"
+                >
+                  {isFullscreen
+                    ? <Minimize2 className="w-4 h-4" />
+                    : <Maximize2 className="w-4 h-4" />}
+                </button>
               )}
 
               {/* ── Landscape mobile chrome ─────────────────────────────────
