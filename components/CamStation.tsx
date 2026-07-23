@@ -285,6 +285,27 @@ export function CamStation() {
   // while visible; pauses when hidden or when nothing is playing.
   useViewerHeartbeat(playingCam?.id);
 
+  // ── Desktop fullscreen-exit recovery (the bulletproof part) ─────────────────
+  // Leaving fullscreen — most often via a double-click toggle on the Twitch
+  // iframe — can leave the live feed frozen; a clean remount instantly reloads
+  // it. So on EVERY fullscreen exit on desktop, no matter how it was entered or
+  // exited (double-click, native player button, Esc), we bump the player key to
+  // force React to destroy + recreate the CamEmbed/CamPlayer. Mobile landscape
+  // fullscreen fires this same event, so we hard-gate on a fine (mouse) pointer
+  // AND not-landscape — every mobile fullscreen/flip path is left untouched.
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      const exitedFullscreen = !document.fullscreenElement;
+      const isDesktop =
+        (window.matchMedia?.("(pointer: fine)").matches ?? false) && !isLandscape;
+      if (exitedFullscreen && isDesktop) {
+        setRefreshKey((k) => k + 1); // remount the current player → fresh feed
+      }
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, [isLandscape]);
+
   const displayList = useMemo(() => {
     let list = ALL_CAMS;
     if (favOnly) list = list.filter((c) => favorites.has(c.id));
@@ -476,7 +497,22 @@ export function CamStation() {
             </div>
 
             {/* Video area — 16:9 on mobile portrait, fills height on desktop, fullscreen in landscape mobile */}
-            <div className={clsx(
+            <div
+              onDoubleClickCapture={(e) => {
+                // Best-effort: swallow desktop double-clicks on the video area so
+                // they can't toggle fullscreen. A cross-origin Twitch iframe's
+                // INTERNAL dblclick can't be caught from here — that's what the
+                // fullscreen-exit recovery above guarantees — but any dblclick
+                // that does reach the container (native <video>, letterbox
+                // margins, chrome) is cancelled. Desktop only; capture phase so
+                // we win before descendants. Mobile (coarse pointer) untouched.
+                if (window.matchMedia?.("(pointer: fine)").matches) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.nativeEvent.stopImmediatePropagation();
+                }
+              }}
+              className={clsx(
               "neon-frame relative bg-black w-full",
               isLandscape
                 ? "flex-1 min-h-0"
