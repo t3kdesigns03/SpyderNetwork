@@ -972,7 +972,7 @@ export const CAMS: Cam[] = [
     // grouped as Marty Byrde's third camera. The separate isFeatured "hero-featured"
     // entry above still owns HERO_CAM, so hero/featured logic is unaffected.
     id: "marty-byrdes-lake-view",
-    name: "Lake View",
+    name: "Strip",
     business: "Marty Byrde's",
     slug: "marty-byrdes-lake-view",
     category: "lake-view",
