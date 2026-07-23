@@ -316,6 +316,18 @@ export function CamStation() {
       )}
       style={isLandscape ? { height: "100dvh", width: "100dvw" } : { height: "calc(100dvh - 56px)" }}
     >
+      {/* ── Brand tagline strip — mobile + tablet only ──────────────────────
+          On lg+ this same tagline lives centered in the header (see NavBar);
+          below lg the header is too tight, so it rides here as a slim banner
+          directly beneath the header. Hidden in landscape-mobile fullscreen. */}
+      {!isLandscape && (
+        <div className="spyder-tagline-strip lg:hidden shrink-0">
+          <span className="spyder-tagline text-[11px] xs:text-xs sm:text-sm leading-tight">
+            Lake of The Ozarks <span className="opacity-50 font-normal">-</span> Largest Network of <span className="hl">LIVE</span> Cameras
+          </span>
+        </div>
+      )}
+
       {/* ── Tab bar — hidden in landscape mobile ─────────── */}
       <div className={clsx("flex shrink-0", isLandscape && "!hidden")} style={{ background: "#0a0506", borderBottom: "2px solid rgba(204,0,0,0.4)", boxShadow: "0 0 20px rgba(204,0,0,0.18), 0 4px 20px rgba(0,0,0,0.6)" }}>
         {/* Silver "chrome" gradient shared by the Partners tab icon + label. */}

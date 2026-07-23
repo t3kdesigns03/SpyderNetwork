@@ -156,6 +156,7 @@ export function HlsPlayer({
   onError,
 }: HlsPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // `mounted` keeps SSR and first client render identical (just the <video>),
   // avoiding hydration mismatch / overlay flash.
@@ -174,6 +175,29 @@ export function HlsPlayer({
     setIsTouch(window.matchMedia?.("(pointer: coarse)").matches ?? false);
     setMounted(true);
   }, []);
+
+  // ── Desktop: kill double-click-to-fullscreen ────────────────────────────────
+  // Chromium toggles fullscreen when a <video> is double-clicked; double-clicking
+  // again to exit can leave the HLS <video> frozen. We intercept `dblclick` in
+  // the CAPTURE phase on the container (an ancestor of the video), so the event
+  // never reaches the browser's built-in media-controls handler — no fullscreen
+  // toggle happens. Single clicks are untouched, so the control-bar fullscreen
+  // button keeps working. Gated to fine (mouse) pointers, so MOBILE fullscreen /
+  // flip behavior is left completely unchanged.
+  useEffect(() => {
+    if (!mounted) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const finePointer = window.matchMedia?.("(pointer: fine)").matches ?? false;
+    if (!finePointer) return; // desktop only — never affect touch devices
+
+    const blockFullscreenDblClick = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    el.addEventListener("dblclick", blockFullscreenDblClick, true);
+    return () => el.removeEventListener("dblclick", blockFullscreenDblClick, true);
+  }, [mounted]);
 
   // ── HLS attach / detach ─────────────────────────────────────────────────────
   // Prefers native HLS on Safari/iOS (lower power, better battery); falls back to
@@ -294,7 +318,7 @@ export function HlsPlayer({
   const nativeControls = controls && dismissed;
 
   return (
-    <div className={clsx("relative h-full w-full overflow-hidden bg-black", className)}>
+    <div ref={containerRef} className={clsx("relative h-full w-full overflow-hidden bg-black", className)}>
       {/* Self-contained animation keyframes */}
       <style>{PLAYER_STYLES}</style>
 

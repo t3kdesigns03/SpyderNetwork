@@ -68,6 +68,30 @@
     animation: dot-pulse 1.4s ease-in-out infinite;
   }
 
+  /* ── Brand tagline — broadcast wordmark with a soft red neon glow ──
+     Shared by the desktop header (centered) and the mobile banner strip so
+     the treatment stays perfectly consistent across breakpoints. */
+  .spyder-tagline {
+    @apply font-display font-bold uppercase text-white;
+    letter-spacing: 0.14em;
+    text-shadow: 0 0 8px rgba(204, 0, 0, 0.55), 0 0 20px rgba(204, 0, 0, 0.30);
+  }
+  /* The word "LIVE" burns hotter red so the tagline reads as live-broadcast. */
+  .spyder-tagline .hl {
+    color: var(--spyder-red-bright);
+    text-shadow: 0 0 8px rgba(255, 26, 26, 0.85), 0 0 22px rgba(204, 0, 0, 0.55);
+  }
+
+  /* Mobile / tablet banner strip that carries the tagline directly beneath the
+     header (which holds the LIVE cam-count), matched to the site's dark navy +
+     red-neon theme. */
+  .spyder-tagline-strip {
+    @apply flex items-center justify-center text-center px-3 py-2;
+    background: linear-gradient(180deg, #05070d 0%, #0a0e1a 100%);
+    border-bottom: 1px solid rgba(204, 0, 0, 0.35);
+    box-shadow: 0 2px 14px rgba(204, 0, 0, 0.14), inset 0 -1px 0 rgba(255, 26, 26, 0.10);
+  }
+
   /* ── Buttons ── */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 bg-spyder-red hover:bg-spyder-red-bright

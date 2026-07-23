@@ -62,6 +62,18 @@ export function NavBar() {
           {LIVE_COUNT} LIVE
         </div>
 
+        {/* ── Center tagline (desktop) ──────────────────────────────────────
+            Sits between the LIVE cam-count and the nav. Absolutely centered so
+            it stays perfectly balanced regardless of the flex items on either
+            side, and pointer-events-none so it never intercepts nav clicks.
+            Shown on lg+ where there's room; on smaller screens the same tagline
+            appears as a banner strip beneath the header (see CamStation). */}
+        <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[42%] justify-center pointer-events-none select-none">
+          <span className="spyder-tagline whitespace-nowrap text-[13px] xl:text-sm leading-none">
+            Lake of The Ozarks <span className="opacity-50 font-normal">-</span> Largest Network of <span className="hl">LIVE</span> Cameras
+          </span>
+        </div>
+
         {/* ── Desktop nav ── */}
         <nav className="hidden md:flex items-center gap-1 ml-4">
           {NAV_ITEMS.map(({ href, label }) => (
