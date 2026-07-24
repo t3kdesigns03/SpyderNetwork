@@ -68,17 +68,25 @@ export function CamPlayer({ cam, onLoad, autoplay = true, allowFullscreen = true
   // request, we walk a ladder of progressively cleaner playerTypes, keeping the
   // cam on the reliable <video> path.
   //
-  // The FIRST attempt is now the clean "frontpage" context (the one that fixed
-  // Angels), applied to EVERY cam — because once the network went live on the
-  // public production domain, Twitch began ad-403'ing the old default "embed"
-  // across most channels, flashing them onto the iframe. Starting on the clean
-  // context keeps them on native HLS from the first frame. A per-cam
-  // `hlsPlayerType` hint still overrides the start. After that we escalate to
-  // "site", then finally retry the original "embed" as a last HLS attempt, so a
-  // cam is never left worse off than before — the iframe stays the last resort.
+  // The FIRST attempt is the clean "frontpage" context (the one that first
+  // helped Angels), applied to EVERY cam — because once the network went live on
+  // the public production domain, Twitch began ad-403'ing the old default
+  // "embed" across most channels, flashing them onto the iframe. Starting on the
+  // clean context keeps them on native HLS from the first frame. A per-cam
+  // `hlsPlayerType` hint still overrides the start.
+  //
+  // After the default we escalate to "autoplay" — the carousel/autoplay context
+  // that returned ad-free segments for Angels when "frontpage" alone still got
+  // ad-403'd (that's why Angels carries an explicit hint). Several other cams
+  // hit the same wall: clean on "autoplay" but not on "frontpage", so without it
+  // in the ladder they exhaust frontpage→site→embed and drop to the non-
+  // autoplaying iframe. Including "autoplay" rescues them onto native HLS. It's
+  // only ever tried AFTER the default already failed, so cams that work today are
+  // unaffected. Then "site", then a last retry of the original "embed"; the
+  // iframe stays the final resort so a cam is never left worse off than before.
   const attempts = useMemo<(string | null)[]>(() => {
     const seq: (string | null)[] = [cam.hlsPlayerType ?? DEFAULT_PLAYER_TYPE];
-    for (const t of ["frontpage", "site", "embed"]) {
+    for (const t of ["frontpage", "autoplay", "site", "embed"]) {
       if (!seq.includes(t)) seq.push(t);
     }
     return seq;
