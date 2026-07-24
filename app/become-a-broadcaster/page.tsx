@@ -110,7 +110,7 @@ export default function BecomeABroadcasterPage() {
               </div>
             ))}
           </div>
-          <a href="mailto:info@spydernetwork.com?subject=Become%20a%20Broadcaster" className="btn-primary text-base px-8 py-4 inline-flex">
+          <a href="mailto:roger@spydernetwork.com?subject=Become%20a%20Broadcaster" className="btn-primary text-base px-8 py-4 inline-flex">
             <Wifi className="w-5 h-5" /> Get Your Cam Live Today <ArrowRight className="w-5 h-5" />
           </a>
         </div>
@@ -158,7 +158,7 @@ export default function BecomeABroadcasterPage() {
                   </li>
                 ))}
               </ul>
-              <a href={`mailto:info@spydernetwork.com?subject=${subject}`} className="w-full flex items-center justify-center gap-2 font-bold text-sm py-3 rounded-xl min-h-[48px] transition-all active:scale-95 touch-manipulation" style={{ background: CTABG[accent], border: CTABDR[accent], color: CTACLR[accent] }}>
+              <a href={`mailto:roger@spydernetwork.com?subject=${subject}`} className="w-full flex items-center justify-center gap-2 font-bold text-sm py-3 rounded-xl min-h-[48px] transition-all active:scale-95 touch-manipulation" style={{ background: CTABG[accent], border: CTABDR[accent], color: CTACLR[accent] }}>
                 {cta} <ArrowRight className="w-4 h-4" />
               </a>
             </div>
@@ -230,7 +230,7 @@ export default function BecomeABroadcasterPage() {
             <h2 className="font-display text-3xl sm:text-4xl font-bold text-white mb-3">Ready to Join the Network?</h2>
             <p className="text-spyder-gray text-base max-w-md mx-auto mb-8 leading-relaxed">No complicated setup. No long contracts. Just your business, live on the lake&apos;s most-watched cam network.</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <a href="mailto:info@spydernetwork.com?subject=Become%20a%20Broadcaster" className="btn-primary text-base px-8 py-4 inline-flex">
+              <a href="mailto:roger@spydernetwork.com?subject=Become%20a%20Broadcaster" className="btn-primary text-base px-8 py-4 inline-flex">
                 <Wifi className="w-5 h-5" /> Email Us to Get Started <ArrowRight className="w-5 h-5" />
               </a>
               <Link href="/contact" className="btn-secondary text-base px-8 py-4">Use the Contact Form</Link>

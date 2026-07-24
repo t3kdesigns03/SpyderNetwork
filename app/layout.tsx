@@ -5,7 +5,10 @@ import { NavBar } from "@/components/NavBar";
 import { JsonLd } from "@/components/JsonLd";
 import { SITE, organizationSchema, websiteSchema } from "@/lib/seo";
 
-const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "";
+// GA4 Measurement ID. Env var is the source of truth (set in Netlify); the
+// hardcoded fallback is the current production property so analytics keeps
+// firing through the domain cutover even if the env var is ever unset.
+const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "G-HBGQRN6Y5N";
 
 // Build once at module load — no JSX interpolation needed inside Script children
 const GA_INIT_SCRIPT = GA_ID

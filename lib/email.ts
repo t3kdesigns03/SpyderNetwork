@@ -11,7 +11,7 @@ import type { Cam } from "@/types";
  */
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
-const ADMIN_URL = "https://beta.spydernetwork.com/admin/viewers";
+const ADMIN_URL = "https://spydernetwork.com/admin/viewers";
 
 // Sends from the verified alerts.spydernetwork.com domain (verified in the Resend
 // account whose RESEND_API_KEY is configured in Netlify). The from-domain MUST

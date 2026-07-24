@@ -8,18 +8,24 @@ import type { Cam } from "@/types";
  * structured data. Route files import from here so metadata, canonicals,
  * sitemap, robots, OG URLs, and schema never drift apart.
  *
- * Canonical domain: beta.spydernetwork.com. All other hosts should 301-redirect
- * here so this stays authoritative. Change SITE.url below to move every SEO URL
- * (canonicals, OG/Twitter, sitemap, robots, schema @ids) to a new domain.
+ * Canonical domain: spydernetwork.com (production apex). All other hosts
+ * (beta, www) should 301-redirect here so this stays authoritative. Change
+ * SITE.url below to move every SEO URL (canonicals, OG/Twitter, sitemap, robots,
+ * schema @ids) to a new domain. If www is later chosen as the primary domain,
+ * switch this to "https://www.spydernetwork.com" to keep canonicals aligned.
  */
 
 export const SITE = {
-  url: "https://beta.spydernetwork.com",
+  // Canonical origin. Defaults to the production apex; override with
+  // NEXT_PUBLIC_SITE_URL (e.g. "https://www.spydernetwork.com" if www is chosen
+  // as primary, or "https://beta.spydernetwork.com" to keep beta canonicals
+  // during the pre-cutover window). No trailing slash.
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://spydernetwork.com",
   name: "SpyderNetwork",
   legalName: "SpyderNetwork",
   description:
     "The largest network of live webcams at Lake of the Ozarks. Watch 60+ real-time feeds from bars, marinas, pools, docks, and lakefront venues — free on any device.",
-  email: "info@spydernetwork.com",
+  email: "roger@spydernetwork.com",
   twitterHandle: "@spyder_network",
   // Region the network covers — used for local SEO + Place schema.
   area: {

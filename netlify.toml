@@ -7,3 +7,39 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Domain redirects (production cutover: beta → spydernetwork.com)
+# ─────────────────────────────────────────────────────────────────────────────
+# NOTE: apex ↔ www is normally handled automatically by Netlify once you set the
+# "primary domain" in Site settings → Domain management (Netlify 301s the other
+# one for you). The commented block below is a manual fallback if you'd rather
+# pin the direction here. Leave it commented until the primary is decided.
+
+# ⚠️ ENABLE AT CUTOVER — uncomment ONLY after spydernetwork.com is attached to
+# this Netlify site and its DNS points here. Enabling it before then would 301
+# live beta traffic to an apex that isn't serving yet. Staged (commented) so an
+# early deploy can't break beta.
+# Retire the beta host: send every beta URL to the apex, preserving the path.
+# [[redirects]]
+#   from = "https://beta.spydernetwork.com/*"
+#   to = "https://spydernetwork.com/:splat"
+#   status = 301
+#   force = true
+
+# --- apex ↔ www preference (uncomment ONE pair after choosing the primary) ---
+# Prefer APEX (spydernetwork.com):
+# [[redirects]]
+#   from = "https://www.spydernetwork.com/*"
+#   to = "https://spydernetwork.com/:splat"
+#   status = 301
+#   force = true
+#
+# Prefer WWW (www.spydernetwork.com):
+# [[redirects]]
+#   from = "https://spydernetwork.com/*"
+#   to = "https://www.spydernetwork.com/:splat"
+#   status = 301
+#   force = true
+#   # If you pick WWW as primary, also update the beta redirect target above
+#   # to https://www.spydernetwork.com/:splat to avoid a double hop.

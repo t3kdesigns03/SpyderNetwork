@@ -45,8 +45,8 @@ export default function ContactPage() {
         <div className="glass-panel p-6 mb-6 space-y-4">
           <div className="flex items-center gap-3 text-sm text-spyder-gray">
             <Mail className="w-5 h-5 text-spyder-red shrink-0" />
-            <a href="mailto:info@spydernetwork.com" className="hover:text-white transition-colors">
-              info@spydernetwork.com
+            <a href="mailto:roger@spydernetwork.com" className="hover:text-white transition-colors">
+              roger@spydernetwork.com
             </a>
           </div>
           <div className="flex items-center gap-3 text-sm text-spyder-gray">
@@ -57,7 +57,7 @@ export default function ContactPage() {
 
         {/* Simple contact form */}
         <form
-          action="mailto:info@spydernetwork.com"
+          action="mailto:roger@spydernetwork.com"
           method="get"
           encType="text/plain"
           className="glass-panel p-6 space-y-4"
