@@ -40,6 +40,10 @@ type Mode = "resolving" | "hls" | "iframe";
 // iframe so the viewer is never stuck staring at a spinner.
 const RESOLVE_TIMEOUT_MS = 5000;
 
+// Clean starting playerType for every cam's first HLS attempt. See the
+// escalation-ladder note below for why "frontpage" (not "embed") is the default.
+const DEFAULT_PLAYER_TYPE = "frontpage";
+
 export function CamPlayer({ cam, onLoad, autoplay = true, allowFullscreen = true, onIframeFallback }: CamPlayerProps) {
   const isTwitch = cam.streamProvider === "twitch" && !!cam.twitchChannel;
 
@@ -62,12 +66,19 @@ export function CamPlayer({ cam, onLoad, autoplay = true, allowFullscreen = true
   // forces the iframe — the surface that can't reliably muted-autoplay) partly
   // on the access-token `playerType`. So instead of retrying the SAME failing
   // request, we walk a ladder of progressively cleaner playerTypes, keeping the
-  // cam on the reliable <video> path. The first entry is the cam's own hint (or
-  // `null` = the server default "embed", i.e. unchanged behaviour for every cam
-  // that already works); the rest are escalations tried only after a failure.
+  // cam on the reliable <video> path.
+  //
+  // The FIRST attempt is now the clean "frontpage" context (the one that fixed
+  // Angels), applied to EVERY cam — because once the network went live on the
+  // public production domain, Twitch began ad-403'ing the old default "embed"
+  // across most channels, flashing them onto the iframe. Starting on the clean
+  // context keeps them on native HLS from the first frame. A per-cam
+  // `hlsPlayerType` hint still overrides the start. After that we escalate to
+  // "site", then finally retry the original "embed" as a last HLS attempt, so a
+  // cam is never left worse off than before — the iframe stays the last resort.
   const attempts = useMemo<(string | null)[]>(() => {
-    const seq: (string | null)[] = [cam.hlsPlayerType ?? null];
-    for (const t of ["frontpage", "site"]) {
+    const seq: (string | null)[] = [cam.hlsPlayerType ?? DEFAULT_PLAYER_TYPE];
+    for (const t of ["frontpage", "site", "embed"]) {
       if (!seq.includes(t)) seq.push(t);
     }
     return seq;
