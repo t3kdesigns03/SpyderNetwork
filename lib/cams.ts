@@ -701,14 +701,17 @@ export const CAMS: Cam[] = [
     streamProvider: "twitch",
     twitchChannel: "spydernetwork72",
     isLive: true,
-    // Angels' stream returns an ad-signed segment 403 under the default "embed"
-    // playerType, which kills the native-HLS <video> and drops it onto Twitch's
-    // iframe — the one surface that can't reliably muted-autoplay (it reports
-    // "style visibility"). Pinning a cleaner playerType makes usher hand back
-    // ad-free segments, so Angels keeps playing on the reliable autoplay path
-    // like every other cam. See CamPlayer.tsx (escalates further on error) and
-    // /api/twitch-hls (allow-lists the value).
-    hlsPlayerType: "frontpage",
+    // Angels is the one channel Twitch actively monetizes, so it gets ad-signed
+    // segment 403s even under the clean "frontpage"/"site"/"embed" contexts that
+    // every other cam now rides — those 403s kill the native-HLS <video> and drop
+    // it onto Twitch's iframe (which can't reliably muted-autoplay: "style
+    // visibility"). "autoplay" is Twitch's hover-preview context and is the last
+    // ad-free playerType we have; pin it as Angels' starting attempt. CamPlayer's
+    // ladder still escalates frontpage → site → embed → iframe if it fails. NOTE:
+    // if even "autoplay" 403s, this is real live-ad monetization and no
+    // playerType avoids it — the true fix is the channel owner disabling
+    // mid-roll ads / monetization on spydernetwork72.
+    hlsPlayerType: "autoplay",
     description: "Lake view from Angels Mexican Restaurant — Lake of the Ozarks",
     websiteUrl: "https://www.facebook.com/profile.php?id=61577060969567",
     spyderPageUrl: "https://spydernetwork.com/angels-mexican-restaurant-lake-view-lake-ozarks/",
